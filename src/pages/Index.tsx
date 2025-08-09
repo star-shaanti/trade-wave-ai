@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Rocket, SignalHigh, Zap } from "lucide-react";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
@@ -119,6 +120,35 @@ const Index = () => {
 
   const latest = signals[0];
 
+  const [countdown, setCountdown] = useState(60);
+  useEffect(() => {
+    if (!latest) return;
+    const expiry = Date.now() + 60_000;
+    setCountdown(60);
+    const id = window.setInterval(() => {
+      const sec = Math.max(0, Math.ceil((expiry - Date.now()) / 1000));
+      setCountdown(sec);
+      if (sec <= 0) window.clearInterval(id);
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [latest?.id]);
+
+  const latestMeta = useMemo(() => {
+    if (!latest) return null;
+    const strength = Math.floor(65 + Math.random() * 30);
+    const trendStrength = Math.floor(50 + Math.random() * 40);
+    const volatility = ["Low", "Medium", "High"][Math.floor(Math.random() * 3)];
+    const volumeFlow = Math.random() > 0.5 ? "Increasing" : "Decreasing";
+    const sentiment = latest.type === "BUY" ? "Bullish" : "Bearish";
+    const movingAverage = Math.random() > 0.5 ? "Above" : "Below";
+    const rsi = latest.type === "BUY" ? "Oversold" : "Overbought";
+    const stochastic = latest.type === "BUY" ? "Crossing Up" : "Crossing Down";
+    const psar = latest.type === "BUY" ? "Bullish Flip" : "Bearish Flip";
+    const envelope = Math.random() > 0.5 ? "Upper Band" : "Lower Band";
+    return { strength, trendStrength, volatility, volumeFlow, sentiment, movingAverage, rsi, stochastic, psar, envelope } as const;
+  }, [latest?.id, latest?.type]);
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -227,15 +257,75 @@ const Index = () => {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="h-[200px] md:h-[240px] rounded-md border border-border/60 flex items-center justify-center bg-background/40">
-                        <div className="text-center">
-                          <div className="text-sm text-muted-foreground mb-1">Latest Signal</div>
-                          <div className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                            {latest.type} {latest.asset}
+                      <div className="rounded-md border border-brand/40 bg-background/40 p-5">
+                        <div className="flex items-start justify-between">
+                          <div className="text-sm text-muted-foreground font-medium">Active Trading Signal</div>
+                          <div className="text-xs text-muted-foreground">
+                            Expires in: {`${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`}
                           </div>
+                        </div>
+
+                        <div className="mt-3 text-center">
+                          <div className={`text-2xl md:text-3xl font-extrabold tracking-tight ${latest.type === "BUY" ? "text-brand" : "text-brand-2"}`}>
+                            {latest.type} SIGNAL!
+                          </div>
+                          <div className="text-base md:text-lg font-semibold">{latest.asset}</div>
                           <div className="text-sm text-muted-foreground mt-1">{latest.reason}</div>
                         </div>
+
+                        <div className="my-4 h-px bg-border/60" />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Market Info</div>
+                            <div className="grid grid-cols-2 text-sm gap-y-1">
+                              <div className="text-muted-foreground">Volatility</div>
+                              <div className="text-right font-medium">{latestMeta?.volatility}</div>
+                              <div className="text-muted-foreground">Trend Strength %</div>
+                              <div className="text-right font-medium">{latestMeta?.trendStrength}%</div>
+                              <div className="text-muted-foreground">Volume Flow</div>
+                              <div className="text-right font-medium">{latestMeta?.volumeFlow}</div>
+                              <div className="text-muted-foreground">Sentiment</div>
+                              <div className="text-right font-medium">{latestMeta?.sentiment}</div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Technical Overview</div>
+                            <div className="grid grid-cols-2 text-sm gap-y-1">
+                              <div className="text-muted-foreground">Moving Average</div>
+                              <div className="text-right font-medium">{latestMeta?.movingAverage}</div>
+                              <div className="text-muted-foreground">RSI</div>
+                              <div className="text-right font-medium">{latestMeta?.rsi}</div>
+                              <div className="text-muted-foreground">Stochastic</div>
+                              <div className="text-right font-medium">{latestMeta?.stochastic}</div>
+                              <div className="text-muted-foreground">Parabolic SAR</div>
+                              <div className="text-right font-medium">{latestMeta?.psar}</div>
+                              <div className="text-muted-foreground">Envelope Trend</div>
+                              <div className="text-right font-medium">{latestMeta?.envelope}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-5">
+                          <div className="text-sm font-medium">Signal Strength</div>
+                          <Progress value={latestMeta?.strength ?? 80} className="mt-2" />
+                          <div className="mt-1 text-xs text-muted-foreground flex items-center justify-between">
+                            <span>
+                              Strength: {((latestMeta?.strength ?? 80) >= 80 ? "Strong" : "Moderate")} ({latestMeta?.strength ?? 80}%)
+                            </span>
+                            <span>Market Conditions: {latest.type === "BUY" ? "Favorable" : "Unfavorable"}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          <div className="text-sm font-medium">Time Remaining</div>
+                          <Progress value={(countdown / 60) * 100} className="mt-2" />
+                          <div className="mt-1 text-xs text-muted-foreground text-right">
+                            {`${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`}
+                          </div>
+                        </div>
                       </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-auto pr-1">
                         {signals.map((s) => (
                           <div key={s.id} className="rounded-md p-3 border border-border/60 bg-background/40">
