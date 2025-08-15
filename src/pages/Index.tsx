@@ -10,7 +10,8 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Rocket, SignalHigh, Zap } from "lucide-react";
+import { Rocket, SignalHigh, Zap, TrendingUp } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
 
@@ -112,7 +113,7 @@ const Index = () => {
     setSignals((prev) => [makeSignal(asset, category, timeframe), ...prev].slice(0, 12));
     intervalRef.current = window.setInterval(() => {
       setSignals((prev) => [makeSignal(asset, category, timeframe), ...prev].slice(0, 12));
-    }, 6000) as unknown as number;
+    }, 60000) as unknown as number; // Changed to 1 minute for proper countdown
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
@@ -123,13 +124,17 @@ const Index = () => {
   const [countdown, setCountdown] = useState(60);
   useEffect(() => {
     if (!latest) return;
-    const expiry = Date.now() + 60_000;
     setCountdown(60);
     const id = window.setInterval(() => {
-      const sec = Math.max(0, Math.ceil((expiry - Date.now()) / 1000));
-      setCountdown(sec);
-      if (sec <= 0) window.clearInterval(id);
-    }, 250);
+      setCountdown(prev => {
+        const newCount = prev - 1;
+        if (newCount <= 0) {
+          window.clearInterval(id);
+          return 0;
+        }
+        return newCount;
+      });
+    }, 1000);
     return () => window.clearInterval(id);
   }, [latest?.id]);
 
@@ -159,9 +164,10 @@ const Index = () => {
           </a>
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="bg-secondary/60">
-              <span className="inline-flex h-2 w-2 rounded-full bg-brand mr-2" aria-hidden />
+              <span className="inline-flex h-2 w-2 rounded-full bg-signal-green mr-2" aria-hidden />
               {onlineCount.toLocaleString()} active traders online
             </Badge>
+            <ThemeToggle />
             <Button variant="hero" size="sm">
               Subscribe
             </Button>
@@ -257,7 +263,7 @@ const Index = () => {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="rounded-md border border-brand/40 bg-background/40 p-5">
+                      <div className="rounded-md border border-signal-green/40 bg-background/40 p-5">
                         <div className="flex items-start justify-between">
                           <div className="text-sm text-muted-foreground font-medium">Active Trading Signal</div>
                           <div className="text-xs text-muted-foreground">
@@ -266,8 +272,12 @@ const Index = () => {
                         </div>
 
                         <div className="mt-3 text-center">
-                          <div className={`text-2xl md:text-3xl font-extrabold tracking-tight ${latest.type === "BUY" ? "text-brand" : "text-brand-2"}`}>
-                            {latest.type} SIGNAL!
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <SignalHigh className="text-signal-green" />
+                            <TrendingUp className="text-signal-green" />
+                          </div>
+                          <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-signal-green">
+                            TRY {latest.type} SIGNAL!
                           </div>
                           <div className="text-base md:text-lg font-semibold">{latest.asset}</div>
                           <div className="text-sm text-muted-foreground mt-1">{latest.reason}</div>
@@ -308,7 +318,12 @@ const Index = () => {
 
                         <div className="mt-5">
                           <div className="text-sm font-medium">Signal Strength</div>
-                          <Progress value={latestMeta?.strength ?? 80} className="mt-2" />
+                          <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
+                            <div 
+                              className="bg-signal-green h-2.5 rounded-full transition-all duration-300" 
+                              style={{ width: `${latestMeta?.strength ?? 80}%` }}
+                            ></div>
+                          </div>
                           <div className="mt-1 text-xs text-muted-foreground flex items-center justify-between">
                             <span>
                               Strength: {((latestMeta?.strength ?? 80) >= 80 ? "Strong" : "Moderate")} ({latestMeta?.strength ?? 80}%)
@@ -319,7 +334,12 @@ const Index = () => {
 
                         <div className="mt-4">
                           <div className="text-sm font-medium">Time Remaining</div>
-                          <Progress value={(countdown / 60) * 100} className="mt-2" />
+                          <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
+                            <div 
+                              className="bg-signal-green h-2.5 rounded-full transition-all duration-300" 
+                              style={{ width: `${(countdown / 60) * 100}%` }}
+                            ></div>
+                          </div>
                           <div className="mt-1 text-xs text-muted-foreground text-right">
                             {`${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`}
                           </div>
@@ -331,7 +351,7 @@ const Index = () => {
                           <div key={s.id} className="rounded-md p-3 border border-border/60 bg-background/40">
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-muted-foreground">{s.timeframe}</span>
-                              <Badge className={s.type === "BUY" ? "bg-brand text-[hsl(var(--hero-foreground))]" : "bg-brand-2 text-[hsl(var(--hero-foreground))]"}>
+                              <Badge className="bg-signal-green text-[hsl(var(--hero-foreground))]">
                                 {s.type}
                               </Badge>
                             </div>
