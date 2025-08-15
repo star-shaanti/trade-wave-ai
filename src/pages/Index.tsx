@@ -10,7 +10,9 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Rocket, SignalHigh, Zap, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Rocket, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
@@ -85,6 +87,8 @@ const Index = () => {
   const [running, setRunning] = useState(false);
   const [signals, setSignals] = useState<Signal[]>([]);
   const [onlineCount, setOnlineCount] = useState(245_014);
+  const [signalExpired, setSignalExpired] = useState(false);
+  const [signalLocked, setSignalLocked] = useState(false);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -125,11 +129,13 @@ const Index = () => {
   useEffect(() => {
     if (!latest) return;
     setCountdown(60);
+    setSignalExpired(false);
     const id = window.setInterval(() => {
       setCountdown(prev => {
         const newCount = prev - 1;
         if (newCount <= 0) {
           window.clearInterval(id);
+          setSignalExpired(true);
           return 0;
         }
         return newCount;
@@ -137,6 +143,16 @@ const Index = () => {
     }, 1000);
     return () => window.clearInterval(id);
   }, [latest?.id]);
+
+  const handleSignalExpiredDismiss = () => {
+    setSignalExpired(false);
+    setSignalLocked(true);
+    setRunning(false);
+    // Auto unlock after 30 seconds
+    setTimeout(() => {
+      setSignalLocked(false);
+    }, 30000);
+  };
 
   const latestMeta = useMemo(() => {
     if (!latest) return null;
@@ -168,9 +184,47 @@ const Index = () => {
               {onlineCount.toLocaleString()} active traders online
             </Badge>
             <ThemeToggle />
-            <Button variant="hero" size="sm">
-              Subscribe
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="hero" size="sm" className="flex items-center gap-1">
+                  Subscribe
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                  <Home className="h-4 w-4" />
+                  Home Page
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                  <User className="h-4 w-4" />
+                  Profile & Settings
+                  <span className="ml-auto text-xs">›</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                  <Settings className="h-4 w-4" />
+                  Manage Subscription
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                  <Lock className="h-4 w-4" />
+                  Change Password
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50 text-orange-500">
+                  <CreditCard className="h-4 w-4" />
+                  Suspend Account
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50 text-red-500">
+                  <Trash2 className="h-4 w-4" />
+                  Delete Account
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -231,9 +285,14 @@ const Index = () => {
                     <Button
                       variant="hero"
                       className="w-full"
+                      disabled={signalLocked}
                       onClick={() => setRunning((r) => !r)}
                     >
-                      <Zap className="mr-1" /> {running ? "Stop" : "Start"} Signals
+                      <Zap className="mr-1" /> 
+                      {signalLocked 
+                        ? "Waiting for signal expiry..." 
+                        : running ? "Stop" : "Start"} 
+                      {!signalLocked && " Signals"}
                     </Button>
                   </div>
                 </div>
@@ -373,9 +432,9 @@ const Index = () => {
 
         <section className="bg-muted/20 border-t border-b border-border/60">
           <div className="container py-12 text-center">
-            <div className="text-2xl font-bold">🎉 Celebrating 500,000 Traders!</div>
+            <div className="text-2xl font-bold">🎉 Celebrating 900,000 Traders!</div>
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              We’re thrilled to have reached a community of over 500,000 registered users. Thank you for being a part of our journey.
+              We're thrilled to have reached a community of over 500,000 registered users. Thank you for being a part of our journey.
             </p>
           </div>
         </section>
@@ -391,6 +450,27 @@ const Index = () => {
           </div>
         </section>
       </main>
+
+      {/* Signal Expired Modal */}
+      <Dialog open={signalExpired} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md bg-background border border-border">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-white text-xl font-bold">Signal Expired</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
+              Click to dismiss
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <Button 
+              onClick={handleSignalExpiredDismiss}
+              variant="outline"
+              className="bg-transparent border-border hover:bg-muted/50"
+            >
+              Dismiss
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
