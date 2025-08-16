@@ -416,7 +416,7 @@ const Index = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Category</div>
-                    <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
+                    <Select value={category} onValueChange={(v) => setCategory(v as Category)} disabled={latest && running}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
                       <SelectContent>
                         {(Object.keys(ASSETS) as Category[]).map((c) => (
@@ -428,7 +428,7 @@ const Index = () => {
 
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Asset</div>
-                    <Select value={asset} onValueChange={setAsset}>
+                    <Select value={asset} onValueChange={setAsset} disabled={latest && running}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="Select asset" /></SelectTrigger>
                       <SelectContent>
                         {assetsForCategory.map((a) => (
@@ -440,7 +440,7 @@ const Index = () => {
 
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Timeframe</div>
-                    <Select value={timeframe} onValueChange={(v) => setTimeframe(v as Timeframe)}>
+                    <Select value={timeframe} onValueChange={(v) => setTimeframe(v as Timeframe)} disabled={latest && running}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="Select timeframe" /></SelectTrigger>
                       <SelectContent>
                         {TIMEFRAMES.map((t) => (
