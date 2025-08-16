@@ -455,8 +455,8 @@ const Index = () => {
                     setRunning(false);
                     setSignals([]);
                     toast({
-                      title: "Déconnecté",
-                      description: "Vous avez été déconnecté avec succès.",
+                      title: "Logged Out",
+                      description: "You have been successfully logged out.",
                     });
                   }}
                 >
@@ -729,7 +729,7 @@ const Index = () => {
               </a>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2025 Real-time Trading Signals. Tous droits réservés.
+              © 2025 Real-time Trading Signals. All rights reserved.
             </div>
           </div>
         </div>
