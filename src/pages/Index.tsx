@@ -105,6 +105,27 @@ function getMarketStatusMessage(category: Category): string {
   }
 }
 
+function isMarketClosed(category: Category): boolean {
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
+  const currentHour = now.getHours();
+  
+  switch (category) {
+    case "FOREX OTC":
+    case "CRYPTOS":
+      return false; // Always open
+    
+    case "FOREX":
+      return currentDay === 0 || currentDay === 6; // Closed on weekends
+    
+    case "INDICE":
+      return currentDay === 0 || currentDay === 6 || currentHour < 9 || currentHour >= 17;
+    
+    default:
+      return false;
+  }
+}
+
 function makeSignal(asset: string, category: Category, timeframe: Timeframe): Signal {
   // Generate more varied BUY/SELL signals with slight bias towards more trading activity
   const randomValue = Math.random();
@@ -200,6 +221,7 @@ const Index = () => {
         if (newCount <= 0) {
           window.clearInterval(id);
           setSignalExpired(true);
+          setRunning(false); // Stop signals when expired
           return 0;
         }
         return newCount;
@@ -211,12 +233,13 @@ const Index = () => {
   const handleSignalExpiredDismiss = () => {
     setSignalExpired(false);
     setSignalLocked(true);
-    setRunning(false);
     // Auto unlock after 30 seconds
     setTimeout(() => {
       setSignalLocked(false);
     }, 30000);
   };
+
+  const isMarketClosedForCategory = isMarketClosed(category);
 
   const latestMeta = useMemo(() => {
     if (!latest) return null;
@@ -442,14 +465,16 @@ const Index = () => {
                       <Button
                         variant="hero"
                         className="w-full"
-                        disabled={signalLocked}
+                        disabled={signalLocked || isMarketClosedForCategory}
                         onClick={() => setRunning((r) => !r)}
                       >
                         <Zap className="mr-1" /> 
                         {signalLocked 
                           ? "Waiting for signal expiry..." 
+                          : isMarketClosedForCategory
+                          ? "Market Closed"
                           : running ? "Stop" : "Start"} 
-                        {!signalLocked && " Signals"}
+                        {!signalLocked && !isMarketClosedForCategory && " Signals"}
                       </Button>
                     )}
                   </div>
@@ -635,16 +660,12 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Signal Expired Modal */}
+      {/* Signal Expired Dialog */}
       <Dialog open={signalExpired} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md bg-background border border-border">
-          <DialogHeader className="text-center">
-            <DialogTitle className="text-white text-xl font-bold">Signal Expired</DialogTitle>
-            <DialogDescription className="text-muted-foreground mt-2">
-              Click to dismiss
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center mt-4">
+        <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur border border-border/50">
+          <div className="text-center py-8">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Signal Expired</h2>
+            <p className="text-muted-foreground mb-6">Click to dismiss</p>
             <Button 
               onClick={handleSignalExpiredDismiss}
               variant="outline"
