@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
-import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
+import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key, X } from "lucide-react";
 import { SatelliteIcon } from "@/components/ui/satellite-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -368,6 +368,17 @@ const Index = () => {
                     Profile & Settings
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
+                    <DropdownMenuItem 
+                      className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer text-red-600"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open('https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00', '_blank');
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel Subscription
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
                       onClick={(e) => {
