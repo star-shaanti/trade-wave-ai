@@ -188,34 +188,55 @@ const Index = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                  onClick={() => window.location.href = '/'}
+                >
                   <Home className="h-4 w-4" />
                   Home Page
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                  onClick={() => alert('Profile & Settings clicked')}
+                >
                   <User className="h-4 w-4" />
                   Profile & Settings
                   <span className="ml-auto text-xs">›</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                  onClick={() => alert('Manage Subscription clicked')}
+                >
                   <Settings className="h-4 w-4" />
                   Manage Subscription
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                  onClick={() => alert('Change Password clicked')}
+                >
                   <Lock className="h-4 w-4" />
                   Change Password
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50 text-orange-500">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
+                  onClick={() => alert('Suspend Account clicked')}
+                >
                   <CreditCard className="h-4 w-4" />
                   Suspend Account
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50 text-red-500">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
+                  onClick={() => alert('Delete Account clicked')}
+                >
                   <Trash2 className="h-4 w-4" />
                   Delete Account
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex items-center gap-2 hover:bg-muted/50">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                  onClick={() => alert('Log out clicked')}
+                >
                   <LogOut className="h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
