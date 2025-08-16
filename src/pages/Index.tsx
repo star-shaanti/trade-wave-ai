@@ -51,10 +51,53 @@ type Signal = {
 };
 
 const ASSETS: Record<Category, string[]> = {
-  "FOREX": ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD"],
-  "FOREX OTC": ["AUD/JPY OTC", "EUR/AUD OTC", "EUR/CAD OTC", "EUR/JPY OTC", "GBP/JPY OTC"],
-  "INDICE": ["S&P 500", "NASDAQ 100", "DAX 40", "FTSE 100"],
-  "CRYPTOS": ["BTC/USDT", "ETH/USDT", "SOL/USDT", "XRP/USDT"],
+  "FOREX": [
+    // Major Pairs
+    "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD", "NZD/USD",
+    // Minor Pairs (Cross Currencies)
+    "EUR/GBP", "EUR/JPY", "EUR/CHF", "EUR/AUD", "EUR/CAD", "EUR/NZD",
+    "GBP/JPY", "GBP/CHF", "GBP/AUD", "GBP/CAD", "GBP/NZD",
+    "CHF/JPY", "AUD/JPY", "CAD/JPY", "NZD/JPY",
+    "AUD/CHF", "AUD/CAD", "AUD/NZD", "CAD/CHF", "NZD/CHF", "NZD/CAD",
+    // Exotic Pairs
+    "USD/TRY", "USD/ZAR", "USD/MXN", "USD/SGD", "USD/HKD", "USD/NOK", "USD/SEK", "USD/DKK",
+    "EUR/TRY", "EUR/ZAR", "EUR/PLN", "EUR/CZK", "EUR/HUF", "GBP/TRY", "GBP/ZAR"
+  ],
+  "FOREX OTC": [
+    // Major OTC Pairs
+    "EUR/USD OTC", "GBP/USD OTC", "USD/JPY OTC", "USD/CHF OTC", "AUD/USD OTC", "USD/CAD OTC", "NZD/USD OTC",
+    // Minor OTC Pairs
+    "EUR/GBP OTC", "EUR/JPY OTC", "EUR/CHF OTC", "EUR/AUD OTC", "EUR/CAD OTC", "EUR/NZD OTC",
+    "GBP/JPY OTC", "GBP/CHF OTC", "GBP/AUD OTC", "GBP/CAD OTC", "GBP/NZD OTC",
+    "CHF/JPY OTC", "AUD/JPY OTC", "CAD/JPY OTC", "NZD/JPY OTC",
+    "AUD/CHF OTC", "AUD/CAD OTC", "AUD/NZD OTC", "CAD/CHF OTC", "NZD/CHF OTC", "NZD/CAD OTC",
+    // Exotic OTC Pairs
+    "USD/TRY OTC", "USD/ZAR OTC", "USD/MXN OTC", "USD/SGD OTC", "USD/HKD OTC", "USD/NOK OTC", "USD/SEK OTC",
+    "EUR/TRY OTC", "EUR/ZAR OTC", "EUR/PLN OTC", "EUR/CZK OTC", "EUR/HUF OTC", "GBP/TRY OTC", "GBP/ZAR OTC"
+  ],
+  "INDICE": [
+    // US Indices
+    "S&P 500", "NASDAQ 100", "Dow Jones", "Russell 2000", "S&P MidCap 400", "NASDAQ Composite",
+    // European Indices
+    "DAX 40", "FTSE 100", "CAC 40", "EURO STOXX 50", "IBEX 35", "AEX 25", "SMI", "BEL 20", "OMX Stockholm 30",
+    "FTSE MIB", "PSI 20", "ATX", "WIG20", "PX", "BUX", "OMXH25", "OMXC25", "OMXS30",
+    // Asian Indices
+    "Nikkei 225", "Hang Seng", "Shanghai Composite", "Shenzhen Component", "KOSPI", "TAIEX", "SET", "KLCI",
+    "STI", "JCI", "PSEi", "VN-Index", "Sensex", "Nifty 50", "ASX 200",
+    // Other Global Indices
+    "TSX", "BOVESPA", "MERVAL", "IPSA", "COLCAP", "IPC", "EGX 30", "TADAWUL", "QE Index", "ADX General",
+    "DFM General", "MSM 30", "CASE 30", "JSE All Share", "FTSE/JSE Top 40"
+  ],
+  "CRYPTOS": [
+    // Top Market Cap Cryptocurrencies
+    "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT", "SOL/USDT", "DOGE/USDT", "TRX/USDT",
+    "TON/USDT", "LINK/USDT", "MATIC/USDT", "ICP/USDT", "SHIB/USDT", "DAI/USDT", "LTC/USDT", "BCH/USDT",
+    "UNI/USDT", "LEO/USDT", "AVAX/USDT", "XLM/USDT", "ATOM/USDT", "ETC/USDT", "HBAR/USDT", "FIL/USDT",
+    "APT/USDT", "LDO/USDT", "VET/USDT", "ALGO/USDT", "SAND/USDT", "MANA/USDT", "AXS/USDT", "THETA/USDT",
+    "FTM/USDT", "EGLD/USDT", "AAVE/USDT", "KLAY/USDT", "FLOW/USDT", "XTZ/USDT", "CAKE/USDT", "NEO/USDT",
+    "KCS/USDT", "ROSE/USDT", "BSV/USDT", "ZEC/USDT", "DASH/USDT", "ENJ/USDT", "BAT/USDT", "1INCH/USDT",
+    "CHZ/USDT", "COMP/USDT"
+  ],
 };
 
 function simulateReason(type: SignalType) {
