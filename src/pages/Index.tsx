@@ -19,6 +19,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
 
@@ -549,9 +550,12 @@ const Index = () => {
         <div className="container py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <button className="hover:text-foreground transition-colors">
+              <Link 
+                to="/terms-conditions"
+                className="hover:text-foreground transition-colors"
+              >
                 Terms & Conditions
-              </button>
+              </Link>
               <button className="hover:text-foreground transition-colors">
                 Privacy Policy
               </button>
