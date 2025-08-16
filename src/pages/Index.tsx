@@ -217,6 +217,8 @@ const Index = () => {
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [showSuspendAccountModal, setShowSuspendAccountModal] = useState(false);
   const [showCancelSubscriptionModal, setShowCancelSubscriptionModal] = useState(false);
+  const [startingDelay, setStartingDelay] = useState(false);
+  const [delayCountdown, setDelayCountdown] = useState(0);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -225,6 +227,26 @@ const Index = () => {
   useEffect(() => {
     if (!assetsForCategory.includes(asset)) setAsset(assetsForCategory[0]);
   }, [assetsForCategory, asset]);
+
+  // Delay countdown for starting signals
+  useEffect(() => {
+    if (!startingDelay) return;
+    
+    const id = window.setInterval(() => {
+      setDelayCountdown(prev => {
+        const newCount = prev - 1;
+        if (newCount <= 0) {
+          window.clearInterval(id);
+          setStartingDelay(false);
+          setRunning(true);
+          return 0;
+        }
+        return newCount;
+      });
+    }, 1000);
+    
+    return () => window.clearInterval(id);
+  }, [startingDelay]);
 
   // Online count progressive fluctuations between 368,568 and 798,326
   useEffect(() => {
@@ -523,16 +545,25 @@ const Index = () => {
                       <Button
                         variant="hero"
                         className="w-full"
-                        disabled={isMarketClosedForCategory || (activeSignal && running)}
-                        onClick={() => setRunning((r) => !r)}
+                        disabled={isMarketClosedForCategory || (activeSignal && running) || startingDelay}
+                        onClick={() => {
+                          if (running) {
+                            setRunning(false);
+                          } else {
+                            setStartingDelay(true);
+                            setDelayCountdown(6);
+                          }
+                        }}
                       >
                         <Zap className="mr-1" /> 
                         {isMarketClosedForCategory
                           ? "Market Closed"
+                          : startingDelay
+                          ? `Starting in ${delayCountdown}s`
                           : (activeSignal && running)
                           ? "Signal Analysis in Progress"
                           : running ? "Stop" : "Start"} 
-                        {!isMarketClosedForCategory && !(activeSignal && running) && " Signals"}
+                        {!isMarketClosedForCategory && !(activeSignal && running) && !startingDelay && " Signals"}
                       </Button>
                     )}
                   </div>
