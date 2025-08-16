@@ -153,6 +153,7 @@ const Index = () => {
   const [timeframe, setTimeframe] = useState<Timeframe>("1MIN");
   const [running, setRunning] = useState(false);
   const [signals, setSignals] = useState<Signal[]>([]);
+  const [activeSignal, setActiveSignal] = useState<Signal | null>(null);
   const [onlineCount, setOnlineCount] = useState(() => {
     // Generate random initial count between 368,568 and 798,326
     const min = 368_568;
@@ -198,21 +199,25 @@ const Index = () => {
       intervalRef.current = null;
       return;
     }
-    // Push first signal immediately for responsiveness
-    setSignals((prev) => [makeSignal(asset, category, timeframe), ...prev].slice(0, 12));
+    // Push first signal immediately for responsiveness and set as active
+    const newSignal = makeSignal(asset, category, timeframe);
+    setSignals((prev) => [newSignal, ...prev].slice(0, 12));
+    setActiveSignal(newSignal);
     intervalRef.current = window.setInterval(() => {
-      setSignals((prev) => [makeSignal(asset, category, timeframe), ...prev].slice(0, 12));
+      const intervalSignal = makeSignal(asset, category, timeframe);
+      setSignals((prev) => [intervalSignal, ...prev].slice(0, 12));
+      setActiveSignal(intervalSignal);
     }, 60000) as unknown as number; // Changed to 1 minute for proper countdown
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
   }, [running, asset, category, timeframe, isAuthenticated, signalExpired]);
 
-  const latest = signals[0];
+  const latest = activeSignal;
 
   const [countdown, setCountdown] = useState(60);
   useEffect(() => {
-    if (!latest || signalExpired) return;
+    if (!activeSignal || signalExpired) return;
     setCountdown(60);
     const id = window.setInterval(() => {
       setCountdown(prev => {
@@ -221,18 +226,20 @@ const Index = () => {
           window.clearInterval(id);
           setSignalExpired(true);
           setRunning(false); // Stop signals when expired
+          setActiveSignal(null); // Clear active signal
           return 0;
         }
         return newCount;
       });
     }, 1000);
     return () => window.clearInterval(id);
-  }, [latest?.id]);
+  }, [activeSignal?.id]);
 
   const handleSignalExpiredDismiss = () => {
     setSignalExpired(false);
     setSignalLocked(true);
     setSignals([]); // Clear all signals
+    setActiveSignal(null); // Clear active signal
     // Auto unlock after 30 seconds
     setTimeout(() => {
       setSignalLocked(false);
@@ -240,6 +247,9 @@ const Index = () => {
   };
 
   const isMarketClosedForCategory = isMarketClosed(category);
+
+  // Disable asset selector only if there's an active signal running
+  const isAssetDisabled = activeSignal && running;
 
   const latestMeta = useMemo(() => {
     if (!latest) return null;
@@ -428,7 +438,7 @@ const Index = () => {
 
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Asset</div>
-                    <Select value={asset} onValueChange={setAsset} disabled={latest && running}>
+                    <Select value={asset} onValueChange={setAsset} disabled={isAssetDisabled}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="Select asset" /></SelectTrigger>
                       <SelectContent>
                         {assetsForCategory.map((a) => (
@@ -465,7 +475,7 @@ const Index = () => {
                       <Button
                         variant="hero"
                         className="w-full"
-                        disabled={signalLocked || isMarketClosedForCategory || (latest && running)}
+                        disabled={signalLocked || isMarketClosedForCategory || (activeSignal && running)}
                         onClick={() => setRunning((r) => !r)}
                       >
                         <Zap className="mr-1" /> 
@@ -473,10 +483,10 @@ const Index = () => {
                           ? "Waiting for signal expiry..." 
                           : isMarketClosedForCategory
                           ? "Market Closed"
-                          : (latest && running)
+                          : (activeSignal && running)
                           ? "Signal Analysis in Progress"
                           : running ? "Stop" : "Start"} 
-                        {!signalLocked && !isMarketClosedForCategory && !(latest && running) && " Signals"}
+                        {!signalLocked && !isMarketClosedForCategory && !(activeSignal && running) && " Signals"}
                       </Button>
                     )}
                   </div>
