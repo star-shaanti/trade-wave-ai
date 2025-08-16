@@ -556,7 +556,7 @@ const Index = () => {
                         }}
                       >
                         {startingDelay ? (
-                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                          <SatelliteIcon className="mr-1 h-4 w-4 animate-spin" />
                         ) : (
                           <Zap className="mr-1" />
                         )}
