@@ -581,24 +581,6 @@ const Index = () => {
                           </div>
                         </div>
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[260px] overflow-auto pr-1">
-                        {signals.map((s) => (
-                          <div key={s.id} className="rounded-md p-3 border border-border/60 bg-background/40">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground">{s.timeframe}</span>
-                              <Badge className={`${s.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} text-[hsl(var(--hero-foreground))]`}>
-                                {s.type}
-                              </Badge>
-                            </div>
-                            <div className="mt-1 font-semibold">{s.asset}</div>
-                            <div className="text-xs text-muted-foreground">{s.reason}</div>
-                            <div className="text-[10px] text-muted-foreground mt-1">
-                              {s.createdAt.toLocaleTimeString()}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
                     </div>
                   )}
                 </div>
