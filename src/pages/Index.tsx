@@ -474,7 +474,7 @@ const Index = () => {
                           : isMarketClosedForCategory
                           ? "Market Closed"
                           : (latest && running)
-                          ? "Signal Active"
+                          ? "Signal en cours d'analyse"
                           : running ? "Stop" : "Start"} 
                         {!signalLocked && !isMarketClosedForCategory && !(latest && running) && " Signals"}
                       </Button>
