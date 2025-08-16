@@ -573,7 +573,7 @@ const Index = () => {
                       </Button>
                     ) : (
                       <Button
-                        className="w-full bg-muted hover:bg-muted/80 text-muted-foreground cursor-pointer"
+                        className="w-full bg-[#4F75FF] hover:bg-[#3D5ECC] text-white"
                         onClick={() => navigate("/pricing")}
                       >
                         <Lock className="mr-2 h-4 w-4" />
