@@ -202,11 +202,13 @@ const Index = () => {
             <span className="font-semibold">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
+            <Button variant="hero" size="sm" className="p-2">
+              <User className="h-4 w-4" />
+            </Button>
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="hero" size="sm" className="flex items-center gap-1">
-                  Subscribe
+                <Button variant="ghost" size="sm" className="p-2">
                   <User className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
