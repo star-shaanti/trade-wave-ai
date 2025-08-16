@@ -18,8 +18,13 @@ import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Set
 import { SatelliteIcon } from "@/components/ui/satellite-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
+import { ManageSubscriptionModal } from "@/components/auth/ManageSubscriptionModal";
+import { DeleteAccountModal } from "@/components/auth/DeleteAccountModal";
+import { SuspendAccountModal } from "@/components/auth/SuspendAccountModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
@@ -206,6 +211,10 @@ const Index = () => {
   const [signalExpired, setSignalExpired] = useState(false);
   const [signalLocked, setSignalLocked] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showManageSubscriptionModal, setShowManageSubscriptionModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [showSuspendAccountModal, setShowSuspendAccountModal] = useState(false);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -363,10 +372,7 @@ const Index = () => {
                       className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
-                        toast({
-                          title: "Manage Subscription",
-                          description: "Feature coming soon!",
-                        });
+                        setShowManageSubscriptionModal(true);
                       }}
                     >
                       <Settings className="h-4 w-4" />
@@ -376,10 +382,7 @@ const Index = () => {
                       className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
-                        toast({
-                          title: "Change Password",
-                          description: "Feature coming soon!",
-                        });
+                        setShowChangePasswordModal(true);
                       }}
                     >
                       <Lock className="h-4 w-4" />
@@ -390,10 +393,7 @@ const Index = () => {
                       className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
-                        toast({
-                          title: "Suspend Account",
-                          description: "Feature coming soon!",
-                        });
+                        setShowSuspendAccountModal(true);
                       }}
                     >
                       <CreditCard className="h-4 w-4" />
@@ -403,10 +403,7 @@ const Index = () => {
                       className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
-                        toast({
-                          title: "Delete Account",
-                          description: "Feature coming soon!",
-                        });
+                        setShowDeleteAccountModal(true);
                       }}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -718,6 +715,28 @@ const Index = () => {
             description: "You are now logged in and can access trading signals.",
           });
         }}
+      />
+
+      {/* Profile & Settings Modals */}
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+      />
+
+      <ManageSubscriptionModal
+        isOpen={showManageSubscriptionModal}
+        onClose={() => setShowManageSubscriptionModal(false)}
+      />
+
+      <SuspendAccountModal
+        isOpen={showSuspendAccountModal}
+        onClose={() => setShowSuspendAccountModal(false)}
+      />
+
+      <DeleteAccountModal
+        isOpen={showDeleteAccountModal}
+        onClose={() => setShowDeleteAccountModal(false)}
+        userEmail={user?.email}
       />
     </div>
   );
