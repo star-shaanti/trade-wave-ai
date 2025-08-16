@@ -35,6 +35,9 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
+    // Get the origin and ensure it has the correct format
+    const origin = req.headers.get("origin") || "https://real-time-ultime.netlify.app";
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -53,8 +56,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/payment-success`,
-      cancel_url: `${req.headers.get("origin")}/?cancelled=true`,
+      success_url: `${origin}/payment-success`,
+      cancel_url: `${origin}/?cancelled=true`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
