@@ -20,6 +20,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
 import { ManageSubscriptionModal } from "@/components/auth/ManageSubscriptionModal";
+import { useNavigate } from "react-router-dom";
 import { DeleteAccountModal } from "@/components/auth/DeleteAccountModal";
 import { SuspendAccountModal } from "@/components/auth/SuspendAccountModal";
 import { CancelSubscriptionModal } from "@/components/auth/CancelSubscriptionModal";
@@ -207,6 +208,9 @@ function makeSignal(asset: string, category: Category, timeframe: Timeframe): Si
 }
 
 const Index = () => {
+  // Navigation
+  const navigate = useNavigate();
+  
   // Authentication
   const { user, isAuthenticated, signOut, loading } = useAuth();
   const { toast } = useToast();
@@ -569,31 +573,11 @@ const Index = () => {
                       </Button>
                     ) : (
                       <Button
-                        variant="hero"
-                        className="w-full"
-                        disabled={isMarketClosedForCategory || (activeSignal && running) || startingDelay}
-                        onClick={() => {
-                          if (running) {
-                            setRunning(false);
-                          } else {
-                            setStartingDelay(true);
-                            setDelayCountdown(6);
-                          }
-                        }}
+                        className="w-full bg-muted hover:bg-muted/80 text-muted-foreground cursor-pointer"
+                        onClick={() => navigate("/pricing")}
                       >
-                        {startingDelay ? (
-                          <SatelliteIcon className="mr-1 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Zap className="mr-1" />
-                        )}
-                        {isMarketClosedForCategory
-                          ? "Market Closed"
-                          : startingDelay
-                          ? "Starting..."
-                          : (activeSignal && running)
-                          ? "Signal Analysis in Progress"
-                          : running ? "Stop" : "Start"} 
-                        {!isMarketClosedForCategory && !(activeSignal && running) && !startingDelay && " Signals"}
+                        <Lock className="mr-2 h-4 w-4" />
+                        Subscribe to Get Signals
                       </Button>
                     )}
                   </div>
