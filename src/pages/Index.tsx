@@ -386,7 +386,7 @@ const Index = () => {
           </a>
           <div className="flex items-center gap-3">
             {isAuthenticated && (
-              <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-green-600 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg animate-pulse">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-green-600 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
                 <img src={crownIcon} alt="Premium" className="h-6 w-6" />
                 <span>Premium</span>
               </div>
