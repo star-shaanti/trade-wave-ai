@@ -557,9 +557,12 @@ const Index = () => {
               >
                 Terms & Conditions
               </Link>
-              <button className="hover:text-foreground transition-colors">
+              <Link 
+                to="/privacy-policy"
+                className="hover:text-foreground transition-colors"
+              >
                 Privacy Policy
-              </button>
+              </Link>
               <a 
                 href="mailto:realtimetradingsignal@gmail.com" 
                 className="hover:text-foreground transition-colors"
