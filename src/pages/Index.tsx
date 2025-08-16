@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
+import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
 import { SatelliteIcon } from "@/components/ui/satellite-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -461,7 +461,7 @@ const Index = () => {
             </div>
 
             <div>
-              <div className="relative rounded-lg border-2 border-signal-green bg-card/60 p-6 overflow-hidden">
+              <div className={`relative rounded-lg border-2 ${latest?.type === 'SELL' ? 'border-signal-red' : 'border-signal-green'} bg-card/60 p-6 overflow-hidden`}>
                 <div className="relative">
                   {!isAuthenticated || !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
@@ -471,7 +471,7 @@ const Index = () => {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="rounded-md border border-signal-green/40 bg-background/40 p-5">
+                      <div className={`rounded-md border ${latest.type === 'SELL' ? 'border-signal-red/40' : 'border-signal-green/40'} bg-background/40 p-5`}>
                         <div className="flex items-start justify-between">
                           <div className="text-sm text-muted-foreground font-medium">Active Trading Signal</div>
                           <div className="text-xs text-muted-foreground">
@@ -481,10 +481,13 @@ const Index = () => {
 
                         <div className="mt-3 text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
-                            <SatelliteIcon className={`text-signal-green w-6 h-6 ${running ? 'animate-pulse' : ''}`} />
-                            <TrendingUp className="text-signal-green" />
+                            <SatelliteIcon className={`${latest.type === 'SELL' ? 'text-signal-red' : 'text-signal-green'} w-6 h-6 ${running ? 'animate-pulse' : ''}`} />
+                            {latest.type === 'SELL' ? 
+                              <TrendingDown className="text-signal-red" /> : 
+                              <TrendingUp className="text-signal-green" />
+                            }
                           </div>
-                          <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-signal-green">
+                          <div className={`text-2xl md:text-3xl font-extrabold tracking-tight ${latest.type === 'SELL' ? 'text-signal-red' : 'text-signal-green'}`}>
                             TRY {latest.type} SIGNAL!
                           </div>
                           <div className="text-base md:text-lg font-semibold">{latest.asset}</div>
@@ -528,7 +531,7 @@ const Index = () => {
                           <div className="text-sm font-medium">Signal Strength</div>
                           <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
                             <div 
-                              className="bg-signal-green h-2.5 rounded-full transition-all duration-300" 
+                              className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
                               style={{ width: `${latestMeta?.strength ?? 80}%` }}
                             ></div>
                           </div>
@@ -544,7 +547,7 @@ const Index = () => {
                           <div className="text-sm font-medium">Time Remaining</div>
                           <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
                             <div 
-                              className="bg-signal-green h-2.5 rounded-full transition-all duration-300" 
+                              className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
                               style={{ width: `${(countdown / 60) * 100}%` }}
                             ></div>
                           </div>
@@ -559,7 +562,7 @@ const Index = () => {
                           <div key={s.id} className="rounded-md p-3 border border-border/60 bg-background/40">
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-muted-foreground">{s.timeframe}</span>
-                              <Badge className="bg-signal-green text-[hsl(var(--hero-foreground))]">
+                              <Badge className={`${s.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} text-[hsl(var(--hero-foreground))]`}>
                                 {s.type}
                               </Badge>
                             </div>
