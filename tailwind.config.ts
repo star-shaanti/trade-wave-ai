@@ -55,6 +55,7 @@ export default {
 					brand: 'hsl(var(--brand))',
 					'brand-2': 'hsl(var(--brand-2))',
 					'signal-green': 'hsl(var(--signal-green))',
+					'signal-red': 'hsl(var(--signal-red))',
 					'hero-foreground': 'hsl(var(--hero-foreground))',
 					sidebar: {
 						DEFAULT: 'hsl(var(--sidebar-background))',
