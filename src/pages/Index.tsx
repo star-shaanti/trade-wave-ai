@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Satellite, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
 
@@ -80,6 +83,10 @@ function makeSignal(asset: string, category: Category, timeframe: Timeframe): Si
 }
 
 const Index = () => {
+  // Authentication
+  const { user, isAuthenticated, signOut, loading } = useAuth();
+  const { toast } = useToast();
+  
   // UI State
   const [category, setCategory] = useState<Category>("FOREX OTC");
   const [asset, setAsset] = useState<string>(ASSETS["FOREX OTC"][0]);
@@ -89,7 +96,7 @@ const Index = () => {
   const [onlineCount, setOnlineCount] = useState(245_014);
   const [signalExpired, setSignalExpired] = useState(false);
   const [signalLocked, setSignalLocked] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -170,6 +177,17 @@ const Index = () => {
     return { strength, trendStrength, volatility, volumeFlow, sentiment, movingAverage, rsi, stochastic, psar, envelope } as const;
   }, [latest?.id, latest?.type]);
 
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="text-center">
+          <SignalHigh className="h-12 w-12 text-brand mx-auto mb-4 animate-pulse" />
+          <div className="font-semibold">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -236,12 +254,16 @@ const Index = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={() => {
+                  onClick={async () => {
                     console.log('Logout initiated');
                     if (confirm('Are you sure you want to log out?')) {
-                      setIsLoggedIn(false);
+                      await signOut();
                       setRunning(false);
                       setSignals([]);
+                      toast({
+                        title: "Logged out",
+                        description: "You have been successfully logged out.",
+                      });
                     }
                   }}
                 >
@@ -319,16 +341,16 @@ const Index = () => {
                     <Button
                       variant="hero"
                       className="w-full"
-                      disabled={signalLocked || !isLoggedIn}
+                      disabled={signalLocked || !isAuthenticated}
                       onClick={() => setRunning((r) => !r)}
                     >
                       <Zap className="mr-1" /> 
-                      {!isLoggedIn
+                      {!isAuthenticated
                         ? "Login Required"
                         : signalLocked 
                         ? "Waiting for signal expiry..." 
                         : running ? "Stop" : "Start"} 
-                      {isLoggedIn && !signalLocked && " Signals"}
+                      {isAuthenticated && !signalLocked && " Signals"}
                     </Button>
                   </div>
                 </div>
@@ -350,14 +372,14 @@ const Index = () => {
                   }}
                 />
                 <div className="relative">
-                  {!isLoggedIn ? (
+                  {!isAuthenticated ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center">
                       <div className="text-xs text-muted-foreground mb-4">(log in to see the signals)</div>
                       <Button 
                         variant="default" 
                         size="lg"
                         className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base font-medium"
-                        onClick={() => setIsLoggedIn(true)}
+                        onClick={() => setShowAuthModal(true)}
                       >
                         <Key className="mr-2 h-5 w-5" />
                         Log In to Get Signals
@@ -545,6 +567,19 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          toast({
+            title: "Welcome!",
+            description: "You are now logged in and can access trading signals.",
+          });
+        }}
+      />
     </div>
   );
 };
