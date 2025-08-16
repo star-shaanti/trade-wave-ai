@@ -212,7 +212,7 @@ const Index = () => {
   const navigate = useNavigate();
   
   // Authentication
-  const { user, isAuthenticated, signOut, loading } = useAuth();
+  const { user, isAuthenticated, signOut, loading, isPremium, subscriptionData, checkSubscription } = useAuth();
   const { toast } = useToast();
   
   // UI State
@@ -288,8 +288,8 @@ const Index = () => {
 
   // Signal stream simulation
   useEffect(() => {
-    // Only run signals if authenticated and running and not expired
-    if (!running || !isAuthenticated || signalExpired) {
+    // Only run signals if authenticated, premium, running and not expired
+    if (!running || !isAuthenticated || !isPremium || signalExpired) {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
       intervalRef.current = null;
       return;
@@ -315,7 +315,7 @@ const Index = () => {
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [running, isAuthenticated, signalExpired, activeSignal]);
+  }, [running, isAuthenticated, isPremium, signalExpired, activeSignal]);
 
   const latest = activeSignal;
 
@@ -385,7 +385,7 @@ const Index = () => {
             <span className="font-semibold">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
-            {isAuthenticated && (
+            {isPremium && (
               <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-green-600 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
                 <img src={crownIcon} alt="Premium" className="h-6 w-6" />
                 <span>Premium</span>
@@ -571,13 +571,47 @@ const Index = () => {
                         </svg>
                         Log In to Get Signals
                       </Button>
-                    ) : (
+                    ) : !isPremium ? (
                       <Button
                         className="w-full bg-[#4F75FF] hover:bg-[#3D5ECC] text-white"
                         onClick={() => navigate("/pricing")}
                       >
                         <Lock className="mr-2 h-4 w-4" />
                         Subscribe to Get Signals
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full bg-signal-green hover:bg-signal-green/90 text-white"
+                        onClick={() => {
+                          if (isMarketClosedForCategory) {
+                            toast({
+                              title: "Market Closed",
+                              description: getMarketStatusMessage(category),
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          setDelayCountdown(5);
+                          setStartingDelay(true);
+                        }}
+                        disabled={running || startingDelay || isMarketClosedForCategory}
+                      >
+                        {startingDelay ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Starting in {delayCountdown}s
+                          </>
+                        ) : running ? (
+                          <>
+                            <Zap className="mr-2 h-4 w-4" />
+                            Signals Running
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="mr-2 h-4 w-4" />
+                            Start Trading Signals
+                          </>
+                        )}
                       </Button>
                     )}
                   </div>
@@ -591,7 +625,7 @@ const Index = () => {
             <div>
               <div className={`relative rounded-lg border-2 ${latest?.type === 'SELL' ? 'border-signal-red' : 'border-signal-green'} bg-card/60 p-6 overflow-hidden`}>
                 <div className="relative">
-                  {!isAuthenticated || !latest ? (
+                  {!isAuthenticated || !isPremium || !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
                       <SatelliteIcon className="mb-2 text-signal-green w-8 h-8" />
                       <div className="font-semibold">No active signals.</div>

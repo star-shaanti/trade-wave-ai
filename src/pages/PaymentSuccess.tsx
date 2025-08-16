@@ -1,10 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
+  const { checkSubscription } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check subscription status after payment
+    const verifyPayment = async () => {
+      try {
+        await checkSubscription();
+        toast({
+          title: "Welcome to Premium!",
+          description: "Your subscription is now active. Enjoy premium trading signals!",
+        });
+      } catch (error) {
+        console.error("Error verifying subscription:", error);
+      }
+    };
+
+    verifyPayment();
+  }, [checkSubscription, toast]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
