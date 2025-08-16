@@ -125,7 +125,7 @@ const Index = () => {
         // Keep within bounds
         return Math.max(minCount, Math.min(maxCount, newCount));
       });
-    }, 1500);
+    }, 5000);
     return () => clearInterval(id);
   }, []);
 
