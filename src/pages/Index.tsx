@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
-import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key, X } from "lucide-react";
+import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key, X, Loader2 } from "lucide-react";
 import { SatelliteIcon } from "@/components/ui/satellite-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -555,11 +555,15 @@ const Index = () => {
                           }
                         }}
                       >
-                        <Zap className="mr-1" /> 
+                        {startingDelay ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Zap className="mr-1" />
+                        )}
                         {isMarketClosedForCategory
                           ? "Market Closed"
                           : startingDelay
-                          ? `Starting in ${delayCountdown}s`
+                          ? "Starting..."
                           : (activeSignal && running)
                           ? "Signal Analysis in Progress"
                           : running ? "Stop" : "Start"} 
