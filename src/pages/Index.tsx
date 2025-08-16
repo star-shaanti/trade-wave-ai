@@ -465,7 +465,7 @@ const Index = () => {
                       <Button
                         variant="hero"
                         className="w-full"
-                        disabled={signalLocked || isMarketClosedForCategory}
+                        disabled={signalLocked || isMarketClosedForCategory || (latest && running)}
                         onClick={() => setRunning((r) => !r)}
                       >
                         <Zap className="mr-1" /> 
@@ -473,8 +473,10 @@ const Index = () => {
                           ? "Waiting for signal expiry..." 
                           : isMarketClosedForCategory
                           ? "Market Closed"
+                          : (latest && running)
+                          ? "Signal Active"
                           : running ? "Stop" : "Start"} 
-                        {!signalLocked && !isMarketClosedForCategory && " Signals"}
+                        {!signalLocked && !isMarketClosedForCategory && !(latest && running) && " Signals"}
                       </Button>
                     )}
                   </div>
