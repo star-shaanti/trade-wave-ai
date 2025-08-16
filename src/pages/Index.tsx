@@ -22,6 +22,7 @@ import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
 import { ManageSubscriptionModal } from "@/components/auth/ManageSubscriptionModal";
 import { DeleteAccountModal } from "@/components/auth/DeleteAccountModal";
 import { SuspendAccountModal } from "@/components/auth/SuspendAccountModal";
+import { CancelSubscriptionModal } from "@/components/auth/CancelSubscriptionModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
@@ -215,6 +216,7 @@ const Index = () => {
   const [showManageSubscriptionModal, setShowManageSubscriptionModal] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [showSuspendAccountModal, setShowSuspendAccountModal] = useState(false);
+  const [showCancelSubscriptionModal, setShowCancelSubscriptionModal] = useState(false);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -372,7 +374,7 @@ const Index = () => {
                       className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer text-red-600"
                       onClick={(e) => {
                         e.preventDefault();
-                        window.open('https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00', '_blank');
+                        setShowCancelSubscriptionModal(true);
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -748,6 +750,11 @@ const Index = () => {
         isOpen={showDeleteAccountModal}
         onClose={() => setShowDeleteAccountModal(false)}
         userEmail={user?.email}
+      />
+
+      <CancelSubscriptionModal
+        isOpen={showCancelSubscriptionModal}
+        onClose={() => setShowCancelSubscriptionModal(false)}
       />
     </div>
   );
