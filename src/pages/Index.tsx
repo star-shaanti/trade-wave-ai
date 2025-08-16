@@ -97,7 +97,12 @@ const Index = () => {
   const [timeframe, setTimeframe] = useState<Timeframe>("1MIN");
   const [running, setRunning] = useState(false);
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [onlineCount, setOnlineCount] = useState(568_326);
+  const [onlineCount, setOnlineCount] = useState(() => {
+    // Generate random initial count between 368,568 and 798,326
+    const min = 368_568;
+    const max = 798_326;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  });
   const [signalExpired, setSignalExpired] = useState(false);
   const [signalLocked, setSignalLocked] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
