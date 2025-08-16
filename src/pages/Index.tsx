@@ -235,7 +235,13 @@ const Index = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={() => alert('Log out clicked')}
+                  onClick={() => {
+                    console.log('Logout initiated');
+                    // Instead of alert, handle logout properly
+                    if (confirm('Are you sure you want to log out?')) {
+                      window.location.reload();
+                    }
+                  }}
                 >
                   <LogOut className="h-4 w-4" />
                   Log out
