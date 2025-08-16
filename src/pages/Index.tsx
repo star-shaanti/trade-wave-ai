@@ -13,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
 import { SatelliteIcon } from "@/components/ui/satellite-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -353,73 +353,67 @@ const Index = () => {
                   <Home className="h-4 w-4" />
                   Home Page
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({
-                      title: "Profile & Settings",
-                      description: "Feature coming soon!",
-                    });
-                  }}
-                >
-                  <User className="h-4 w-4" />
-                  Profile & Settings
-                  <span className="ml-auto text-xs">›</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({
-                      title: "Manage Subscription",
-                      description: "Feature coming soon!",
-                    });
-                  }}
-                >
-                  <Settings className="h-4 w-4" />
-                  Manage Subscription
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({
-                      title: "Change Password",
-                      description: "Feature coming soon!",
-                    });
-                  }}
-                >
-                  <Lock className="h-4 w-4" />
-                  Change Password
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({
-                      title: "Suspend Account",
-                      description: "Feature coming soon!",
-                    });
-                  }}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  Suspend Account
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toast({
-                      title: "Delete Account",
-                      description: "Feature coming soon!",
-                    });
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete Account
-                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer">
+                    <User className="h-4 w-4" />
+                    Profile & Settings
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem 
+                      className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toast({
+                          title: "Manage Subscription",
+                          description: "Feature coming soon!",
+                        });
+                      }}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Manage Subscription
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toast({
+                          title: "Change Password",
+                          description: "Feature coming soon!",
+                        });
+                      }}
+                    >
+                      <Lock className="h-4 w-4" />
+                      Change Password
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toast({
+                          title: "Suspend Account",
+                          description: "Feature coming soon!",
+                        });
+                      }}
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      Suspend Account
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toast({
+                          title: "Delete Account",
+                          description: "Feature coming soon!",
+                        });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Account
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
