@@ -178,6 +178,34 @@ export type Database = {
           payment_intent_id: string | null
           payment_status: string | null
         }
+        Insert: {
+          amount_subtotal?: number | null
+          amount_total?: number | null
+          checkout_session_id?: string | null
+          currency?: string | null
+          customer_id?: string | null
+          order_date?: string | null
+          order_id?: number | null
+          order_status?:
+            | Database["public"]["Enums"]["stripe_order_status"]
+            | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
+        }
+        Update: {
+          amount_subtotal?: number | null
+          amount_total?: number | null
+          checkout_session_id?: string | null
+          currency?: string | null
+          customer_id?: string | null
+          order_date?: string | null
+          order_id?: number | null
+          order_status?:
+            | Database["public"]["Enums"]["stripe_order_status"]
+            | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
+        }
         Relationships: []
       }
       stripe_user_subscriptions: {
@@ -191,6 +219,32 @@ export type Database = {
           price_id: string | null
           subscription_id: string | null
           subscription_status:
+            | Database["public"]["Enums"]["stripe_subscription_status"]
+            | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          current_period_end?: number | null
+          current_period_start?: number | null
+          customer_id?: string | null
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          price_id?: string | null
+          subscription_id?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["stripe_subscription_status"]
+            | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          current_period_end?: number | null
+          current_period_start?: number | null
+          customer_id?: string | null
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          price_id?: string | null
+          subscription_id?: string | null
+          subscription_status?:
             | Database["public"]["Enums"]["stripe_subscription_status"]
             | null
         }
