@@ -369,22 +369,22 @@ const Index = () => {
                     </Select>
                   </div>
 
-                  <div className="flex items-end">
-                    <Button
-                      variant="hero"
-                      className="w-full"
-                      disabled={signalLocked || !isAuthenticated}
-                      onClick={() => setRunning((r) => !r)}
-                    >
-                      <Zap className="mr-1" /> 
-                      {!isAuthenticated
-                        ? "Login Required"
-                        : signalLocked 
-                        ? "Waiting for signal expiry..." 
-                        : running ? "Stop" : "Start"} 
-                      {isAuthenticated && !signalLocked && " Signals"}
-                    </Button>
-                  </div>
+                  {isAuthenticated && (
+                    <div className="flex items-end">
+                      <Button
+                        variant="hero"
+                        className="w-full"
+                        disabled={signalLocked}
+                        onClick={() => setRunning((r) => !r)}
+                      >
+                        <Zap className="mr-1" /> 
+                        {signalLocked 
+                          ? "Waiting for signal expiry..." 
+                          : running ? "Stop" : "Start"} 
+                        {!signalLocked && " Signals"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-3 text-xs text-muted-foreground">
                   {category === "FOREX OTC" ? "FOREX OTC markets are open 24/7." : "Signals are simulated for educational preview."}
@@ -408,12 +408,13 @@ const Index = () => {
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center">
                       <div className="text-xs text-muted-foreground mb-4">(log in to see the signals)</div>
                       <Button 
-                        variant="default" 
                         size="lg"
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base font-medium"
+                        className="bg-[#4F75FF] hover:bg-[#3D5ECC] text-white px-6 py-3 text-sm font-medium rounded-lg border-0"
                         onClick={() => setShowAuthModal(true)}
                       >
-                        <Key className="mr-2 h-5 w-5" />
+                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
                         Log In to Get Signals
                       </Button>
                     </div>
