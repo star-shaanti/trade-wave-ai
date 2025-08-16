@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import siteLogo from "@/assets/site-logo.png";
+import crownIcon from "@/assets/crown-icon.png";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -202,9 +203,10 @@ const Index = () => {
             <span className="font-semibold">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
-            <Button variant="hero" size="sm" className="p-2">
-              <User className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
+              <img src={crownIcon} alt="Premium" className="h-4 w-4" />
+              <span>Premium</span>
+            </div>
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
