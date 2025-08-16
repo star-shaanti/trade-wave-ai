@@ -97,7 +97,7 @@ const Index = () => {
   const [timeframe, setTimeframe] = useState<Timeframe>("1MIN");
   const [running, setRunning] = useState(false);
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [onlineCount, setOnlineCount] = useState(245_014);
+  const [onlineCount, setOnlineCount] = useState(568_326);
   const [signalExpired, setSignalExpired] = useState(false);
   const [signalLocked, setSignalLocked] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -110,10 +110,21 @@ const Index = () => {
     if (!assetsForCategory.includes(asset)) setAsset(assetsForCategory[0]);
   }, [assetsForCategory, asset]);
 
-  // Online count playful fluctuations
+  // Online count progressive fluctuations between 368,568 and 798,326
   useEffect(() => {
     const id = window.setInterval(() => {
-      setOnlineCount((c) => Math.max(123_456, c + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 7)));
+      setOnlineCount((current) => {
+        const minCount = 368_568;
+        const maxCount = 798_326;
+        const maxChange = 70;
+        
+        // Generate random change between -70 and +70
+        const change = Math.floor(Math.random() * (maxChange * 2 + 1)) - maxChange;
+        const newCount = current + change;
+        
+        // Keep within bounds
+        return Math.max(minCount, Math.min(maxCount, newCount));
+      });
     }, 1500);
     return () => clearInterval(id);
   }, []);
