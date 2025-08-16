@@ -256,9 +256,6 @@ const Index = () => {
 
   const isMarketClosedForCategory = isMarketClosed(category);
 
-  // Disable asset selector only if there's an active signal running
-  const isAssetDisabled = activeSignal && running;
-
   const latestMeta = useMemo(() => {
     if (!latest) return null;
     const strength = Math.floor(65 + Math.random() * 30);
@@ -446,7 +443,7 @@ const Index = () => {
 
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Asset</div>
-                    <Select value={asset} onValueChange={setAsset} disabled={isAssetDisabled}>
+                    <Select value={asset} onValueChange={setAsset}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="Select asset" /></SelectTrigger>
                       <SelectContent>
                         {assetsForCategory.map((a) => (
