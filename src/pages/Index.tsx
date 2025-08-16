@@ -204,7 +204,7 @@ const Index = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="hero" size="sm" className="flex items-center gap-1">
                   Subscribe
-                  <ChevronDown className="h-4 w-4" />
+                  <User className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
