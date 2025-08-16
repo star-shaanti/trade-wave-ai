@@ -42,24 +42,17 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    // Create a one-time payment session
+    // Create a subscription checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: { 
-              name: `Trading Signals - ${planName}`,
-              description: "Access to premium trading signals and market analysis"
-            },
-            unit_amount: amount, // Amount in cents
-          },
+          price: priceId, // Utiliser directement l'ID de prix Stripe
           quantity: 1,
         },
       ],
-      mode: "payment",
+      mode: "subscription", // Mode abonnement au lieu de paiement unique
       success_url: `${req.headers.get("origin")}/payment-success`,
       cancel_url: `${req.headers.get("origin")}/pricing`,
       metadata: {
