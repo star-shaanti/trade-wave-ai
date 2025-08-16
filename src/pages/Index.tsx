@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Rocket, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2 } from "lucide-react";
+import { Satellite, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
@@ -179,10 +179,6 @@ const Index = () => {
             <span className="font-semibold">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="bg-secondary/60">
-              <span className="inline-flex h-2 w-2 rounded-full bg-signal-green mr-2" aria-hidden />
-              {onlineCount.toLocaleString()} active traders online
-            </Badge>
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -231,14 +227,23 @@ const Index = () => {
 
       <main>
         <section className="container py-12 md:py-16">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
+              AI-powered Real-Time Trading Signals
+            </h1>
+            <p className="mt-3 text-muted-foreground text-lg max-w-2xl mx-auto">
+              Harness simulated institutional-grade strategies to get instant BUY/SELL alerts across Forex, Indices, and Crypto markets.
+            </p>
+          </div>
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div>
-              <h1 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
-                AI-powered Real-Time Trading Signals
-              </h1>
-              <p className="mt-3 text-muted-foreground text-lg max-w-xl">
-                Harness simulated institutional-grade strategies to get instant BUY/SELL alerts across Forex, Indices, and Crypto markets.
-              </p>
+              <div className="text-center mb-6">
+                <Badge variant="secondary" className="bg-secondary/60">
+                  <span className="inline-flex h-2 w-2 rounded-full bg-signal-green mr-2" aria-hidden />
+                  {onlineCount.toLocaleString()} active traders online
+                </Badge>
+              </div>
 
               <Card className="mt-8 p-5 bg-card/60 border-border/60">
                 <div className="text-sm uppercase tracking-wide text-muted-foreground font-semibold mb-3">
@@ -316,7 +321,7 @@ const Index = () => {
                 <div className="relative">
                   {!latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
-                      <Rocket className="mb-2 text-brand" />
+                      <Satellite className="mb-2 text-signal-green w-8 h-8" />
                       <div className="font-semibold">No active signals.</div>
                       <div className="text-sm">First select settings, then click on Start Signals.</div>
                     </div>
@@ -332,7 +337,7 @@ const Index = () => {
 
                         <div className="mt-3 text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
-                            <SignalHigh className="text-signal-green" />
+                            <Satellite className={`text-signal-green w-6 h-6 ${running ? 'animate-pulse' : ''}`} />
                             <TrendingUp className="text-signal-green" />
                           </div>
                           <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-signal-green">
