@@ -380,9 +380,9 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container py-4 flex items-center justify-between">
-          <a href="/" aria-label="Real-Time Trading Signals home" className="flex items-center gap-2">
+          <a href="/" aria-label="Real-Time Trading Signals home" className="flex flex-col sm:flex-row items-center gap-2">
             <img src={siteLogo} alt="Real-Time Trading Signals" className="h-8 w-8" />
-            <span className="font-semibold">Real-time Trading Signals</span>
+            <span className="font-semibold text-center sm:text-left">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
             {isPremium && (
