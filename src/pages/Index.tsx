@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import siteLogo from "@/assets/site-logo.png";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -196,7 +197,7 @@ const Index = () => {
       <header className="border-b border-border/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container py-4 flex items-center justify-between">
           <a href="/" aria-label="Real-Time Trading Signals home" className="flex items-center gap-2">
-            <SignalHigh className="text-brand" />
+            <img src={siteLogo} alt="Real-Time Trading Signals" className="h-8 w-8" />
             <span className="font-semibold">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
