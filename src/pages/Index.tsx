@@ -175,6 +175,21 @@ function isMarketClosed(category: Category): boolean {
   }
 }
 
+function getTimeframeInSeconds(timeframe: Timeframe): number {
+  const timeframeMap: Record<Timeframe, number> = {
+    "1MIN": 60,
+    "2MIN": 120,
+    "3MIN": 180,
+    "5MIN": 300,
+    "15MIN": 900,
+    "30MIN": 1800,
+    "1H": 3600,
+    "4H": 14400,
+    "Daily": 86400,
+  };
+  return timeframeMap[timeframe];
+}
+
 function makeSignal(asset: string, category: Category, timeframe: Timeframe): Signal {
   // Generate more varied BUY/SELL signals with slight bias towards more trading activity
   const randomValue = Math.random();
@@ -285,11 +300,12 @@ const Index = () => {
     
     // Set interval only if there's no active signal
     if (!activeSignal) {
+      const timeframeSeconds = getTimeframeInSeconds(timeframe);
       intervalRef.current = window.setInterval(() => {
         const intervalSignal = makeSignal(asset, category, timeframe);
         setSignals((prev) => [intervalSignal, ...prev].slice(0, 12));
         setActiveSignal(intervalSignal);
-      }, 60000) as unknown as number;
+      }, timeframeSeconds * 1000) as unknown as number;
     }
     
     return () => {
@@ -302,7 +318,8 @@ const Index = () => {
   const [countdown, setCountdown] = useState(60);
   useEffect(() => {
     if (!activeSignal || signalExpired) return;
-    setCountdown(60);
+    const timeframeSeconds = getTimeframeInSeconds(timeframe);
+    setCountdown(timeframeSeconds);
     const id = window.setInterval(() => {
       setCountdown(prev => {
         const newCount = prev - 1;
@@ -317,7 +334,7 @@ const Index = () => {
       });
     }, 1000);
     return () => window.clearInterval(id);
-  }, [activeSignal?.id]);
+  }, [activeSignal?.id, timeframe]);
 
   const handleSignalExpiredDismiss = () => {
     setSignalExpired(false);
@@ -675,7 +692,7 @@ const Index = () => {
                           <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
                             <div 
                               className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
-                              style={{ width: `${(countdown / 60) * 100}%` }}
+                              style={{ width: `${(countdown / getTimeframeInSeconds(timeframe)) * 100}%` }}
                             ></div>
                           </div>
                           <div className="mt-1 text-xs text-muted-foreground text-right">
