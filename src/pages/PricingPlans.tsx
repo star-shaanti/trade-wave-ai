@@ -1,17 +1,24 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const PricingPlans = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const plans = [
     {
       name: "24-Hour Pass",
       price: "€7",
       priceId: "prix_1RrhKFEHHHdPbMazw8GHJobk",
-      stripeUrl: "https://buy.stripe.com/6oUaEXfem4639DGf0pdfG0k",
+      amount: 700, // en centimes
       features: [
         "Full access to signals",
         "All asset classes", 
@@ -23,7 +30,7 @@ const PricingPlans = () => {
       name: "48-Hour Pass", 
       price: "€12",
       priceId: "prix_1RrhKFEHHHdPbMazw8GHJobk",
-      stripeUrl: "https://buy.stripe.com/00wdR97LUfOLeY09G5dfG0j",
+      amount: 1200,
       features: [
         "Full access to signals",
         "All asset classes",
@@ -35,7 +42,7 @@ const PricingPlans = () => {
       name: "Weekly",
       price: "€30", 
       priceId: "prix_1RrhIxEHHHdPbMazBeWWXRur",
-      stripeUrl: "https://buy.stripe.com/4gM7sL9U25a78zC4lLdfG0i",
+      amount: 3000,
       features: [
         "Full access to signals",
         "All asset classes",
@@ -46,8 +53,8 @@ const PricingPlans = () => {
     {
       name: "Monthly",
       price: "€85",
-      priceId: "prix_1RrhH9EHHHdPbMazFfMVdz8E", 
-      stripeUrl: "https://buy.stripe.com/fZudR93vE6ebcPSf0pdfG0h",
+      priceId: "prix_1RrhH9EHHHdPbMazFfMVdz8E",
+      amount: 8500,
       features: [
         "Full access to signals",
         "All asset classes",
@@ -57,8 +64,47 @@ const PricingPlans = () => {
     }
   ];
 
-  const handleSubscribe = (stripeUrl: string) => {
-    window.open(stripeUrl, '_blank');
+  const handleSubscribe = async (plan: typeof plans[0]) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to subscribe to a plan",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoadingPlan(plan.priceId);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          priceId: plan.priceId,
+          amount: plan.amount,
+          planName: plan.name
+        },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // Rediriger dans la même fenêtre
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create payment session",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -66,6 +112,14 @@ const PricingPlans = () => {
       {/* Header */}
       <div className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Trading
+          </Button>
           <div className="flex items-center gap-2">
             <img src="/src/assets/site-logo.png" alt="Logo" className="h-8 w-8" />
             <span className="text-xl font-bold">Trading Signals</span>
@@ -124,14 +178,15 @@ const PricingPlans = () => {
               </div>
 
               <Button
-                onClick={() => handleSubscribe(plan.stripeUrl)}
+                onClick={() => handleSubscribe(plan)}
+                disabled={loadingPlan === plan.priceId}
                 className={`w-full ${
                   plan.popular 
                     ? 'bg-primary hover:bg-primary/90' 
                     : 'bg-primary/90 hover:bg-primary'
                 }`}
               >
-                Subscribe Now
+                {loadingPlan === plan.priceId ? 'Loading...' : 'Subscribe Now'}
               </Button>
             </div>
           ))}
