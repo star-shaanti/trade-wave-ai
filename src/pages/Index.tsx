@@ -437,9 +437,9 @@ const Index = () => {
 
         <section className="bg-muted/20 border-t border-b border-border/60">
           <div className="container py-12 text-center">
-            <div className="text-2xl font-bold">🎉 Celebrating 900,000 Traders!</div>
+            <div className="text-2xl font-bold">🎉 Celebrating 1,000,000 Traders!</div>
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              We're thrilled to have reached a community of over 500,000 registered users. Thank you for being a part of our journey.
+              We're thrilled to have reached a community of over 1,000,000 registered users. Thank you for being a part of our journey.
             </p>
           </div>
         </section>
@@ -455,6 +455,123 @@ const Index = () => {
           </div>
         </section>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-background border-t border-border/60">
+        <div className="container py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Support</h3>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Need help? Contact our support team:</p>
+                <a 
+                  href="mailto:realtimetradingsignal@gmail.com" 
+                  className="text-sm text-primary hover:underline"
+                >
+                  realtimetradingsignal@gmail.com
+                </a>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Legal</h3>
+              <div className="space-y-2">
+                <button className="text-sm text-muted-foreground hover:text-foreground">
+                  Terms & Conditions
+                </button>
+                <button className="text-sm text-muted-foreground hover:text-foreground">
+                  Privacy Policy
+                </button>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Company</h3>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Real-time Trading Signals</p>
+                <p className="text-sm text-muted-foreground">Last Updated: August 14, 2025</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-border/60 pt-8">
+            <div className="text-sm text-muted-foreground space-y-4">
+              <h4 className="font-semibold text-foreground">Terms & Conditions of Use</h4>
+              
+              <div className="space-y-3">
+                <p>
+                  Welcome to Real-time Trading Signals! These Terms & Conditions of Use govern the access and use of the website realtimetradingsignals.com and the signal provision subscription services offered by Real-time Trading Signals.
+                </p>
+                
+                <p>
+                  By accessing the Site and using our Services, you acknowledge that you have read, understood, and agree to be bound by all of these T&C. If you do not agree with these terms, you must not use the Site or the Services.
+                </p>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 1: Purpose</h5>
+                  <p>The purpose of these T&C is to define the terms and conditions under which Users may access the Site and subscribe to the Services.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 2: Account Creation</h5>
+                  <p>2.1. Access to the Services requires the creation of a personal account. The User agrees to provide accurate, complete, and up-to-date information.</p>
+                  <p>2.2. The User is solely responsible for the confidentiality of their password and for all activities conducted from their account.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 3: Subscriptions</h5>
+                  <p>3.1. Subscription: The Services are accessible through one or more paid Subscriptions, as presented on the Site. Payments are managed by our secure payment service provider, Stripe.</p>
+                  <p>3.2. Automatic Renewal: Unless canceled by the User before the expiration date, all Subscriptions are automatically renewed for a period identical to the one initially subscribed.</p>
+                  <p>3.3. Cancellation: The User may cancel the automatic renewal of their Subscription at any time from their personal account area.</p>
+                  <p>3.4. No Refunds: As detailed in Article 4, canceling a Subscription or its early termination does not entitle the User to any refund for the remaining period.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 4: No-Refund Policy</h5>
+                  <p>4.1. Finality of Purchase: The User expressly acknowledges and agrees that any payment made for a Subscription is final.</p>
+                  <p>4.2. NO REFUNDS: Due to the digital and immediate nature of the Services provided (instant access to signals and content), Real-time Trading Signals does not issue any refunds, either full or partial, under any circumstances.</p>
+                  <p>4.3. This includes, but is not limited to, cases of dissatisfaction, non-use of the Service, cancellation during the billing period, or forgetting to cancel the automatic renewal.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 5: User Obligations</h5>
+                  <p>The User agrees to: Use the Services for strictly personal and non-commercial purposes. Not share, resell, copy, or distribute the Signals and content of the Site to third parties. Not use any devices or software intended to disrupt the proper functioning of the Site. Comply with all applicable laws and regulations.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 6: IMPORTANT DISCLAIMER AND LIMITATION OF LIABILITY</h5>
+                  <p>6.1. Nature of Information: The Signals and content provided on the Site are for purely informational and educational purposes. They do not, under any circumstances, constitute investment advice, financial recommendation, solicitation, or an offer to buy or sell any financial product.</p>
+                  <p>6.2. No Guarantee: Real-time Trading Signals does not guarantee the performance, accuracy, or relevance of the Signals in any way. Past performance is not indicative of future results.</p>
+                  <p>6.3. Assumption of Risk: The User is solely and exclusively responsible for their investment or trading decisions and for any financial losses that may result. The use of the Signals is at the User's own risk.</p>
+                  <p>6.4. Service Availability: We strive to keep the Site accessible 24/7 but cannot guarantee continuous availability.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 7: Intellectual Property</h5>
+                  <p>All elements of the Site (logo, texts, software, signals, design) are the exclusive property of Real-time Trading Signals and are protected by copyright and intellectual property law. Any reproduction, even partial, is strictly prohibited.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 8: Personal Data</h5>
+                  <p>The collection and processing of Users' personal data are carried out in accordance with our Privacy Policy, accessible on the Site, and in compliance with the General Data Protection Regulation (GDPR).</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 9: Modification of T&C</h5>
+                  <p>Real-time Trading Signals reserves the right to modify these T&C at any time. Users will be informed of any substantial changes. The applicable version is the one in effect on the Site at the time the Services are used.</p>
+                </div>
+                
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">Article 10: Governing Law and Jurisdiction</h5>
+                  <p>These T&C are subject to the laws of France. In the event of a dispute, and after an attempt at an amicable resolution, exclusive jurisdiction is granted to the competent courts of Paris.</p>
+                </div>
+                
+                <p className="pt-4 border-t border-border/60">
+                  For any questions, please contact us at: <a href="mailto:realtimetradingsignal@gmail.com" className="text-primary hover:underline">realtimetradingsignal@gmail.com</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* Signal Expired Modal */}
       <Dialog open={signalExpired} onOpenChange={() => {}}>
