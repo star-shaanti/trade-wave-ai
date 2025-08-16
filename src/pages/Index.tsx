@@ -210,14 +210,23 @@ const Index = () => {
               <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={() => window.location.href = '/'}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Already on home page, no action needed
+                  }}
                 >
                   <Home className="h-4 w-4" />
                   Home Page
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={() => alert('Profile & Settings clicked')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast({
+                      title: "Profile & Settings",
+                      description: "Feature coming soon!",
+                    });
+                  }}
                 >
                   <User className="h-4 w-4" />
                   Profile & Settings
@@ -226,28 +235,52 @@ const Index = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={() => alert('Manage Subscription clicked')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast({
+                      title: "Manage Subscription",
+                      description: "Feature coming soon!",
+                    });
+                  }}
                 >
                   <Settings className="h-4 w-4" />
                   Manage Subscription
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={() => alert('Change Password clicked')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast({
+                      title: "Change Password",
+                      description: "Feature coming soon!",
+                    });
+                  }}
                 >
                   <Lock className="h-4 w-4" />
                   Change Password
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
-                  onClick={() => alert('Suspend Account clicked')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast({
+                      title: "Suspend Account",
+                      description: "Feature coming soon!",
+                    });
+                  }}
                 >
                   <CreditCard className="h-4 w-4" />
                   Suspend Account
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
-                  onClick={() => alert('Delete Account clicked')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast({
+                      title: "Delete Account",
+                      description: "Feature coming soon!",
+                    });
+                  }}
                 >
                   <Trash2 className="h-4 w-4" />
                   Delete Account
@@ -255,17 +288,15 @@ const Index = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={async () => {
-                    console.log('Logout initiated');
-                    if (confirm('Are you sure you want to log out?')) {
-                      await signOut();
-                      setRunning(false);
-                      setSignals([]);
-                      toast({
-                        title: "Logged out",
-                        description: "You have been successfully logged out.",
-                      });
-                    }
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    await signOut();
+                    setRunning(false);
+                    setSignals([]);
+                    toast({
+                      title: "Déconnecté",
+                      description: "Vous avez été déconnecté avec succès.",
+                    });
                   }}
                 >
                   <LogOut className="h-4 w-4" />
