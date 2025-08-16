@@ -330,7 +330,7 @@ const Index = () => {
                 </Badge>
               </div>
 
-              <Card className="mt-8 p-5 bg-card/60 border-border/60">
+              <Card className="mt-8 p-5 bg-card/60 border-2 border-signal-green">
                 <div className="text-sm uppercase tracking-wide text-muted-foreground font-semibold mb-3">
                   Trading Bot Settings
                 </div>
@@ -405,7 +405,7 @@ const Index = () => {
             </div>
 
             <div>
-              <div className="relative rounded-lg border border-border bg-card/60 p-6 overflow-hidden">
+              <div className="relative rounded-lg border-2 border-signal-green bg-card/60 p-6 overflow-hidden">
                 <div className="relative">
                   {!isAuthenticated || !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
