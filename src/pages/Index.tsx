@@ -364,10 +364,12 @@ const Index = () => {
             <span className="font-semibold">Real-time Trading Signals</span>
           </a>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
-              <img src={crownIcon} alt="Premium" className="h-6 w-6" />
-              <span>Premium</span>
-            </div>
+            {isAuthenticated && (
+              <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
+                <img src={crownIcon} alt="Premium" className="h-6 w-6" />
+                <span>Premium</span>
+              </div>
+            )}
             <ThemeToggle />
             {!isAuthenticated ? (
               <Button 
