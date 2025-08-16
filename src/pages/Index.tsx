@@ -414,15 +414,11 @@ const Index = () => {
                   }}
                 />
                 <div className="relative">
-                  {!isAuthenticated ? (
-                    <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center">
-                      <div className="text-xs text-muted-foreground mb-4">(log in to see the signals)</div>
-                    </div>
-                  ) : !latest ? (
+                  {!isAuthenticated || !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
                       <Satellite className="mb-2 text-signal-green w-8 h-8" />
                       <div className="font-semibold">No active signals.</div>
-                      <div className="text-sm">First select settings, then click on Start Signals.</div>
+                      <div className="text-sm">First select settings, then click on Start Signals, and you will see the active signal here.</div>
                     </div>
                   ) : (
                     <div className="space-y-4">
