@@ -73,6 +73,38 @@ function simulateReason(type: SignalType) {
   return base[Math.floor(Math.random() * base.length)];
 }
 
+function getMarketStatusMessage(category: Category): string {
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const currentHour = now.getHours();
+  
+  switch (category) {
+    case "FOREX OTC":
+    case "CRYPTOS":
+      return `${category} markets are open 24/7.`;
+    
+    case "FOREX":
+      // FOREX is closed on weekends (Saturday and Sunday)
+      if (currentDay === 0 || currentDay === 6) {
+        return "FOREX markets are closed for the weekend.";
+      }
+      return "FOREX markets are open.";
+    
+    case "INDICE":
+      // Simplified schedule - indices generally open during business hours
+      if (currentDay === 0 || currentDay === 6) {
+        return "Index markets are closed for the weekend.";
+      }
+      if (currentHour < 9 || currentHour >= 17) {
+        return "Index markets are closed outside trading hours.";
+      }
+      return "Index markets are open.";
+    
+    default:
+      return "Market status unknown.";
+  }
+}
+
 function makeSignal(asset: string, category: Category, timeframe: Timeframe): Signal {
   const type: SignalType = Math.random() > 0.5 ? "BUY" : "SELL";
   return {
@@ -420,7 +452,7 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-muted-foreground">
-                  {category === "FOREX OTC" ? "FOREX OTC markets are open 24/7." : "Signals are simulated for educational preview."}
+                  {getMarketStatusMessage(category)}
                 </div>
               </Card>
             </div>
