@@ -106,7 +106,10 @@ function getMarketStatusMessage(category: Category): string {
 }
 
 function makeSignal(asset: string, category: Category, timeframe: Timeframe): Signal {
-  const type: SignalType = Math.random() > 0.5 ? "BUY" : "SELL";
+  // Generate more varied BUY/SELL signals with slight bias towards more trading activity
+  const randomValue = Math.random();
+  const type: SignalType = randomValue < 0.48 ? "BUY" : randomValue < 0.96 ? "SELL" : (randomValue < 0.98 ? "BUY" : "SELL");
+  
   return {
     id: crypto.randomUUID(),
     asset,
