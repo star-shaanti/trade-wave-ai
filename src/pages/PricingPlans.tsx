@@ -17,7 +17,7 @@ const PricingPlans = () => {
     {
       name: "24-Hour Pass",
       price: "€7",
-      priceId: "price_VOTRE_VRAI_ID_24H", // Remplacez par votre vrai price ID
+      priceId: "price_1RrhLMEHHHdPbMazyyK4L0Yi",
       amount: 700,
       features: [
         "Full access to signals",
@@ -29,7 +29,7 @@ const PricingPlans = () => {
     {
       name: "48-Hour Pass", 
       price: "€12",
-      priceId: "price_VOTRE_VRAI_ID_48H", // Remplacez par votre vrai price ID
+      priceId: "price_1RrhKFEHHHdPbMazw8GHJobk",
       amount: 1200,
       features: [
         "Full access to signals",
@@ -41,7 +41,7 @@ const PricingPlans = () => {
     {
       name: "Weekly",
       price: "€30", 
-      priceId: "price_VOTRE_VRAI_ID_WEEKLY", // Remplacez par votre vrai price ID
+      priceId: "price_1RrhIxEHHHdPbMazBeWWXRur",
       amount: 3000,
       features: [
         "Full access to signals",
@@ -53,7 +53,7 @@ const PricingPlans = () => {
     {
       name: "Monthly",
       price: "€85",
-      priceId: "price_VOTRE_VRAI_ID_MONTHLY", // Remplacez par votre vrai price ID
+      priceId: "price_1RrhH9EHHHdPbMazFfMVdz8E",
       amount: 8500,
       features: [
         "Full access to signals",
