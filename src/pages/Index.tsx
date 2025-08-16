@@ -539,8 +539,9 @@ const Index = () => {
             Join our affiliate program and earn a generous 30% commission for every new subscriber you refer.
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
-            <Button variant="hero">Become an Affiliate</Button>
-            <Button variant="outline">Learn more</Button>
+            <a href="mailto:realtimetradingsignal@gmail.com">
+              <Button variant="hero">Become an Affiliate</Button>
+            </a>
           </div>
         </section>
       </main>
