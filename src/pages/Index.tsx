@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Satellite, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2 } from "lucide-react";
+import { Satellite, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
@@ -89,6 +89,7 @@ const Index = () => {
   const [onlineCount, setOnlineCount] = useState(245_014);
   const [signalExpired, setSignalExpired] = useState(false);
   const [signalLocked, setSignalLocked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -237,9 +238,10 @@ const Index = () => {
                   className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
                   onClick={() => {
                     console.log('Logout initiated');
-                    // Instead of alert, handle logout properly
                     if (confirm('Are you sure you want to log out?')) {
-                      window.location.reload();
+                      setIsLoggedIn(false);
+                      setRunning(false);
+                      setSignals([]);
                     }
                   }}
                 >
@@ -317,14 +319,16 @@ const Index = () => {
                     <Button
                       variant="hero"
                       className="w-full"
-                      disabled={signalLocked}
+                      disabled={signalLocked || !isLoggedIn}
                       onClick={() => setRunning((r) => !r)}
                     >
                       <Zap className="mr-1" /> 
-                      {signalLocked 
+                      {!isLoggedIn
+                        ? "Login Required"
+                        : signalLocked 
                         ? "Waiting for signal expiry..." 
                         : running ? "Stop" : "Start"} 
-                      {!signalLocked && " Signals"}
+                      {isLoggedIn && !signalLocked && " Signals"}
                     </Button>
                   </div>
                 </div>
@@ -346,7 +350,20 @@ const Index = () => {
                   }}
                 />
                 <div className="relative">
-                  {!latest ? (
+                  {!isLoggedIn ? (
+                    <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center">
+                      <div className="text-xs text-muted-foreground mb-4">(log in to see the signals)</div>
+                      <Button 
+                        variant="default" 
+                        size="lg"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base font-medium"
+                        onClick={() => setIsLoggedIn(true)}
+                      >
+                        <Key className="mr-2 h-5 w-5" />
+                        Log In to Get Signals
+                      </Button>
+                    </div>
+                  ) : !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
                       <Satellite className="mb-2 text-signal-green w-8 h-8" />
                       <div className="font-semibold">No active signals.</div>
