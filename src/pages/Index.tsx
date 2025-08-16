@@ -454,10 +454,6 @@ const Index = () => {
                     await signOut();
                     setRunning(false);
                     setSignals([]);
-                    toast({
-                      title: "Logged Out",
-                      description: "You have been successfully logged out.",
-                    });
                   }}
                 >
                   <LogOut className="h-4 w-4" />
@@ -758,10 +754,6 @@ const Index = () => {
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => {
           setShowAuthModal(false);
-          toast({
-            title: "Welcome!",
-            description: "You are now logged in and can access trading signals.",
-          });
         }}
       />
 
