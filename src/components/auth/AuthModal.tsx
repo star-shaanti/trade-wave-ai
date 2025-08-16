@@ -49,8 +49,8 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
         if (error) throw error;
 
-        // Si l'utilisateur est immédiatement connecté (confirmation email désactivée)
-        if (data.user && !data.user.email_confirmed_at && data.session) {
+        // Si une session est créée immédiatement, l'utilisateur est connecté
+        if (data.session) {
           toast({
             title: "Success",
             description: "Registration successful! Welcome!",
@@ -58,7 +58,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           onSuccess();
           onClose();
         } else {
-          // Si la confirmation email est requise
+          // Si pas de session, confirmation email requise
           toast({
             title: "Success",
             description: "Registration successful! Please check your email to confirm your account.",
