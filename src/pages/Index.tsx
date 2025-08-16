@@ -369,98 +369,109 @@ const Index = () => {
               <span>Premium</span>
             </div>
             <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
-                  <User className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // Already on home page, no action needed
-                  }}
-                >
-                  <Home className="h-4 w-4" />
-                  Home Page
-                </DropdownMenuItem>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer">
+            {!isAuthenticated ? (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2"
+                onClick={() => setShowAuthModal(true)}
+              >
+                <User className="h-4 w-4" />
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="p-2">
                     <User className="h-4 w-4" />
-                    Profile & Settings
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem 
-                      className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer text-red-600"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowCancelSubscriptionModal(true);
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                      Cancel Subscription
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowManageSubscriptionModal(true);
-                      }}
-                    >
-                      <Settings className="h-4 w-4" />
-                      Manage Subscription
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowChangePasswordModal(true);
-                      }}
-                    >
-                      <Lock className="h-4 w-4" />
-                      Change Password
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowSuspendAccountModal(true);
-                      }}
-                    >
-                      <CreditCard className="h-4 w-4" />
-                      Suspend Account
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowDeleteAccountModal(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete Account
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    await signOut();
-                    setRunning(false);
-                    setSignals([]);
-                  }}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
+                  <DropdownMenuItem 
+                    className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Already on home page, no action needed
+                    }}
+                  >
+                    <Home className="h-4 w-4" />
+                    Home Page
+                  </DropdownMenuItem>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer">
+                      <User className="h-4 w-4" />
+                      Profile & Settings
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer text-red-600"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowCancelSubscriptionModal(true);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel Subscription
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowManageSubscriptionModal(true);
+                        }}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Manage Subscription
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowChangePasswordModal(true);
+                        }}
+                      >
+                        <Lock className="h-4 w-4" />
+                        Change Password
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowSuspendAccountModal(true);
+                        }}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Suspend Account
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowDeleteAccountModal(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Account
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      await signOut();
+                      setRunning(false);
+                      setSignals([]);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </header>
