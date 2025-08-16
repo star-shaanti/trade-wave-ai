@@ -199,19 +199,27 @@ const Index = () => {
       intervalRef.current = null;
       return;
     }
-    // Push first signal immediately for responsiveness and set as active
-    const newSignal = makeSignal(asset, category, timeframe);
-    setSignals((prev) => [newSignal, ...prev].slice(0, 12));
-    setActiveSignal(newSignal);
-    intervalRef.current = window.setInterval(() => {
-      const intervalSignal = makeSignal(asset, category, timeframe);
-      setSignals((prev) => [intervalSignal, ...prev].slice(0, 12));
-      setActiveSignal(intervalSignal);
-    }, 60000) as unknown as number; // Changed to 1 minute for proper countdown
+    
+    // Only create new signal if there's no active signal
+    if (!activeSignal) {
+      const newSignal = makeSignal(asset, category, timeframe);
+      setSignals((prev) => [newSignal, ...prev].slice(0, 12));
+      setActiveSignal(newSignal);
+    }
+    
+    // Set interval only if there's no active signal
+    if (!activeSignal) {
+      intervalRef.current = window.setInterval(() => {
+        const intervalSignal = makeSignal(asset, category, timeframe);
+        setSignals((prev) => [intervalSignal, ...prev].slice(0, 12));
+        setActiveSignal(intervalSignal);
+      }, 60000) as unknown as number;
+    }
+    
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [running, asset, category, timeframe, isAuthenticated, signalExpired]);
+  }, [running, isAuthenticated, signalExpired, activeSignal]);
 
   const latest = activeSignal;
 
