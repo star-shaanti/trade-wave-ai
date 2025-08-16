@@ -80,9 +80,18 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         onClose();
       }
     } catch (error: any) {
+      let errorMessage = error.message || "An error occurred";
+      
+      // Gestion spécifique pour email déjà inscrit
+      if (error.message?.includes("User already registered") || 
+          error.message?.includes("already registered") ||
+          error.message?.includes("already exists")) {
+        errorMessage = "Cette email existe déjà";
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "An error occurred",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
