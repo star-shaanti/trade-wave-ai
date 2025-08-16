@@ -39,7 +39,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -49,10 +49,21 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
         if (error) throw error;
 
-        toast({
-          title: "Success",
-          description: "Registration successful! Please check your email to confirm your account.",
-        });
+        // Si l'utilisateur est immédiatement connecté (confirmation email désactivée)
+        if (data.user && !data.user.email_confirmed_at && data.session) {
+          toast({
+            title: "Success",
+            description: "Registration successful! Welcome!",
+          });
+          onSuccess();
+          onClose();
+        } else {
+          // Si la confirmation email est requise
+          toast({
+            title: "Success",
+            description: "Registration successful! Please check your email to confirm your account.",
+          });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
