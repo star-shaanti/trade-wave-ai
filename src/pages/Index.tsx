@@ -553,7 +553,7 @@ const Index = () => {
                         </div>
 
                         <div className="mt-5">
-                          <div className="text-sm font-medium">Signal Strength</div>
+                          <div className={`text-sm font-medium ${latest.type === 'SELL' ? 'text-signal-red' : ''}`}>Signal Strength</div>
                           <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
                             <div 
                               className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
@@ -569,7 +569,7 @@ const Index = () => {
                         </div>
 
                         <div className="mt-4">
-                          <div className="text-sm font-medium">Time Remaining</div>
+                          <div className={`text-sm font-medium ${latest.type === 'SELL' ? 'text-signal-red' : ''}`}>Time Remaining</div>
                           <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
                             <div 
                               className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
