@@ -192,8 +192,8 @@ const Index = () => {
 
   // Signal stream simulation
   useEffect(() => {
-    // Only run signals if authenticated and running
-    if (!running || !isAuthenticated) {
+    // Only run signals if authenticated and running and not expired
+    if (!running || !isAuthenticated || signalExpired) {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
       intervalRef.current = null;
       return;
@@ -206,15 +206,14 @@ const Index = () => {
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [running, asset, category, timeframe, isAuthenticated]);
+  }, [running, asset, category, timeframe, isAuthenticated, signalExpired]);
 
   const latest = signals[0];
 
   const [countdown, setCountdown] = useState(60);
   useEffect(() => {
-    if (!latest) return;
+    if (!latest || signalExpired) return;
     setCountdown(60);
-    setSignalExpired(false);
     const id = window.setInterval(() => {
       setCountdown(prev => {
         const newCount = prev - 1;
@@ -233,6 +232,7 @@ const Index = () => {
   const handleSignalExpiredDismiss = () => {
     setSignalExpired(false);
     setSignalLocked(true);
+    setSignals([]); // Clear all signals
     // Auto unlock after 30 seconds
     setTimeout(() => {
       setSignalLocked(false);
