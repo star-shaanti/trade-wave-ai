@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Satellite, SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
+import { SignalHigh, Zap, TrendingUp, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key } from "lucide-react";
+import { SatelliteIcon } from "@/components/ui/satellite-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -416,7 +417,7 @@ const Index = () => {
                 <div className="relative">
                   {!isAuthenticated || !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
-                      <Satellite className="mb-2 text-signal-green w-8 h-8" />
+                      <SatelliteIcon className="mb-2 text-signal-green w-8 h-8" />
                       <div className="font-semibold">No active signals.</div>
                       <div className="text-sm">First select settings, then click on Start Signals, and you will see the active signal here.</div>
                     </div>
@@ -432,7 +433,7 @@ const Index = () => {
 
                         <div className="mt-3 text-center">
                           <div className="flex items-center justify-center gap-2 mb-2">
-                            <Satellite className={`text-signal-green w-6 h-6 ${running ? 'animate-pulse' : ''}`} />
+                            <SatelliteIcon className={`text-signal-green w-6 h-6 ${running ? 'animate-pulse' : ''}`} />
                             <TrendingUp className="text-signal-green" />
                           </div>
                           <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-signal-green">
