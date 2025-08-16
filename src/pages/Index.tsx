@@ -288,13 +288,9 @@ const Index = () => {
 
   const handleSignalExpiredDismiss = () => {
     setSignalExpired(false);
-    setSignalLocked(true);
     setSignals([]); // Clear all signals
     setActiveSignal(null); // Clear active signal
-    // Auto unlock after 30 seconds
-    setTimeout(() => {
-      setSignalLocked(false);
-    }, 30000);
+    // No lock - button becomes available immediately
   };
 
   const isMarketClosedForCategory = isMarketClosed(category);
@@ -523,18 +519,16 @@ const Index = () => {
                       <Button
                         variant="hero"
                         className="w-full"
-                        disabled={signalLocked || isMarketClosedForCategory || (activeSignal && running)}
+                        disabled={isMarketClosedForCategory || (activeSignal && running)}
                         onClick={() => setRunning((r) => !r)}
                       >
                         <Zap className="mr-1" /> 
-                        {signalLocked 
-                          ? "Waiting for signal expiry..." 
-                          : isMarketClosedForCategory
+                        {isMarketClosedForCategory
                           ? "Market Closed"
                           : (activeSignal && running)
                           ? "Signal Analysis in Progress"
                           : running ? "Stop" : "Start"} 
-                        {!signalLocked && !isMarketClosedForCategory && !(activeSignal && running) && " Signals"}
+                        {!isMarketClosedForCategory && !(activeSignal && running) && " Signals"}
                       </Button>
                     )}
                   </div>
