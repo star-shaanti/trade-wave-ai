@@ -406,15 +406,6 @@ const Index = () => {
 
             <div>
               <div className="relative rounded-lg border border-border bg-card/60 p-6 overflow-hidden">
-                <div className="absolute inset-0 pointer-events-none [mask-image:radial-gradient(150px_150px_at_var(--mx,50%)_var(--my,30%),#000_10%,transparent_60%)] bg-[radial-gradient(circle_at_var(--mx,50%)_var(--my,30%),hsl(var(--brand)/0.2),transparent_40%)] transition-[background]" />
-                <div
-                  className="absolute inset-0"
-                  onMouseMove={(e) => {
-                    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                    (e.currentTarget as HTMLDivElement).style.setProperty("--mx", `${((e.clientX - rect.left) / rect.width) * 100}%`);
-                    (e.currentTarget as HTMLDivElement).style.setProperty("--my", `${((e.clientY - rect.top) / rect.height) * 100}%`);
-                  }}
-                />
                 <div className="relative">
                   {!isAuthenticated || !latest ? (
                     <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
