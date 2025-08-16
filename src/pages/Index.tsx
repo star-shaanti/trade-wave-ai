@@ -116,7 +116,8 @@ const Index = () => {
 
   // Signal stream simulation
   useEffect(() => {
-    if (!running) {
+    // Only run signals if authenticated and running
+    if (!running || !isAuthenticated) {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
       intervalRef.current = null;
       return;
@@ -129,7 +130,7 @@ const Index = () => {
     return () => {
       if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
-  }, [running, asset, category, timeframe]);
+  }, [running, asset, category, timeframe, isAuthenticated]);
 
   const latest = signals[0];
 
