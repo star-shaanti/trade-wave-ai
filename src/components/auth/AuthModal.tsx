@@ -30,15 +30,6 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
     try {
       if (isSignUp) {
-        if (password !== confirmPassword) {
-          toast({
-            title: "Error",
-            description: "Passwords do not match",
-            variant: "destructive",
-          });
-          return;
-        }
-
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
