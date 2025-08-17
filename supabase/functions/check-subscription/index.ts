@@ -97,7 +97,7 @@ serve(async (req) => {
       logStep("No active subscription found");
     }
 
-    await supabaseClient.from("subscribers").upsert({
+    const upsertResult = await supabaseClient.from("subscribers").upsert({
       email: user.email,
       user_id: user.id,
       stripe_customer_id: customerId,
@@ -107,7 +107,18 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
+    if (upsertResult.error) {
+      logStep("ERROR updating database", { error: upsertResult.error.message });
+      throw new Error(`Database update failed: ${upsertResult.error.message}`);
+    }
+
+    logStep("Successfully updated database with subscription info", { 
+      subscribed: hasActiveSub, 
+      subscriptionTier,
+      email: user.email,
+      userId: user.id 
+    });
+    
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,

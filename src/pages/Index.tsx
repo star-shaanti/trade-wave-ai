@@ -238,6 +238,7 @@ const Index = () => {
   const [showCancelSubscriptionModal, setShowCancelSubscriptionModal] = useState(false);
   const [startingDelay, setStartingDelay] = useState(false);
   const [delayCountdown, setDelayCountdown] = useState(0);
+  const [showSubscriptionSuccess, setShowSubscriptionSuccess] = useState(false);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -285,6 +286,37 @@ const Index = () => {
     }, 5000);
     return () => clearInterval(id);
   }, []);
+
+  // Auto-check subscription for authenticated users who are not premium
+  useEffect(() => {
+    if (isAuthenticated && !isPremium && !loading && !subscriptionLoading) {
+      // Check subscription after a short delay to allow for any pending updates
+      const timer = setTimeout(() => {
+        checkSubscription();
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, isPremium, loading, subscriptionLoading, checkSubscription]);
+
+  // Show success notification when subscription becomes active
+  useEffect(() => {
+    if (isAuthenticated && isPremium && !loading) {
+      // Check if this is a recent subscription activation
+      const lastCheck = localStorage.getItem('lastSubscriptionCheck');
+      const now = Date.now();
+      
+      if (!lastCheck || (now - parseInt(lastCheck)) > 30000) { // 30 seconds
+        setShowSubscriptionSuccess(true);
+        localStorage.setItem('lastSubscriptionCheck', now.toString());
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          setShowSubscriptionSuccess(false);
+        }, 5000);
+      }
+    }
+  }, [isAuthenticated, isPremium, loading]);
 
   // Signal stream simulation
   useEffect(() => {
@@ -572,13 +604,31 @@ const Index = () => {
                         Log In to Get Signals
                       </Button>
                     ) : !isPremium ? (
-                      <Button
-                        className="w-full bg-[#4F75FF] hover:bg-[#3D5ECC] text-white"
-                        onClick={() => navigate("/pricing")}
-                      >
-                        <Lock className="mr-2 h-4 w-4" />
-                        Subscribe to Get Signals
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          className="w-full bg-[#4F75FF] hover:bg-[#3D5ECC] text-white"
+                          onClick={() => navigate("/pricing")}
+                        >
+                          <Lock className="mr-2 h-4 w-4" />
+                          Subscribe to Get Signals
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs"
+                          onClick={checkSubscription}
+                          disabled={subscriptionLoading}
+                        >
+                          {subscriptionLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                              Vérification...
+                            </>
+                          ) : (
+                            "Actualiser l'abonnement"
+                          )}
+                        </Button>
+                      </div>
                     ) : (
                       <Button
                         className="w-full bg-signal-green hover:bg-signal-green/90 text-white"
@@ -831,6 +881,27 @@ const Index = () => {
         isOpen={showCancelSubscriptionModal}
         onClose={() => setShowCancelSubscriptionModal(false)}
       />
+
+      {/* Subscription Success Notification */}
+      {showSubscriptionSuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white p-4 rounded-lg shadow-lg max-w-sm">
+          <div className="flex items-center gap-2">
+            <Check className="w-5 h-5" />
+            <div>
+              <div className="font-semibold">Abonnement activé !</div>
+              <div className="text-sm opacity-90">Vous avez maintenant accès aux signaux premium</div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-white hover:bg-green-600"
+              onClick={() => setShowSubscriptionSuccess(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,7 +15,7 @@ export const useAuth = () => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({ subscribed: false });
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
-  const checkSubscription = async () => {
+  const checkSubscription = useCallback(async () => {
     if (!session?.access_token) return;
     
     setSubscriptionLoading(true);
@@ -39,7 +39,7 @@ export const useAuth = () => {
     } finally {
       setSubscriptionLoading(false);
     }
-  };
+  }, [session?.access_token]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -78,7 +78,7 @@ export const useAuth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [checkSubscription]);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
