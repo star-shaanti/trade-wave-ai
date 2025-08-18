@@ -15,14 +15,7 @@ const PricingPlans = () => {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Debug: Afficher l'état d'authentification
-  useEffect(() => {
-    console.log("État d'authentification:", {
-      user: user?.email,
-      isAuthenticated,
-      loading
-    });
-  }, [user, isAuthenticated, loading]);
+
 
   const plans = [
     {
@@ -76,35 +69,26 @@ const PricingPlans = () => {
   ];
 
   const handleSubscribe = async (plan: typeof plans[0]) => {
-    console.log("=== DÉBUT handleSubscribe ===");
-    console.log("Plan cliqué:", plan.name);
-    console.log("État actuel:", { user: user?.email, isAuthenticated, loading });
     setError(null);
 
     if (!isAuthenticated) {
-      console.log("❌ Utilisateur non authentifié");
       toast({
-        title: "Authentification requise",
-        description: "Veuillez vous connecter pour souscrire à un forfait",
+        title: "Authentication required",
+        description: "Please sign in to subscribe to a plan",
         variant: "destructive"
       });
       return;
     }
 
     if (!user?.email) {
-      console.log("❌ Pas d'email utilisateur");
-      setError("Email utilisateur manquant");
+      setError("User email missing");
       return;
     }
 
-    console.log("✅ Utilisateur authentifié:", user.email);
     setLoadingPlan(plan.priceId);
     
     try {
-      console.log("📞 Appel de la fonction create-payment...");
-      
       const session = await supabase.auth.getSession();
-      console.log("Session obtenue:", !!session.data.session);
 
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -117,37 +101,29 @@ const PricingPlans = () => {
         },
       });
 
-      console.log("📥 Réponse de create-payment:", { data, error });
-
       if (error) {
-        console.error("❌ Erreur Supabase:", error);
-        throw new Error(`Erreur Supabase: ${error.message}`);
+        throw new Error(`Supabase error: ${error.message}`);
       }
 
       if (data?.url) {
-        console.log("✅ Redirection vers:", data.url);
         window.location.href = data.url;
       } else {
-        console.error("❌ Pas d'URL de redirection dans la réponse");
-        throw new Error("Pas d'URL de redirection reçue");
+        throw new Error("No redirect URL received");
       }
     } catch (error: any) {
-      console.error("❌ Erreur complète:", error);
-      const errorMessage = error.message || "Erreur inconnue lors de la création de la session de paiement";
+      const errorMessage = error.message || "Unknown error during payment session creation";
       setError(errorMessage);
       toast({
-        title: "Erreur",
+        title: "Error",
         description: errorMessage,
         variant: "destructive"
       });
     } finally {
       setLoadingPlan(null);
-      console.log("=== FIN handleSubscribe ===");
     }
   };
 
   const handleButtonClick = (plan: typeof plans[0]) => {
-    console.log("🖱️ Bouton cliqué pour:", plan.name);
     handleSubscribe(plan);
   };
 
@@ -156,7 +132,7 @@ const PricingPlans = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -173,12 +149,8 @@ const PricingPlans = () => {
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Retour aux signaux
+            Back to signals
           </Button>
-          <div className="flex items-center gap-2">
-            <img src="/src/assets/site-logo.png" alt="Logo" className="h-8 w-8" />
-            <span className="text-xl font-bold">Signaux de Trading</span>
-          </div>
           <Button 
             variant="ghost" 
             onClick={() => navigate("/")}
@@ -192,34 +164,19 @@ const PricingPlans = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Choisissez votre forfait</h1>
+          <h1 className="text-4xl font-bold mb-4">Choose your plan</h1>
           <p className="text-lg text-muted-foreground">
-            Débloquez les signaux de trading premium et améliorez votre stratégie.
+            Unlock premium trading signals and improve your strategy.
           </p>
         </div>
 
-        {/* Debug Info */}
-        <div className="mb-6 p-4 bg-muted rounded-lg">
-          <h3 className="font-semibold mb-2">Informations de débogage:</h3>
-          <p className="text-sm">
-            <strong>Statut:</strong> {isAuthenticated ? "✅ Connecté" : "❌ Non connecté"}
-          </p>
-          <p className="text-sm">
-            <strong>Email:</strong> {user?.email || "Aucun"}
-          </p>
-          <p className="text-sm">
-            <strong>Loading:</strong> {loading ? "Oui" : "Non"}
-          </p>
-          <p className="text-sm">
-            <strong>Boutons:</strong> {isAuthenticated ? "Cliquables" : "Désactivés"}
-          </p>
-        </div>
+
 
         {/* Error Display */}
         {error && (
           <Alert className="mb-6" variant="destructive">
             <AlertDescription>
-              <strong>Erreur:</strong> {error}
+              <strong>Error:</strong> {error}
             </AlertDescription>
           </Alert>
         )}
@@ -235,7 +192,7 @@ const PricingPlans = () => {
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                    ⭐ Plus populaire
+                    ⭐ Most popular
                   </span>
                 </div>
               )}
@@ -267,8 +224,8 @@ const PricingPlans = () => {
                     : 'bg-primary/90 hover:bg-primary'
                 } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {loadingPlan === plan.priceId ? 'Chargement...' : 
-                 !isAuthenticated ? 'Se connecter d\'abord' : 'Souscrire maintenant'}
+                {loadingPlan === plan.priceId ? 'Loading...' : 
+                 !isAuthenticated ? 'Sign in first' : 'Subscribe now'}
               </Button>
             </div>
           ))}
@@ -276,7 +233,7 @@ const PricingPlans = () => {
 
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground">
-            Tous les forfaits incluent l'accès aux signaux en temps réel, l'analyse technique et les insights de marché.
+            All plans include access to real-time signals, technical analysis, and market insights.
           </p>
         </div>
       </div>
