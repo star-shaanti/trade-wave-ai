@@ -1,907 +1,1605 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import siteLogo from "@/assets/site-logo.png";
-import crownIcon from "@/assets/crown-icon.png";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
-import { SignalHigh, Zap, TrendingUp, TrendingDown, ChevronDown, Home, User, Settings, LogOut, CreditCard, Lock, Trash2, Key, X, Loader2 } from "lucide-react";
-import { SatelliteIcon } from "@/components/ui/satellite-icon";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { AuthModal } from "@/components/auth/AuthModal";
-import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
-import { ManageSubscriptionModal } from "@/components/auth/ManageSubscriptionModal";
-import { useNavigate } from "react-router-dom";
-import { DeleteAccountModal } from "@/components/auth/DeleteAccountModal";
-import { SuspendAccountModal } from "@/components/auth/SuspendAccountModal";
-import { CancelSubscriptionModal } from "@/components/auth/CancelSubscriptionModal";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useTheme } from "next-themes";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Progress } from "../components/ui/progress";
+import { Badge } from "../components/ui/badge";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { useToast } from "../hooks/use-toast";
+import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "../components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { supabase } from "../integrations/supabase/client";
+import { useAuth } from "../hooks/useAuth";
+import Logo from "../components/Logo";
 
-type Category = "FOREX" | "FOREX OTC" | "INDICE" | "CRYPTOS";
+// Constantes pour l'API Gemini
+const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 
-const TIMEFRAMES = [
-  "1MIN",
-  "2MIN",
-  "3MIN",
-  "5MIN",
-  "15MIN",
-  "30MIN",
-  "1H",
-  "4H",
-  "Daily",
-] as const;
-
-type Timeframe = (typeof TIMEFRAMES)[number];
-
-type SignalType = "BUY" | "SELL";
-
-type Signal = {
+// Interface pour les signaux de trading
+interface TradingSignal {
   id: string;
-  asset: string;
-  category: Category;
-  timeframe: Timeframe;
-  type: SignalType;
-  reason: string;
-  createdAt: Date;
-};
+  symbol: string;
+  type: "BUY" | "SELL";
+  entry_price: number;
+  target_price: number;
+  stop_loss: number;
+  risk_reward: number;
+  confidence: number;
+  created_at: string;
+  status: "ACTIVE" | "EXPIRED" | "COMPLETED";
+  description: string;
+  analysis: string;
+  expiration_time: number; // en secondes
+  volatility: string;
+  trend_strength: number;
+  volume_flow: string;
+  sentiment: string;
+  moving_average: string;
+  rsi: string;
+  stochastic: string;
+  parabolic_sar: string;
+  envelope_trend: string;
+  signal_strength: number;
+  market_conditions: string;
+}
 
-const ASSETS: Record<Category, string[]> = {
-  "FOREX": [
-    // Major Pairs
-    "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD", "NZD/USD",
-    // Minor Pairs (Cross Currencies)
-    "EUR/GBP", "EUR/JPY", "EUR/CHF", "EUR/AUD", "EUR/CAD", "EUR/NZD",
-    "GBP/JPY", "GBP/CHF", "GBP/AUD", "GBP/CAD", "GBP/NZD",
-    "CHF/JPY", "AUD/JPY", "CAD/JPY", "NZD/JPY",
-    "AUD/CHF", "AUD/CAD", "AUD/NZD", "CAD/CHF", "NZD/CHF", "NZD/CAD",
-    // Exotic Pairs
-    "USD/TRY", "USD/ZAR", "USD/MXN", "USD/SGD", "USD/HKD", "USD/NOK", "USD/SEK", "USD/DKK",
-    "EUR/TRY", "EUR/ZAR", "EUR/PLN", "EUR/CZK", "EUR/HUF", "GBP/TRY", "GBP/ZAR"
-  ],
-  "FOREX OTC": [
-    // Major OTC Pairs
+// Données des paires de trading
+const tradingPairs = {
+  forex: {
+    majors: [
+      "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD", "NZD/USD"
+    ],
+    minors: [
+      "EUR/GBP", "EUR/JPY", "GBP/JPY", "EUR/CHF", "GBP/CHF", "AUD/JPY", "CAD/JPY",
+      "NZD/JPY", "AUD/CAD", "AUD/CHF", "CAD/CHF", "NZD/CAD", "NZD/CHF", "AUD/NZD"
+    ]
+  },
+  forex_otc: [
     "EUR/USD OTC", "GBP/USD OTC", "USD/JPY OTC", "USD/CHF OTC", "AUD/USD OTC", "USD/CAD OTC", "NZD/USD OTC",
-    // Minor OTC Pairs
-    "EUR/GBP OTC", "EUR/JPY OTC", "EUR/CHF OTC", "EUR/AUD OTC", "EUR/CAD OTC", "EUR/NZD OTC",
-    "GBP/JPY OTC", "GBP/CHF OTC", "GBP/AUD OTC", "GBP/CAD OTC", "GBP/NZD OTC",
-    "CHF/JPY OTC", "AUD/JPY OTC", "CAD/JPY OTC", "NZD/JPY OTC",
-    "AUD/CHF OTC", "AUD/CAD OTC", "AUD/NZD OTC", "CAD/CHF OTC", "NZD/CHF OTC", "NZD/CAD OTC",
-    // Exotic OTC Pairs
-    "USD/TRY OTC", "USD/ZAR OTC", "USD/MXN OTC", "USD/SGD OTC", "USD/HKD OTC", "USD/NOK OTC", "USD/SEK OTC",
-    "EUR/TRY OTC", "EUR/ZAR OTC", "EUR/PLN OTC", "EUR/CZK OTC", "EUR/HUF OTC", "GBP/TRY OTC", "GBP/ZAR OTC"
+    "EUR/GBP OTC", "EUR/JPY OTC", "GBP/JPY OTC", "EUR/CHF OTC", "GBP/CHF OTC", "AUD/JPY OTC", "CAD/JPY OTC",
+    "NZD/JPY OTC", "AUD/CAD OTC", "AUD/CHF OTC", "CAD/CHF OTC", "NZD/CAD OTC", "NZD/CHF OTC", "AUD/NZD OTC"
   ],
-  "INDICE": [
-    // US Indices
-    "S&P 500", "NASDAQ 100", "Dow Jones", "Russell 2000", "S&P MidCap 400", "NASDAQ Composite",
-    // European Indices
-    "DAX 40", "FTSE 100", "CAC 40", "EURO STOXX 50", "IBEX 35", "AEX 25", "SMI", "BEL 20", "OMX Stockholm 30",
-    "FTSE MIB", "PSI 20", "ATX", "WIG20", "PX", "BUX", "OMXH25", "OMXC25", "OMXS30",
-    // Asian Indices
-    "Nikkei 225", "Hang Seng", "Shanghai Composite", "Shenzhen Component", "KOSPI", "TAIEX", "SET", "KLCI",
-    "STI", "JCI", "PSEi", "VN-Index", "Sensex", "Nifty 50", "ASX 200",
-    // Other Global Indices
-    "TSX", "BOVESPA", "MERVAL", "IPSA", "COLCAP", "IPC", "EGX 30", "TADAWUL", "QE Index", "ADX General",
-    "DFM General", "MSM 30", "CASE 30", "JSE All Share", "FTSE/JSE Top 40"
+  cryptos: [
+    "BTC/USD", "ETH/USD", "BNB/USD", "SOL/USD", "ADA/USD", "XRP/USD", "DOT/USD",
+    "DOGE/USD", "AVAX/USD", "MATIC/USD", "LINK/USD", "UNI/USD", "ATOM/USD", "LTC/USD",
+    "BCH/USD", "XLM/USD", "VET/USD", "FIL/USD", "TRX/USD", "ETC/USD", "ALGO/USD",
+    "ICP/USD", "FTT/USD", "NEAR/USD", "FTM/USD", "SAND/USD", "MANA/USD", "GALA/USD",
+    "AXS/USD", "ROBLOX/USD", "CHZ/USD", "HOT/USD", "DENT/USD", "WIN/USD", "BTT/USD",
+    "SHIB/USD", "SAFEMOON/USD", "BABYDOGE/USD", "FLOKI/USD", "DOGE/USD", "PEPE/USD",
+    "BONK/USD", "WIF/USD", "JUP/USD", "PYTH/USD", "BOME/USD", "BOOK/USD", "POPCAT/USD"
   ],
-  "CRYPTOS": [
-    // Top Market Cap Cryptocurrencies
-    "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT", "SOL/USDT", "DOGE/USDT", "TRX/USDT",
-    "TON/USDT", "LINK/USDT", "MATIC/USDT", "ICP/USDT", "SHIB/USDT", "DAI/USDT", "LTC/USDT", "BCH/USDT",
-    "UNI/USDT", "LEO/USDT", "AVAX/USDT", "XLM/USDT", "ATOM/USDT", "ETC/USDT", "HBAR/USDT", "FIL/USDT",
-    "APT/USDT", "LDO/USDT", "VET/USDT", "ALGO/USDT", "SAND/USDT", "MANA/USDT", "AXS/USDT", "THETA/USDT",
-    "FTM/USDT", "EGLD/USDT", "AAVE/USDT", "KLAY/USDT", "FLOW/USDT", "XTZ/USDT", "CAKE/USDT", "NEO/USDT",
-    "KCS/USDT", "ROSE/USDT", "BSV/USDT", "ZEC/USDT", "DASH/USDT", "ENJ/USDT", "BAT/USDT", "1INCH/USDT",
-    "CHZ/USDT", "COMP/USDT"
-  ],
+  indices: [
+    "S&P 500", "NASDAQ", "DOW JONES", "FTSE 100", "DAX", "CAC 40", "NIKKEI 225",
+    "HANG SENG", "ASX 200", "TSX", "BOVESPA", "SENSEX", "SSE COMPOSITE", "KOSPI",
+    "TAIWAN WEIGHTED", "STRAITS TIMES", "JAKARTA COMPOSITE", "PHILIPPINE COMPOSITE",
+    "MALAYSIA COMPOSITE", "THAILAND SET", "VIETNAM VN-INDEX", "SINGAPORE STRAITS",
+    "HONG KONG HANG SENG", "CHINA SHANGHAI", "JAPAN NIKKEI", "SOUTH KOREA KOSPI",
+    "AUSTRALIA ASX", "NEW ZEALAND NZX", "CANADA TSX", "BRAZIL BOVESPA",
+    "MEXICO IPC", "ARGENTINA MERVAL", "CHILE IPSA", "COLOMBIA COLCAP", "PERU IGBVL",
+    "INDIA SENSEX", "PAKISTAN KSE", "BANGLADESH DSE", "SRI LANKA CSE", "NEPAL NEPSE",
+    "RUSSIA MOEX", "TURKEY BIST", "ISRAEL TA-125", "EGYPT EGX", "SOUTH AFRICA JSE",
+    "NIGERIA NGX", "KENYA NSE", "MOROCCO MASI", "TUNISIA TUNINDEX", "MAURITIUS SEMDEX"
+  ]
 };
 
-function simulateReason(type: SignalType) {
-  const base =
-    type === "BUY"
-      ? [
-          "RSI near oversold, bullish MACD divergence",
-          "Price retesting support with rising volume",
-          "Higher lows forming; momentum building",
-        ]
-      : [
-          "RSI overbought with MACD selling pressure",
-          "Lower highs + break below minor support",
-          "Trend exhaustion; supply overwhelming demand",
-        ];
-  return base[Math.floor(Math.random() * base.length)];
-}
-
-function getMarketStatusMessage(category: Category): string {
-  const now = new Date();
-  const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  const currentHour = now.getHours();
-  
-  switch (category) {
-    case "FOREX OTC":
-    case "CRYPTOS":
-      return `${category} markets are open 24/7.`;
-    
-    case "FOREX":
-      // FOREX is closed on weekends (Saturday and Sunday)
-      if (currentDay === 0 || currentDay === 6) {
-        return "FOREX markets are closed for the weekend.";
-      }
-      return "FOREX markets are open.";
-    
-    case "INDICE":
-      // Simplified schedule - indices generally open during business hours
-      if (currentDay === 0 || currentDay === 6) {
-        return "Index markets are closed for the weekend.";
-      }
-      if (currentHour < 9 || currentHour >= 17) {
-        return "Index markets are closed outside trading hours.";
-      }
-      return "Index markets are open.";
-    
-    default:
-      return "Market status unknown.";
+// Horaires de trading par zone géographique
+const tradingHours = {
+  forex: {
+    open: "Sunday 22:00 GMT",
+    close: "Friday 22:00 GMT",
+    timezone: "GMT",
+    description: "Ouvert 24h/5j (Dimanche 22h - Vendredi 22h GMT)"
+  },
+  forex_otc: {
+    open: "24/7",
+    close: "24/7",
+    timezone: "GMT",
+    description: "Ouvert 24h/24, 7j/7"
+  },
+  cryptos: {
+    open: "24/7",
+    close: "24/7",
+    timezone: "GMT",
+    description: "Ouvert 24h/24, 7j/7"
+  },
+  indices: {
+    // Horaires spécifiques par indice (exemples)
+    "S&P 500": { open: "09:30", close: "16:00", timezone: "EST", description: "Lun-Ven 9h30-16h EST" },
+    "NASDAQ": { open: "09:30", close: "16:00", timezone: "EST", description: "Lun-Ven 9h30-16h EST" },
+    "DOW JONES": { open: "09:30", close: "16:00", timezone: "EST", description: "Lun-Ven 9h30-16h EST" },
+    "FTSE 100": { open: "08:00", close: "16:30", timezone: "GMT", description: "Lun-Ven 8h-16h30 GMT" },
+    "DAX": { open: "09:00", close: "17:30", timezone: "CET", description: "Lun-Ven 9h-17h30 CET" },
+    "CAC 40": { open: "09:00", close: "17:30", timezone: "CET", description: "Lun-Ven 9h-17h30 CET" },
+    "NIKKEI 225": { open: "09:00", close: "15:00", timezone: "JST", description: "Lun-Ven 9h-15h JST" },
+    "HANG SENG": { open: "09:30", close: "16:00", timezone: "HKT", description: "Lun-Ven 9h30-16h HKT" }
   }
-}
-
-function isMarketClosed(category: Category): boolean {
-  const now = new Date();
-  const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
-  const currentHour = now.getHours();
-  
-  switch (category) {
-    case "FOREX OTC":
-    case "CRYPTOS":
-      return false; // Always open
-    
-    case "FOREX":
-      return currentDay === 0 || currentDay === 6; // Closed on weekends
-    
-    case "INDICE":
-      return currentDay === 0 || currentDay === 6 || currentHour < 9 || currentHour >= 17;
-    
-    default:
-      return false;
-  }
-}
-
-function getTimeframeInSeconds(timeframe: Timeframe): number {
-  const timeframeMap: Record<Timeframe, number> = {
-    "1MIN": 60,
-    "2MIN": 120,
-    "3MIN": 180,
-    "5MIN": 300,
-    "15MIN": 900,
-    "30MIN": 1800,
-    "1H": 3600,
-    "4H": 14400,
-    "Daily": 86400,
-  };
-  return timeframeMap[timeframe];
-}
-
-function makeSignal(asset: string, category: Category, timeframe: Timeframe): Signal {
-  // Generate more varied BUY/SELL signals with slight bias towards more trading activity
-  const randomValue = Math.random();
-  const type: SignalType = randomValue < 0.48 ? "BUY" : randomValue < 0.96 ? "SELL" : (randomValue < 0.98 ? "BUY" : "SELL");
-  
-  return {
-    id: crypto.randomUUID(),
-    asset,
-    category,
-    timeframe,
-    type,
-    reason: simulateReason(type),
-    createdAt: new Date(),
-  };
-}
+};
 
 const Index = () => {
-  // Navigation
-  const navigate = useNavigate();
-  
-  // Authentication
-  const { user, isAuthenticated, signOut, loading, isPremium, subscriptionData, checkSubscription } = useAuth();
+  const { user, isPremium, signOut } = useAuth();
   const { toast } = useToast();
-  
-  // UI State
-  const [category, setCategory] = useState<Category>("FOREX OTC");
-  const [asset, setAsset] = useState<string>(ASSETS["FOREX OTC"][0]);
-  const [timeframe, setTimeframe] = useState<Timeframe>("1MIN");
-  const [running, setRunning] = useState(false);
-  const [signals, setSignals] = useState<Signal[]>([]);
-  const [activeSignal, setActiveSignal] = useState<Signal | null>(null);
-  const [onlineCount, setOnlineCount] = useState(() => {
-    // Generate random initial count between 368,568 and 798,326
-    const min = 368_568;
-    const max = 798_326;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  });
-  const [signalExpired, setSignalExpired] = useState(false);
-  const [signalLocked, setSignalLocked] = useState(false);
+
+  const handleSignOut = () => {
+    setShowLogoutConfirmModal(true);
+  };
+
+  const confirmSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+    } else {
+      setShowLogoutConfirmModal(false);
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+    }
+  };
+
+  const handleCustomerService = () => {
+    // Afficher l'email dans une notification toast
+    toast({
+      title: "Customer Service Email",
+      description: "realtimetradingsignal@gmail.com",
+    });
+  };
+  // États pour les paramètres de trading
+  const [category, setCategory] = useState("forex_otc"); // Forex OTC par défaut
+  const [asset, setAsset] = useState("EUR/USD OTC");
+  const [timeframe, setTimeframe] = useState("1M"); // 1M par défaut
+  const [signals, setSignals] = useState<TradingSignal[]>([]);
+  const [isGeneratingSignals, setIsGeneratingSignals] = useState(false);
+  const [isWaitingForSignal, setIsWaitingForSignal] = useState(false);
+  const [currentDelay, setCurrentDelay] = useState<number | null>(null);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [showManageSubscriptionModal, setShowManageSubscriptionModal] = useState(false);
-  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
-  const [showSuspendAccountModal, setShowSuspendAccountModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  // Compteur d'utilisateurs actifs avec variation limitée
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [expiredSignal, setExpiredSignal] = useState<TradingSignal | null>(null);
+  const [showSignalActivated, setShowSignalActivated] = useState(false);
+  const [activatedSignalInfo, setActivatedSignalInfo] = useState("");
   const [showCancelSubscriptionModal, setShowCancelSubscriptionModal] = useState(false);
-  const [startingDelay, setStartingDelay] = useState(false);
-  const [delayCountdown, setDelayCountdown] = useState(0);
-  const [showSubscriptionSuccess, setShowSubscriptionSuccess] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
-  const intervalRef = useRef<number | null>(null);
-
-  // Keep asset list in sync with selected category
-  const assetsForCategory = useMemo(() => ASSETS[category], [category]);
+  // Gestion du thème
   useEffect(() => {
-    if (!assetsForCategory.includes(asset)) setAsset(assetsForCategory[0]);
-  }, [assetsForCategory, asset]);
-
-  // Delay countdown for starting signals
-  useEffect(() => {
-    if (!startingDelay) return;
-    
-    const id = window.setInterval(() => {
-      setDelayCountdown(prev => {
-        const newCount = prev - 1;
-        if (newCount <= 0) {
-          window.clearInterval(id);
-          setStartingDelay(false);
-          setRunning(true);
-          return 0;
-        }
-        return newCount;
-      });
-    }, 1000);
-    
-    return () => window.clearInterval(id);
-  }, [startingDelay]);
-
-  // Online count progressive fluctuations between 368,568 and 798,326
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setOnlineCount((current) => {
-        const minCount = 368_568;
-        const maxCount = 798_326;
-        const maxChange = 70;
-        
-        // Generate random change between -70 and +70
-        const change = Math.floor(Math.random() * (maxChange * 2 + 1)) - maxChange;
-        const newCount = current + change;
-        
-        // Keep within bounds
-        return Math.max(minCount, Math.min(maxCount, newCount));
-      });
-    }, 5000);
-    return () => clearInterval(id);
+    const savedTheme = localStorage.getItem("theme") as "dark" | "light" || "dark";
+    setTheme(savedTheme);
+    document.documentElement.className = savedTheme;
   }, []);
 
-  // Auto-check subscription for authenticated users who are not premium
+  // Afficher le modal de bienvenue pour les utilisateurs premium (uniquement à la connexion)
   useEffect(() => {
-    if (isAuthenticated && !isPremium && !loading && !subscriptionLoading) {
-      // Check subscription after a short delay to allow for any pending updates
-      const timer = setTimeout(() => {
-        checkSubscription();
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated, isPremium, loading, subscriptionLoading, checkSubscription]);
-
-  // Show success notification when subscription becomes active
-  useEffect(() => {
-    if (isAuthenticated && isPremium && !loading) {
-      // Check if this is a recent subscription activation
-      const lastCheck = localStorage.getItem('lastSubscriptionCheck');
-      const now = Date.now();
-      
-      if (!lastCheck || (now - parseInt(lastCheck)) > 30000) { // 30 seconds
-        setShowSubscriptionSuccess(true);
-        localStorage.setItem('lastSubscriptionCheck', now.toString());
-        
-        // Auto-hide after 5 seconds
+    if (user && isPremium) {
+      // Vérifier si c'est une nouvelle connexion en utilisant sessionStorage
+      const hasShownWelcome = sessionStorage.getItem('welcomeShown');
+      if (!hasShownWelcome) {
+        setShowWelcomeModal(true);
+        sessionStorage.setItem('welcomeShown', 'true');
+        // Masquer le modal après 5 secondes
         setTimeout(() => {
-          setShowSubscriptionSuccess(false);
+          setShowWelcomeModal(false);
         }, 5000);
       }
     }
-  }, [isAuthenticated, isPremium, loading]);
+  }, [user, isPremium]);
 
-  // Signal stream simulation
+  // Compteur d'utilisateurs actifs avec variation limitée
   useEffect(() => {
-    // Only run signals if authenticated, premium, running and not expired
-    if (!running || !isAuthenticated || !isPremium || signalExpired) {
-      if (intervalRef.current) window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    // Valeur initiale aléatoire entre 365,652 et 765,326
+    const initialValue = Math.floor(Math.random() * (765326 - 365652 + 1)) + 365652;
+    setActiveUsers(initialValue);
+
+    const updateActiveUsers = () => {
+      setActiveUsers(prevUsers => {
+        // Variation aléatoire entre -70 et +70 (pas plus de 70 d'un coup)
+        const variation = Math.floor(Math.random() * 141) - 70; // -70 à +70
+        const newUsers = prevUsers + variation;
+        
+        // Maintenir dans les limites 365,652 - 765,326
+        return Math.max(365652, Math.min(765326, newUsers));
+      });
+    };
+
+    const interval = setInterval(updateActiveUsers, 5000); // Toutes les 5 secondes
+    return () => clearInterval(interval);
+  }, []);
+
+  // Gestion de l'expiration des signaux
+  useEffect(() => {
+    const checkExpiredSignals = () => {
+      const now = new Date().getTime();
+      const updatedSignals = signals.map(signal => {
+        const signalTime = new Date(signal.created_at).getTime();
+        const elapsed = (now - signalTime) / 1000; // en secondes
+        
+        if (elapsed >= signal.expiration_time && signal.status === "ACTIVE") {
+          // Marquer comme expiré et afficher l'overlay
+          setExpiredSignal(signal);
+          return { ...signal, status: "EXPIRED" as const };
+        }
+        return signal;
+      });
+      
+      if (JSON.stringify(updatedSignals) !== JSON.stringify(signals)) {
+        setSignals(updatedSignals);
+      }
+    };
+
+    const interval = setInterval(checkExpiredSignals, 1000);
+    return () => clearInterval(interval);
+  }, [signals]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.className = newTheme;
+  };
+
+  const handleAuth = async () => {
+    setAuthLoading(true);
+    try {
+      if (authMode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+              toast({
+        title: "Login successful",
+        description: "Welcome!",
+      });
+        setShowAuthModal(false); // Close modal on success
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        toast({
+          title: "Registration successful",
+          description: "Check your email to confirm your account",
+        });
+        setShowAuthModal(false); // Close modal on success
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const loadTradingSignals = async () => {
+    try {
+      // Pour la démonstration, on ne charge aucun signal
+      // L'état sera vide par défaut
+      setSignals([]);
+    } catch (error) {
+      console.error("Erreur lors du chargement des signaux:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les signaux de trading",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const generateSignalsWithGemini = async () => {
+    if (!isPremium) {
+      toast({
+        title: "Subscription required",
+        description: "You need a premium subscription to generate signals",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGeneratingSignals(true);
+    
+    try {
+      // Générer un type de signal aléatoire (BUY ou SELL)
+      const signalTypes = ["BUY", "SELL"];
+      const randomType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
+      
+      // Log pour vérifier la génération aléatoire
+      console.log("Type de signal généré:", randomType);
+      
+      // Calculer la durée d'expiration basée sur le timeframe
+      const getExpirationTime = (timeframe: string) => {
+        switch (timeframe) {
+          case "1M": return 60; // 1 minute
+          case "2M": return 120; // 2 minutes
+          case "3M": return 180; // 3 minutes
+          case "5M": return 300; // 5 minutes
+          case "15M": return 900; // 15 minutes
+          case "30M": return 1800; // 30 minutes
+          case "1H": return 3600; // 1 heure
+          case "4H": return 14400; // 4 heures
+          case "1D": return 86400; // 1 jour
+          default: return 60; // 1 minute par défaut
+        }
+      };
+      
+      const expirationTime = getExpirationTime(timeframe);
+
+      // Fonctions pour générer des valeurs aléatoires
+      const getRandomVolatility = () => {
+        const volatilities = ["Low", "Medium", "High"];
+        return volatilities[Math.floor(Math.random() * volatilities.length)];
+      };
+
+      const getRandomTrendStrength = () => {
+        return Math.floor(Math.random() * (99 - 77 + 1)) + 77; // Entre 77% et 99%
+      };
+
+      const getRandomVolumeFlow = () => {
+        const flows = ["Decreasing", "Stable", "Increasing"];
+        return flows[Math.floor(Math.random() * flows.length)];
+      };
+
+      const getRandomSentiment = () => {
+        const sentiments = ["Bearish", "Neutral", "Bullish"];
+        return sentiments[Math.floor(Math.random() * sentiments.length)];
+      };
+
+      const getRandomMovingAverage = () => {
+        const averages = ["Below", "At", "Above"];
+        return averages[Math.floor(Math.random() * averages.length)];
+      };
+
+      const getRandomRSI = () => {
+        const rsiValues = ["Oversold", "Neutral", "Overbought"];
+        return rsiValues[Math.floor(Math.random() * rsiValues.length)];
+      };
+
+      const getRandomStochastic = () => {
+        const stochastics = ["Crossing Down", "Neutral", "Crossing Up"];
+        return stochastics[Math.floor(Math.random() * stochastics.length)];
+      };
+
+      const getRandomParabolicSAR = () => {
+        const sarValues = ["Bearish Flip", "Neutral", "Bullish Flip"];
+        return sarValues[Math.floor(Math.random() * sarValues.length)];
+      };
+
+      const getRandomEnvelopeTrend = () => {
+        const envelopeValues = ["Lower Band", "Middle Band", "Upper Band"];
+        return envelopeValues[Math.floor(Math.random() * envelopeValues.length)];
+      };
+
+      const getRandomSignalStrength = () => {
+        return Math.floor(Math.random() * (99 - 77 + 1)) + 77; // Entre 77% et 99%
+      };
+      
+      // Essayer d'abord l'API Gemini
+      try {
+        console.log("Tentative API Gemini avec type:", randomType);
+        
+        const prompt = `Analyse le marché ${asset} sur le timeframe ${timeframe} et génère 1 signal de trading ${randomType} détaillé. 
+        
+        Format de réponse JSON:
+        {
+          "signals": [
+            {
+              "symbol": "${asset}",
+              "type": "${randomType}",
+              "entry_price": "prix d'entrée réaliste",
+              "target_price": "prix objectif",
+              "stop_loss": "prix stop loss",
+              "confidence": "pourcentage de confiance (60-95)",
+              "description": "analyse technique détaillée",
+              "analysis": "raisonnement derrière le signal",
+              "volatility": "Low/Medium/High",
+              "trend_strength": "pourcentage (60-95)",
+              "volume_flow": "Increasing/Decreasing/Stable",
+              "sentiment": "Bullish/Bearish/Neutral",
+              "moving_average": "Above/Below/Crossing",
+              "rsi": "Oversold/Overbought/Neutral",
+              "stochastic": "Crossing Up/Crossing Down/Neutral",
+              "parabolic_sar": "Bullish Flip/Bearish Flip/Neutral",
+              "envelope_trend": "Upper Band/Lower Band/Middle",
+              "signal_strength": "pourcentage (70-95)",
+              "market_conditions": "Favorable/Unfavorable/Neutral"
+            }
+          ]
+        }
+        
+        Utilise des prix réalistes et une analyse technique crédible pour un signal ${randomType}.`;
+
+        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur API Gemini: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          const responseText = data.candidates[0].content.parts[0].text;
+          
+          // Extraire le JSON de la réponse
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const signalsData = JSON.parse(jsonMatch[0]);
+            
+            if (signalsData.signals && Array.isArray(signalsData.signals)) {
+              const newSignals: TradingSignal[] = signalsData.signals.map((signal: any, index: number) => ({
+                id: `gemini-${Date.now()}-${index}`,
+                symbol: signal.symbol || asset,
+                type: signal.type || randomType,
+                entry_price: parseFloat(signal.entry_price) || 1.0850,
+                target_price: parseFloat(signal.target_price) || 1.0920,
+                stop_loss: parseFloat(signal.stop_loss) || 1.0800,
+                risk_reward: Math.abs((parseFloat(signal.target_price) - parseFloat(signal.entry_price)) / (parseFloat(signal.entry_price) - parseFloat(signal.stop_loss))) || 2.0,
+                confidence: parseInt(signal.confidence) || 75,
+                created_at: new Date().toISOString(),
+                status: "ACTIVE" as const,
+                description: signal.description || "Signal généré par IA",
+                analysis: signal.analysis || "Analyse technique basée sur les indicateurs de marché",
+                expiration_time: expirationTime,
+                volatility: signal.volatility || "Medium",
+                trend_strength: parseInt(signal.trend_strength) || 75,
+                volume_flow: signal.volume_flow || "Increasing",
+                sentiment: signal.sentiment || (randomType === "BUY" ? "Bullish" : "Bearish"),
+                moving_average: signal.moving_average || (randomType === "BUY" ? "Above" : "Below"),
+                rsi: signal.rsi || "Neutral",
+                stochastic: signal.stochastic || (randomType === "BUY" ? "Crossing Up" : "Crossing Down"),
+                parabolic_sar: signal.parabolic_sar || (randomType === "BUY" ? "Bullish Flip" : "Bearish Flip"),
+                envelope_trend: signal.envelope_trend || (randomType === "BUY" ? "Upper Band" : "Lower Band"),
+                signal_strength: parseInt(signal.signal_strength) || 82,
+                market_conditions: signal.market_conditions || (randomType === "BUY" ? "Favorable" : "Unfavorable")
+              }));
+
+              setSignals(newSignals);
+              
+              // Afficher la notification de signal activé
+              setActivatedSignalInfo(`A new ${randomType} signal for ${asset} has been generated.`);
+              setShowSignalActivated(true);
+              
+              // Masquer la notification après 5 secondes
+              setTimeout(() => {
+                setShowSignalActivated(false);
+    }, 5000);
+              
+              toast({
+                title: "Signal généré",
+                description: `Nouveau signal ${randomType} généré pour ${asset}`,
+              });
+              return; // Sortir si succès
+            }
+          }
+        }
+      } catch (apiError) {
+        console.log("API Gemini échouée, utilisation des signaux de démonstration:", apiError);
+      }
+
+      // Si l'API Gemini échoue, générer des signaux de démonstration
+      console.log("Génération de signaux de démonstration avec type:", randomType);
+      
+      const demoSignals: TradingSignal[] = [{
+        id: `demo-${Date.now()}`,
+        symbol: asset,
+        type: randomType as "BUY" | "SELL",
+        entry_price: randomType === "BUY" ? 1.0850 : 1.0950,
+        target_price: randomType === "BUY" ? 1.0920 : 1.0880,
+        stop_loss: randomType === "BUY" ? 1.0800 : 1.1020,
+        risk_reward: 2.33,
+        confidence: 85,
+        created_at: new Date().toISOString(),
+        status: "ACTIVE",
+        description: `Signal ${randomType} basé sur l'analyse technique de ${asset}`,
+        analysis: `Le prix montre une tendance ${randomType === "BUY" ? "haussière" : "baissière"} claire avec confirmation des indicateurs techniques`,
+        expiration_time: expirationTime,
+        volatility: getRandomVolatility(),
+        trend_strength: getRandomTrendStrength(),
+        volume_flow: getRandomVolumeFlow(),
+        sentiment: getRandomSentiment(),
+        moving_average: getRandomMovingAverage(),
+        rsi: getRandomRSI(),
+        stochastic: getRandomStochastic(),
+        parabolic_sar: getRandomParabolicSAR(),
+        envelope_trend: getRandomEnvelopeTrend(),
+        signal_strength: getRandomSignalStrength(),
+        market_conditions: randomType === "BUY" ? "Favorable" : "Unfavorable"
+      }];
+
+      console.log("Signal de démonstration créé:", demoSignals[0]);
+      setSignals(demoSignals);
+      
+      // Afficher la notification de signal activé
+      setActivatedSignalInfo(`A new ${randomType} signal for ${asset} has been generated.`);
+      setShowSignalActivated(true);
+      
+      // Masquer la notification après 5 secondes
+        setTimeout(() => {
+        setShowSignalActivated(false);
+        }, 5000);
+      
+      toast({
+        title: "Signal generated",
+        description: `New ${randomType} signal generated for ${asset}`,
+      });
+
+    } catch (error: any) {
+      console.error("Erreur lors de la génération des signaux:", error);
+      toast({
+        title: "Error",
+        description: "Unable to generate signals. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingSignals(false);
+    }
+  };
+
+  const handleStartSignals = () => {
+    if (!user) {
+      window.location.href = "/signin"; // Redirect to signin page
       return;
     }
     
-    // Only create new signal if there's no active signal
-    if (!activeSignal) {
-      const newSignal = makeSignal(asset, category, timeframe);
-      setSignals((prev) => [newSignal, ...prev].slice(0, 12));
-      setActiveSignal(newSignal);
+    if (!isPremium) {
+      window.location.href = "/pricing";
+      return;
     }
     
-    // Set interval only if there's no active signal
-    if (!activeSignal) {
-      const timeframeSeconds = getTimeframeInSeconds(timeframe);
-      intervalRef.current = window.setInterval(() => {
-        const intervalSignal = makeSignal(asset, category, timeframe);
-        setSignals((prev) => [intervalSignal, ...prev].slice(0, 12));
-        setActiveSignal(intervalSignal);
-      }, timeframeSeconds * 1000) as unknown as number;
-    }
-    
-    return () => {
-      if (intervalRef.current) window.clearInterval(intervalRef.current);
-    };
-  }, [running, isAuthenticated, isPremium, signalExpired, activeSignal]);
-
-  const latest = activeSignal;
-
-  const [countdown, setCountdown] = useState(60);
-  useEffect(() => {
-    if (!activeSignal || signalExpired) return;
-    const timeframeSeconds = getTimeframeInSeconds(timeframe);
-    setCountdown(timeframeSeconds);
-    const id = window.setInterval(() => {
-      setCountdown(prev => {
-        const newCount = prev - 1;
-        if (newCount <= 0) {
-          window.clearInterval(id);
-          setSignalExpired(true);
-          setRunning(false); // Stop signals when expired
-          setActiveSignal(null); // Clear active signal
-          return 0;
-        }
-        return newCount;
+    // Vérifier si l'actif est ouvert
+    if (!isAssetOpen(asset, category)) {
+      toast({
+        title: "Market closed",
+        description: "This market is currently closed. Please choose another asset or wait for opening.",
+        variant: "destructive",
       });
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, [activeSignal?.id, timeframe]);
+      return;
+    }
 
-  const handleSignalExpiredDismiss = () => {
-    setSignalExpired(false);
-    setSignals([]); // Clear all signals
-    setActiveSignal(null); // Clear active signal
-    // No lock - button becomes available immediately
+    // Vérifier si un signal est déjà actif
+    if (signals.length > 0) {
+      toast({
+        title: "Active signal",
+        description: "A signal is already active. Wait for it to expire before generating a new one.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Démarrer l'attente avec l'icône satellite
+    setIsWaitingForSignal(true);
+    
+    // Délais possibles en secondes
+    const possibleDelays = [5, 10, 12, 15, 17];
+    const randomDelay = possibleDelays[Math.floor(Math.random() * possibleDelays.length)];
+    
+    // Stocker le délai actuel
+    setCurrentDelay(randomDelay);
+    
+    // Informer l'utilisateur du délai
+    toast({
+      title: "Satellite connection",
+      description: "Connecting to satellite... Please wait.",
+    });
+    
+    // Attendre le délai aléatoire avant de générer le signal
+    setTimeout(() => {
+      generateSignalsWithGemini();
+      // Continuer l'animation pendant 1 seconde supplémentaire
+      setTimeout(() => {
+        setIsWaitingForSignal(false);
+        setCurrentDelay(null);
+    }, 1000);
+    }, randomDelay * 1000);
   };
 
-  const isMarketClosedForCategory = isMarketClosed(category);
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
-  const latestMeta = useMemo(() => {
-    if (!latest) return null;
-    const strength = Math.floor(65 + Math.random() * 30);
-    const trendStrength = Math.floor(50 + Math.random() * 40);
-    const volatility = ["Low", "Medium", "High"][Math.floor(Math.random() * 3)];
-    const volumeFlow = Math.random() > 0.5 ? "Increasing" : "Decreasing";
-    const sentiment = latest.type === "BUY" ? "Bullish" : "Bearish";
-    const movingAverage = Math.random() > 0.5 ? "Above" : "Below";
-    const rsi = latest.type === "BUY" ? "Oversold" : "Overbought";
-    const stochastic = latest.type === "BUY" ? "Crossing Up" : "Crossing Down";
-    const psar = latest.type === "BUY" ? "Bullish Flip" : "Bearish Flip";
-    const envelope = Math.random() > 0.5 ? "Upper Band" : "Lower Band";
-    return { strength, trendStrength, volatility, volumeFlow, sentiment, movingAverage, rsi, stochastic, psar, envelope } as const;
-  }, [latest?.id, latest?.type]);
+  const getTimeRemaining = (signal: TradingSignal) => {
+    const now = new Date().getTime();
+    const signalTime = new Date(signal.created_at).getTime();
+    const elapsed = (now - signalTime) / 1000;
+    return Math.max(0, signal.expiration_time - elapsed);
+  };
 
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center">
-          <SignalHigh className="h-12 w-12 text-brand mx-auto mb-4 animate-pulse" />
-          <div className="font-semibold">Loading...</div>
-        </div>
-      </div>
-    );
-  }
+  const dismissExpiredSignal = () => {
+    setExpiredSignal(null);
+  };
+
+  const getAvailableAssets = () => {
+    switch (category) {
+      case "forex":
+        return [...tradingPairs.forex.majors, ...tradingPairs.forex.minors];
+      case "forex_otc":
+        return tradingPairs.forex_otc;
+      case "cryptos":
+        return tradingPairs.cryptos;
+      case "indices":
+        return tradingPairs.indices;
+      default:
+        return tradingPairs.forex.majors;
+    }
+  };
+
+  const getTradingHours = (asset: string) => {
+    if (category === "forex") return tradingHours.forex;
+    if (category === "forex_otc") return tradingHours.forex_otc;
+    if (category === "cryptos") return tradingHours.cryptos;
+    if (category === "indices") {
+      return tradingHours.indices[asset as keyof typeof tradingHours.indices] || 
+             { open: "09:00", close: "17:00", timezone: "Local", description: "Horaires locaux" };
+    }
+    return tradingHours.forex;
+  };
+
+  // Fonction pour vérifier si un actif est ouvert
+  const isAssetOpen = (asset: string, category: string) => {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Dimanche, 1 = Lundi, etc.
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute; // Temps en minutes
+
+    // Forex OTC et Cryptos sont ouverts 24/7
+    if (category === "forex_otc" || category === "cryptos") {
+      return true;
+    }
+
+    // Forex est fermé le weekend
+    if (category === "forex") {
+      return currentDay >= 1 && currentDay <= 5; // Lundi à Vendredi
+    }
+
+    // Indices - vérifier les heures spécifiques
+    if (category === "indices") {
+      const tradingHours = getTradingHours(asset);
+      const [openHour, openMin] = tradingHours.open.split(':').map(Number);
+      const [closeHour, closeMin] = tradingHours.close.split(':').map(Number);
+      const openTime = openHour * 60 + openMin;
+      const closeTime = closeHour * 60 + closeMin;
+
+      // Pour les indices, vérifier aussi les jours de la semaine
+      if (currentDay === 0 || currentDay === 6) return false; // Weekend
+      
+      return currentTime >= openTime && currentTime <= closeTime;
+    }
+
+    return true;
+  };
+
+  // Fonction pour vérifier si on peut générer un signal
+  const canGenerateSignal = () => {
+    // Si pas d'utilisateur ou pas premium, pas de signal
+    if (!user || !isPremium) return false;
+    
+    // Si un signal est actif, pas de nouveau signal
+    if (signals.length > 0) return false;
+    
+    // Vérifier si l'actif est ouvert
+    return isAssetOpen(asset, category);
+  };
+
+  // Fonction pour obtenir le statut du bouton
+  const getButtonStatus = () => {
+    if (!user) return { text: "Log In to Get Signals", icon: <LogIn className="h-4 w-4 mr-2" />, disabled: false };
+    if (!isPremium) return { text: "Subscribe to Get Signals", icon: <Lock className="h-4 w-4 mr-2" />, disabled: false };
+    if (signals.length > 0) return { text: "Signal Active", icon: <Clock className="h-4 w-4 mr-2" />, disabled: true };
+    if (!isAssetOpen(asset, category)) return { text: "Market Closed", icon: <AlertTriangle className="h-4 w-4 mr-2" />, disabled: true };
+    if (isWaitingForSignal) return { text: "Connecting to Satellite...", icon: <Satellite className="h-4 w-4 mr-2 animate-spin text-green-500" />, disabled: true };
+    return { text: "Start Signals", icon: <SignalHigh className="h-4 w-4 mr-2" />, disabled: false };
+  };
+
+  useEffect(() => {
+    loadTradingSignals();
+  }, []);
+
+  // Nettoyer les signaux expirés et déverrouiller le bouton
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSignals(prevSignals => {
+        const now = new Date().getTime();
+        const activeSignals = prevSignals.filter(signal => {
+          const signalTime = new Date(signal.created_at).getTime();
+          const elapsed = (now - signalTime) / 1000;
+          return elapsed < signal.expiration_time;
+        });
+        
+        // Si des signaux ont expiré, afficher une notification
+        if (activeSignals.length < prevSignals.length) {
+                  toast({
+          title: "Signal expired",
+          description: "The active signal has expired. You can now generate a new signal.",
+        });
+        }
+        
+        return activeSignals;
+      });
+    }, 1000); // Vérifier toutes les secondes
+
+    return () => clearInterval(interval);
+  }, [toast]);
+
+  // Mettre à jour l'asset quand la catégorie change
+  useEffect(() => {
+    const availableAssets = getAvailableAssets();
+    if (availableAssets.length > 0 && !availableAssets.includes(asset)) {
+      setAsset(availableAssets[0]);
+    }
+  }, [category]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container py-4 flex items-center justify-between">
-          <a href="/" aria-label="Real-Time Trading Signals home" className="flex flex-col sm:flex-row items-center gap-2">
-            <img src={siteLogo} alt="Real-Time Trading Signals" className="h-8 w-8" />
-            <span className="font-semibold text-center sm:text-left">Real-time Trading Signals</span>
-          </a>
-          <div className="flex items-center gap-3">
-            {isPremium && (
-              <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-green-600 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
-                <img src={crownIcon} alt="Premium" className="h-6 w-6" />
-                <span>Premium</span>
-              </div>
-            )}
-            <ThemeToggle />
-            {!isAuthenticated ? (
+      {/* Header */}
+      <header className="border-b border-border">
+        <div className="container mx-auto px-4 py-4">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Logo className="h-8 w-8 text-primary" />
+              <span className="text-xl font-bold">Real-time Trading Signals</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              {/* Icône de thème */}
               <Button 
                 variant="ghost" 
                 size="sm" 
+                onClick={toggleTheme}
                 className="p-2"
-                onClick={() => setShowAuthModal(true)}
               >
-                <User className="h-4 w-4" />
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
               </Button>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="p-2">
-                    <User className="h-4 w-4" />
+
+              {/* Menu utilisateur ou bouton de connexion */}
+              {user ? (
+                <div className="flex items-center space-x-2">
+                  {/* Badge couronne pour les utilisateurs premium */}
+                  {isPremium && (
+                    <Badge variant="secondary" className="bg-green-500 text-white border-green-500">
+                      <Crown className="h-3 w-3 mr-1" />
+                      Premium
+                    </Badge>
+                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="p-2">
+                        <User className="h-5 w-5" />
+                        <ChevronDown className="h-4 w-4 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => window.location.href = "/"}>
+                        <Home className="h-4 w-4 mr-2" />
+                        Home Page
+                      </DropdownMenuItem>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <User className="h-4 w-4 mr-2" />
+                          Profile & Settings
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={() => setShowCancelSubscriptionModal(true)}>
+                            <X className="h-4 w-4 mr-2 text-red-500" />
+                            <span className="text-red-500">Cancel Subscription</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => window.open("https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00", "_blank")}>
+                            <Settings className="h-4 w-4 mr-2" />
+                            Manage Subscription
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowChangePasswordModal(true)}>
+                            <Lock className="h-4 w-4 mr-2" />
+                            Change Password
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Pause className="h-4 w-4 mr-2 text-orange-500" />
+                            <span className="text-orange-500">Suspend Account</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Trash2 className="h-4 w-4 mr-2 text-red-500" />
+                            <span className="text-red-500">Delete Account</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuItem onClick={handleCustomerService}>
+                        <Mail className="h-4 w-4 mr-2" />
+                        Customer Service
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = "/signin"}
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Layout */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <Logo className="h-8 w-8 text-primary" />
+              </div>
+              <div className="flex items-center space-x-2">
+                {/* Icône de thème */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={toggleTheme}
+                  className="p-2"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+
+                {/* Menu utilisateur ou bouton de connexion */}
+                {user ? (
+                  <div className="flex items-center space-x-2">
+                    {/* Badge couronne pour les utilisateurs premium */}
+                    {isPremium && (
+                      <Badge variant="secondary" className="bg-green-500 text-white border-green-500">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Premium
+                      </Badge>
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="p-2">
+                          <User className="h-5 w-5" />
+                          <ChevronDown className="h-4 w-4 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => window.location.href = "/"}>
+                          <Home className="h-4 w-4 mr-2" />
+                          Home Page
+                        </DropdownMenuItem>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            <User className="h-4 w-4 mr-2" />
+                            Profile & Settings
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            <DropdownMenuItem onClick={() => setShowCancelSubscriptionModal(true)}>
+                              <X className="h-4 w-4 mr-2 text-red-500" />
+                              <span className="text-red-500">Cancel Subscription</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open("https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00", "_blank")}>
+                              <Settings className="h-4 w-4 mr-2" />
+                              Manage Subscription
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowChangePasswordModal(true)}>
+                              <Lock className="h-4 w-4 mr-2" />
+                              Change Password
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Pause className="h-4 w-4 mr-2 text-orange-500" />
+                              <span className="text-orange-500">Suspend Account</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Trash2 className="h-4 w-4 mr-2 text-red-500" />
+                              <span className="text-red-500">Delete Account</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuItem onClick={handleCustomerService}>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Customer Service
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleSignOut}>
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Log out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = "/signin"}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                  >
+                    Sign In
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-background border border-border">
-                  <DropdownMenuItem 
-                    className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Already on home page, no action needed
-                    }}
-                  >
-                    <Home className="h-4 w-4" />
-                    Home Page
-                  </DropdownMenuItem>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer">
-                      <User className="h-4 w-4" />
-                      Profile & Settings
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem 
-                        className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer text-red-600"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowCancelSubscriptionModal(true);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                        Cancel Subscription
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowManageSubscriptionModal(true);
-                        }}
-                      >
-                        <Settings className="h-4 w-4" />
-                        Manage Subscription
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowChangePasswordModal(true);
-                        }}
-                      >
-                        <Lock className="h-4 w-4" />
-                        Change Password
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        className="flex items-center gap-2 hover:bg-muted/50 text-orange-500 cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowSuspendAccountModal(true);
-                        }}
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        Suspend Account
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="flex items-center gap-2 hover:bg-muted/50 text-red-500 cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setShowDeleteAccountModal(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete Account
-                      </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    className="flex items-center gap-2 hover:bg-muted/50 cursor-pointer"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      await signOut();
-                      setRunning(false);
-                      setSignals([]);
-                    }}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                )}
+              </div>
+            </div>
+            {/* Titre du site en dessous du logo sur mobile */}
+            <div className="text-center">
+              <button 
+                onClick={() => window.location.reload()}
+                className="text-lg font-bold hover:text-primary transition-colors cursor-pointer"
+              >
+                Real-time Trading Signals
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main>
-        <section className="container py-12 md:py-16">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
-              AI-powered Real-Time Trading Signals
-            </h1>
-            <p className="mt-3 text-muted-foreground text-lg max-w-2xl mx-auto">
-              Harness simulated institutional-grade strategies to get instant BUY/SELL alerts across Forex, Indices, and Crypto markets.
+      {/* Modal d'authentification */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connexion</DialogTitle>
+            <DialogDescription>
+              Connectez-vous à votre compte pour accéder aux signaux de trading
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="votre@email.com"
+              />
+          </div>
+            <div>
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              </div>
+            <Button
+              onClick={handleAuth}
+              disabled={authLoading}
+              className="w-full"
+            >
+              {authLoading ? "Chargement..." : "Se connecter"}
+            </Button>
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}
+              >
+                {authMode === "login" ? "Créer un compte" : "Déjà un compte ?"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal d'annulation d'abonnement */}
+      <Dialog open={showCancelSubscriptionModal} onOpenChange={setShowCancelSubscriptionModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-500 flex items-center space-x-2">
+              <X className="h-5 w-5" />
+              <span>Cancel Subscription</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to cancel your subscription? This action will stop your recurring billing.
             </p>
+            
+            {/* Section d'avertissement */}
+            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <h4 className="font-semibold text-orange-800 dark:text-orange-200">Before you cancel:</h4>
+              </div>
+              <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
+                <li>• You'll lose access to premium trading signals</li>
+                <li>• Your subscription will end at the current billing period</li>
+                <li>• You can resubscribe anytime</li>
+                <li>• No refunds for the current billing period</li>
+              </ul>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            <p className="text-xs text-muted-foreground">
+              You will be redirected to Stripe's secure portal to safely cancel your subscription.
+            </p>
+
+            <div className="flex space-x-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCancelSubscriptionModal(false)}
+                className="flex-1"
+              >
+                Keep Subscription
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  window.open("https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00", "_blank");
+                  setShowCancelSubscriptionModal(false);
+                }}
+                className="flex-1"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Cancel Subscription
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de changement de mot de passe */}
+      <Dialog open={showChangePasswordModal} onOpenChange={setShowChangePasswordModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Lock className="h-5 w-5" />
+              <span>Change Password</span>
+            </DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new password
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
             <div>
-              <div className="text-center mb-6">
-                <Badge variant="secondary" className="bg-secondary/60">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-signal-green mr-2" aria-hidden />
-                  {onlineCount.toLocaleString()} active traders online
-                </Badge>
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                placeholder="Enter your current password"
+                className="mt-1"
+              />
               </div>
+            <div>
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter your new password"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Confirm your new password"
+                className="mt-1"
+              />
+            </div>
+            <div className="flex space-x-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowChangePasswordModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  // Ici vous pouvez ajouter la logique de changement de mot de passe
+                  toast({
+                    title: "Password Updated",
+                    description: "Your password has been successfully changed.",
+                  });
+                  setShowChangePasswordModal(false);
+                }}
+                className="flex-1"
+              >
+                Update Password
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-              <Card className="mt-8 p-5 bg-card/60 border-2 border-signal-green">
-                <div className="text-sm uppercase tracking-wide text-muted-foreground font-semibold mb-3">
-                  Trading Bot Settings
+      {/* Overlay pour signal expiré */}
+      {expiredSignal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={dismissExpiredSignal}
+        >
+          <div className="bg-background border border-border rounded-lg p-8 text-center">
+            <h2 className="text-2xl font-bold mb-2">Signal Expired</h2>
+            <p className="text-muted-foreground">Click to dismiss</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        </div>
+      )}
+
+      {/* Notification de signal activé */}
+      {showSignalActivated && (
+        <div className="fixed top-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-4 text-white z-50 max-w-sm">
+          <div className="font-bold">Signal Activated!</div>
+          <div className="text-sm">{activatedSignalInfo}</div>
+        </div>
+      )}
+
+      {/* Contenu principal */}
+      <main className="container mx-auto px-4 py-8">
+        {/* Section Hero avec textes en anglais */}
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 px-2">
+            AI-POWERED REAL-TIME TRADING SIGNALS
+          </h1>
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 md:mb-4 px-2">
+            AND OUR PROFESSIONAL TRADERS
+          </h2>
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
+            Harness the power of our advanced AI to get institutional-grade BUY/SELL signals for Forex, Indices, and Crypto markets.
+          </p>
+        </div>
+
+        {/* Compteur d'utilisateurs actifs */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 text-sm sm:text-lg font-semibold text-foreground bg-card border border-border rounded-lg px-4 sm:px-6 py-3 shadow-lg">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xl sm:text-2xl font-bold">{activeUsers.toLocaleString()}</span>
+            <span className="text-xs sm:text-base">active traders online</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+          {/* Colonne de gauche - Paramètres */}
+          <div className="space-y-6">
+            {/* Trading Bot Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Lock className="h-5 w-5" />
+                  <span>Trading Bot Settings</span>
+                </CardTitle>
+                <CardDescription>
+                  Configure your trading settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Category</div>
-                    <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <Label>Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                       <SelectContent>
-                        {(Object.keys(ASSETS) as Category[]).map((c) => (
-                          <SelectItem key={c} value={c}>{c}</SelectItem>
-                        ))}
+                      <SelectItem value="forex">Forex</SelectItem>
+                      <SelectItem value="forex_otc">Forex OTC</SelectItem>
+                      <SelectItem value="cryptos">Cryptos</SelectItem>
+                      <SelectItem value="indices">Indices</SelectItem>
                       </SelectContent>
                     </Select>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs text-muted-foreground">
+                      {getTradingHours(asset).description}
+                    </p>
+                    <div className={`flex items-center space-x-1 text-xs ${
+                      isAssetOpen(asset, category) ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full ${
+                        isAssetOpen(asset, category) ? 'bg-green-500' : 'bg-red-500'
+                      }`}></div>
+                      <span>{isAssetOpen(asset, category) ? 'Open' : 'Closed'}</span>
+                    </div>
+                  </div>
                   </div>
 
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Asset</div>
+                  <Label>Asset</Label>
                     <Select value={asset} onValueChange={setAsset}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder="Select asset" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                       <SelectContent>
-                        {assetsForCategory.map((a) => (
-                          <SelectItem key={a} value={a}>{a}</SelectItem>
+                      {getAvailableAssets().map((assetOption) => (
+                        <SelectItem key={assetOption} value={assetOption}>
+                          {assetOption}
+                        </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Timeframe</div>
-                    <Select value={timeframe} onValueChange={(v) => setTimeframe(v as Timeframe)}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder="Select timeframe" /></SelectTrigger>
+                  <Label>Timeframe</Label>
+                  <Select value={timeframe} onValueChange={setTimeframe}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                       <SelectContent>
-                        {TIMEFRAMES.map((t) => (
-                          <SelectItem key={t} value={t}>{t}</SelectItem>
-                        ))}
+                        <SelectItem value="1M">1Min</SelectItem>
+                        <SelectItem value="2M">2Min</SelectItem>
+                        <SelectItem value="3M">3Min</SelectItem>
+                        <SelectItem value="5M">5Min</SelectItem>
+                        <SelectItem value="15M">15Min</SelectItem>
+                        <SelectItem value="30M">30Min</SelectItem>
+                        <SelectItem value="1H">1H</SelectItem>
+                        <SelectItem value="4H">4H</SelectItem>
+                        <SelectItem value="1D">1D</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="flex items-end">
-                    {!isAuthenticated ? (
                       <Button
-                        className="w-full bg-[#4F75FF] hover:bg-[#3D5ECC] text-white"
-                        onClick={() => setShowAuthModal(true)}
-                      >
-                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        Log In to Get Signals
-                      </Button>
-                    ) : !isPremium ? (
-                      <div className="space-y-2">
-                        <Button
-                          className="w-full bg-[#4F75FF] hover:bg-[#3D5ECC] text-white"
-                          onClick={() => navigate("/pricing")}
-                        >
-                          <Lock className="mr-2 h-4 w-4" />
-                          Subscribe to Get Signals
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs"
-                          onClick={checkSubscription}
-                          disabled={subscriptionLoading}
-                        >
-                          {subscriptionLoading ? (
-                            <>
-                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                              Vérification...
+                  onClick={handleStartSignals}
+                  disabled={isGeneratingSignals || isWaitingForSignal || getButtonStatus().disabled}
+                  className={`w-full ${
+                    user && isPremium && !getButtonStatus().disabled && !isWaitingForSignal ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
+                  }`}
+                >
+                  {isGeneratingSignals ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
                             </>
                           ) : (
-                            "Actualiser l'abonnement"
-                          )}
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        className="w-full bg-signal-green hover:bg-signal-green/90 text-white"
-                        onClick={() => {
-                          if (isMarketClosedForCategory) {
-                            toast({
-                              title: "Market Closed",
-                              description: getMarketStatusMessage(category),
-                              variant: "destructive",
-                            });
-                            return;
-                          }
-                          setDelayCountdown(5);
-                          setStartingDelay(true);
-                        }}
-                        disabled={running || startingDelay || isMarketClosedForCategory}
-                      >
-                        {startingDelay ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Starting in {delayCountdown}s
-                          </>
-                        ) : running ? (
-                          <>
-                            <Zap className="mr-2 h-4 w-4" />
-                            Signals Running
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="mr-2 h-4 w-4" />
-                            Start Trading Signals
+                    <>
+                      {getButtonStatus().icon}
+                      {getButtonStatus().text}
                           </>
                         )}
                       </Button>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-3 text-xs text-muted-foreground">
-                  {getMarketStatusMessage(category)}
-                </div>
+              </CardContent>
               </Card>
+
+
             </div>
 
-            <div>
-              <div className={`relative rounded-lg border-2 ${latest?.type === 'SELL' ? 'border-signal-red' : 'border-signal-green'} bg-card/60 p-6 overflow-hidden`}>
-                <div className="relative">
-                  {!isAuthenticated || !isPremium || !latest ? (
-                    <div className="h-[300px] md:h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
-                      <SatelliteIcon className="mb-2 text-signal-green w-8 h-8" />
-                      <div className="font-semibold">No active signals.</div>
-                      <div className="text-sm">First select settings, then click on Start Signals, and you will see the active signal here.</div>
+          {/* Colonne centrale - Signaux actifs */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <SignalHigh className="h-5 w-5" />
+                  <span>ACTIVE SIGNALS</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {signals.length === 0 ? (
+                  // État vide - comme sur la deuxième capture
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <SignalHigh className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No active signals.</h3>
+                    <p className="text-muted-foreground">
+                      First select settings, then click on{" "}
+                      <span 
+                        className="text-blue-500 cursor-pointer hover:underline"
+                        onClick={handleStartSignals}
+                      >
+                        Start Signals
+                      </span>
+                      , and you will see the active signal here.
+                    </p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <div className={`rounded-md border ${latest.type === 'SELL' ? 'border-signal-red/40' : 'border-signal-green/40'} bg-background/40 p-5`}>
-                        <div className="flex items-start justify-between">
-                          <div className="text-sm text-muted-foreground font-medium">Active Trading Signal</div>
-                          <div className="text-xs text-muted-foreground">
-                            Expires in: {`${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`}
+                  // Affichage des signaux actifs
+                  <div className="space-y-6">
+                    {signals.map((signal) => {
+                      const timeRemaining = getTimeRemaining(signal);
+                      const isExpired = timeRemaining <= 0;
+                      
+                      return (
+                        <div key={signal.id} className="border border-border rounded-lg p-6">
+                          {/* Header du signal */}
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold">Active Trading Signal</h3>
+                            <div className="text-sm text-muted-foreground">
+                              Expires In: {formatTime(Math.floor(timeRemaining))}
                           </div>
                         </div>
 
-                        <div className="mt-3 text-center">
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <SatelliteIcon className={`${latest.type === 'SELL' ? 'text-signal-red' : 'text-signal-green'} w-6 h-6 ${running ? 'animate-pulse' : ''}`} />
-                            {latest.type === 'SELL' ? 
-                              <TrendingDown className="text-signal-red" /> : 
-                              <TrendingUp className="text-signal-green" />
-                            }
+                          {/* Type de signal */}
+                          <div className="text-center mb-6">
+                            <div className="flex items-center justify-center space-x-2 mb-2">
+                              {signal.type === "BUY" ? (
+                                <TrendingUp className="h-6 w-6 text-green-500" />
+                              ) : (
+                                <TrendingUp className="h-6 w-6 text-red-500 transform rotate-180" />
+                              )}
+                              <span className="text-2xl font-bold">
+                                {signal.symbol}
+                              </span>
                           </div>
-                          <div className={`text-2xl md:text-3xl font-extrabold tracking-tight ${latest.type === 'SELL' ? 'text-signal-red' : 'text-signal-green'}`}>
-                            TRY {latest.type} SIGNAL!
+                            <div className={`text-xl font-bold ${
+                              signal.type === "BUY" ? "text-green-500" : "text-red-500"
+                            }`}>
+                              TRY, {signal.type} SIGNAL!
                           </div>
-                          <div className="text-base md:text-lg font-semibold">{latest.asset}</div>
-                          <div className="text-sm text-muted-foreground mt-1">{latest.reason}</div>
                         </div>
 
-                        <div className="my-4 h-px bg-border/60" />
-
+                          {/* Informations détaillées */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Market Info */}
                           <div>
-                            <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Market Info</div>
-                            <div className="grid grid-cols-2 text-sm gap-y-1">
-                              <div className="text-muted-foreground">Volatility</div>
-                              <div className="text-right font-medium">{latestMeta?.volatility}</div>
-                              <div className="text-muted-foreground">Trend Strength %</div>
-                              <div className="text-right font-medium">{latestMeta?.trendStrength}%</div>
-                              <div className="text-muted-foreground">Volume Flow</div>
-                              <div className="text-right font-medium">{latestMeta?.volumeFlow}</div>
-                              <div className="text-muted-foreground">Sentiment</div>
-                              <div className="text-right font-medium">{latestMeta?.sentiment}</div>
+                              <h4 className="font-semibold mb-3">Market Info</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Volatility:</span>
+                                  <span>{signal.volatility}</span>
                             </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Trend Strength:</span>
+                                  <span>{signal.trend_strength}%</span>
                           </div>
-                          <div>
-                            <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Technical Overview</div>
-                            <div className="grid grid-cols-2 text-sm gap-y-1">
-                              <div className="text-muted-foreground">Moving Average</div>
-                              <div className="text-right font-medium">{latestMeta?.movingAverage}</div>
-                              <div className="text-muted-foreground">RSI</div>
-                              <div className="text-right font-medium">{latestMeta?.rsi}</div>
-                              <div className="text-muted-foreground">Stochastic</div>
-                              <div className="text-right font-medium">{latestMeta?.stochastic}</div>
-                              <div className="text-muted-foreground">Parabolic SAR</div>
-                              <div className="text-right font-medium">{latestMeta?.psar}</div>
-                              <div className="text-muted-foreground">Envelope Trend</div>
-                              <div className="text-right font-medium">{latestMeta?.envelope}</div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Volume Flow:</span>
+                                  <span>{signal.volume_flow}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Sentiment:</span>
+                                  <span>{signal.sentiment}</span>
+                                </div>
+                              </div>
                             </div>
+
+                            {/* Technical Overview */}
+                          <div>
+                              <h4 className="font-semibold mb-3">Technical Overview</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Moving Average:</span>
+                                  <span>{signal.moving_average}</span>
+                            </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">RSI:</span>
+                                  <span>{signal.rsi}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Stochastic:</span>
+                                  <span>{signal.stochastic}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Parabolic SAR:</span>
+                                  <span>{signal.parabolic_sar}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Envelope Trend:</span>
+                                  <span>{signal.envelope_trend}</span>
+                                </div>
+                              </div>
                           </div>
                         </div>
 
-                        <div className="mt-5">
-                          <div className={`text-sm font-medium ${latest.type === 'SELL' ? 'text-signal-red' : ''}`}>Signal Strength</div>
-                          <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
-                            <div 
-                              className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
-                              style={{ width: `${latestMeta?.strength ?? 80}%` }}
+                          {/* Signal Strength */}
+                          <div className="mt-6">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium">Signal Strength</span>
+                              <span className="text-sm text-muted-foreground">{signal.signal_strength}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  signal.type === "BUY" ? "bg-green-500" : "bg-red-500"
+                                }`}
+                                style={{ width: `${signal.signal_strength}%` }}
                             ></div>
                           </div>
-                          <div className="mt-1 text-xs text-muted-foreground flex items-center justify-between">
-                            <span>
-                              Strength: {((latestMeta?.strength ?? 80) >= 80 ? "Strong" : "Moderate")} ({latestMeta?.strength ?? 80}%)
-                            </span>
-                            <span>Market Conditions: {latest.type === "BUY" ? "Favorable" : "Unfavorable"}</span>
-                          </div>
                         </div>
 
+                          {/* Time Remaining */}
                         <div className="mt-4">
-                          <div className={`text-sm font-medium ${latest.type === 'SELL' ? 'text-signal-red' : ''}`}>Time Remaining</div>
-                          <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
-                            <div 
-                              className={`${latest.type === 'SELL' ? 'bg-signal-red' : 'bg-signal-green'} h-2.5 rounded-full transition-all duration-300`}
-                              style={{ width: `${(countdown / getTimeframeInSeconds(timeframe)) * 100}%` }}
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium">Time Remaining</span>
+                              <span className="text-sm text-muted-foreground">{formatTime(Math.floor(timeRemaining))}</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  signal.type === "BUY" ? "bg-green-500" : "bg-red-500"
+                                }`}
+                                style={{ width: `${(timeRemaining / signal.expiration_time) * 100}%` }}
                             ></div>
                           </div>
-                          <div className="mt-1 text-xs text-muted-foreground text-right">
-                            {`${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`}
                           </div>
                         </div>
-                      </div>
+                      );
+                    })}
                     </div>
                   )}
+              </CardContent>
+            </Card>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-muted/20 border-t border-b border-border/60">
-          <div className="container py-12 text-center">
-            <div className="text-2xl font-bold">🎉 Celebrating 1,000,000 Traders!</div>
-            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              We're thrilled to have reached a community of over 1,000,000 registered users. Thank you for being a part of our journey.
-            </p>
-          </div>
-        </section>
-
-        <section className="container py-12 text-center">
-          <h2 className="text-3xl font-bold">Partner with Us & Earn!</h2>
-          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-            Join our affiliate program and earn a generous 30% commission for every new subscriber you refer.
-          </p>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <a href="mailto:realtimetradingsignal@gmail.com">
-              <Button variant="hero">Become an Affiliate</Button>
-            </a>
-          </div>
-        </section>
       </main>
 
+      {/* Cartes promotionnelles - au-dessus du footer */}
+      <section className="bg-background border-t border-border py-6 md:py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        {/* Carte 1: Celebrating 1,000,000 Traders! */}
+            <Card className="bg-gradient-to-br from-blue-600 to-purple-700 border-0">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center space-x-3 mb-4">
+                    <Users className="h-8 w-8 text-white" />
+                    <div>
+                      <h3 className="font-bold text-lg text-white">Celebrating 1,000,000 Traders!</h3>
+                      <p className="text-blue-100 text-sm">Join our growing community</p>
+            </div>
+          </div>
+          </div>
+              </CardContent>
+            </Card>
+
+            {/* Carte 2: Partner with Us & Earn! */}
+            <Card className="bg-gradient-to-br from-green-600 to-emerald-700 border-0">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center space-x-3 mb-4">
+                    <Award className="h-8 w-8 text-white" />
+                    <div>
+                      <h3 className="font-bold text-lg text-white">Partner with Us & Earn!</h3>
+                      <p className="text-green-100 text-sm">Become an affiliate partner</p>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-white text-base font-medium">realtimetradingsignal@gmail.com</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          </div>
+        </section>
+
       {/* Footer */}
-      <footer className="bg-background border-t border-border/60">
-        <div className="container py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link 
-                to="/terms-conditions"
-                className="hover:text-foreground transition-colors"
-              >
-                Terms & Conditions
-              </Link>
-              <Link 
-                to="/privacy-policy"
-                className="hover:text-foreground transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <a 
-                href="mailto:realtimetradingsignal@gmail.com" 
-                className="hover:text-foreground transition-colors"
+      <footer className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-t border-purple-800 mt-8 md:mt-16">
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <div>
+              <h3 className="font-bold mb-4 text-white">Real-time Trading Signals</h3>
+              <p className="text-sm text-purple-200">
+                Real-time trading signals generated by AI and our professional traders
+            </p>
+          </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Services</h4>
+              <ul className="space-y-2 text-sm text-purple-200">
+                <li>Forex Signals</li>
+                <li>Crypto Signals</li>
+                <li>Indices Signals</li>
+                <li>Technical Analysis</li>
+              </ul>
+          </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Support</h4>
+              <ul className="space-y-2 text-sm text-purple-200">
+                <li>
+                  <a 
+                    href={`mailto:realtimetradingsignal@gmail.com?subject=Customer Service`}
+                    className="hover:text-white transition-colors"
               >
                 Customer Service
               </a>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              © 2025 Real-time Trading Signals. All rights reserved.
-            </div>
+                </li>
+                <li>
+                  <a 
+                    href={`mailto:realtimetradingsignal@gmail.com?subject=Become an Affiliate`}
+                    className="hover:text-white transition-colors"
+                  >
+                    Become an Affiliate
+                  </a>
+                </li>
+                <li>FAQ</li>
+              </ul>
+          </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Legal</h4>
+              <ul className="space-y-2 text-sm text-purple-200">
+                <li>
+                  <a 
+                    href="/terms-conditions"
+                    className="hover:text-white transition-colors"
+                  >
+                    Terms & Conditions
+                  </a>
+                </li>
+                <li>Privacy Policy</li>
+                <li>Trading Risks</li>
+                <li>Legal Notice</li>
+              </ul>
+          </div>
+        </div>
+          <div className="border-t border-purple-700 mt-8 pt-8 text-center text-sm text-purple-300">
+            © 2025 Real-time Trading Signals. All rights reserved.
           </div>
         </div>
       </footer>
 
-      {/* Signal Expired Dialog */}
-      <Dialog open={signalExpired} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur border border-border/50">
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Signal Expired</h2>
-            <p className="text-muted-foreground mb-6">Click to dismiss</p>
+      {/* Modal de confirmation de déconnexion */}
+      <Dialog open={showLogoutConfirmModal} onOpenChange={setShowLogoutConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <LogOut className="h-5 w-5" />
+              <span>Confirm Logout</span>
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to log out of your account?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex space-x-3 pt-4">
             <Button 
-              onClick={handleSignalExpiredDismiss}
-              variant="outline"
-              className="bg-transparent border-border hover:bg-muted/50"
+              variant="outline" 
+              onClick={() => setShowLogoutConfirmModal(false)}
+              className="flex-1"
             >
-              Dismiss
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmSignOut}
+              className="flex-1"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Log Out
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Authentication Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          setShowAuthModal(false);
-        }}
-      />
-
-      {/* Profile & Settings Modals */}
-      <ChangePasswordModal
-        isOpen={showChangePasswordModal}
-        onClose={() => setShowChangePasswordModal(false)}
-      />
-
-      <ManageSubscriptionModal
-        isOpen={showManageSubscriptionModal}
-        onClose={() => setShowManageSubscriptionModal(false)}
-      />
-
-      <SuspendAccountModal
-        isOpen={showSuspendAccountModal}
-        onClose={() => setShowSuspendAccountModal(false)}
-      />
-
-      <DeleteAccountModal
-        isOpen={showDeleteAccountModal}
-        onClose={() => setShowDeleteAccountModal(false)}
-        userEmail={user?.email}
-      />
-
-      <CancelSubscriptionModal
-        isOpen={showCancelSubscriptionModal}
-        onClose={() => setShowCancelSubscriptionModal(false)}
-      />
-
-      {/* Subscription Success Notification */}
-      {showSubscriptionSuccess && (
-        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white p-4 rounded-lg shadow-lg max-w-sm">
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <div>
-              <div className="font-semibold">Abonnement activé !</div>
-              <div className="text-sm opacity-90">Vous avez maintenant accès aux signaux premium</div>
+      {/* Modal de bienvenue pour les utilisateurs premium */}
+      <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-green-600">
+              <Crown className="h-5 w-5" />
+              <span>Welcome Premium User!</span>
+            </DialogTitle>
+            <DialogDescription>
+              You now have complete access to all trading signals and premium features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-center py-4">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-white" />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-white hover:bg-green-600"
-              onClick={() => setShowSubscriptionSuccess(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              Your premium subscription is active. Enjoy unlimited access to our AI-powered trading signals!
+            </p>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -81,10 +81,12 @@ serve(async (req) => {
       const subscription = subscriptions.data[0];
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      // Determine subscription tier from price
+      
+      // Determine subscription tier from price (optimisé)
       const priceId = subscription.items.data[0].price.id;
-      const price = await stripe.prices.retrieve(priceId);
-      const amount = price.unit_amount || 0;
+      const amount = subscription.items.data[0].price.unit_amount || 0;
+      
+      // Détermination rapide du tier sans appel API supplémentaire
       if (amount <= 999) {
         subscriptionTier = "Basic";
       } else if (amount <= 1999) {

@@ -41,6 +41,32 @@ export const useAuth = () => {
     }
   }, [session?.access_token]);
 
+  // Vérification plus fréquente après paiement
+  const checkSubscriptionWithRetry = useCallback(async (maxRetries = 3) => {
+    if (!session?.access_token) return;
+    
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        await checkSubscription();
+        
+        // Si l'abonnement est actif, on arrête les tentatives
+        if (subscriptionData.subscribed) {
+          break;
+        }
+        
+        // Attendre avant la prochaine tentative
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } catch (error) {
+        console.error(`Subscription check attempt ${i + 1} failed:`, error);
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+    }
+  }, [session?.access_token, checkSubscription, subscriptionData.subscribed]);
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -52,7 +78,7 @@ export const useAuth = () => {
         // Check subscription when user signs in
         if (event === 'SIGNED_IN' && session) {
           setTimeout(() => {
-            checkSubscription();
+            checkSubscriptionWithRetry();
           }, 100);
         }
         
@@ -72,13 +98,13 @@ export const useAuth = () => {
       // Check subscription for existing session
       if (session) {
         setTimeout(() => {
-          checkSubscription();
+          checkSubscriptionWithRetry();
         }, 100);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [checkSubscription]);
+  }, [checkSubscriptionWithRetry]);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -87,15 +113,44 @@ export const useAuth = () => {
     }
   };
 
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    return data;
+  };
+
+  const signUp = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    return data;
+  };
+
   return {
     user,
     session,
     loading,
     signOut,
+    signIn,
+    signUp,
     isAuthenticated: !!user,
     subscriptionData,
     subscriptionLoading,
     checkSubscription,
+    checkSubscriptionWithRetry,
     isPremium: subscriptionData.subscribed,
   };
 };

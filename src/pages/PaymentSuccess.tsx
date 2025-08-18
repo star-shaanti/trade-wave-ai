@@ -10,51 +10,73 @@ const PaymentSuccess = () => {
   const { checkSubscription, isPremium, subscriptionLoading } = useAuth();
   const { toast } = useToast();
   const [verifying, setVerifying] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
+    // Marquer que l'utilisateur vient de payer
+    sessionStorage.setItem('fromPaymentSuccess', 'true');
+    
     // Check subscription status after payment with retry logic
     const verifyPayment = async () => {
       setVerifying(true);
       let retryCount = 0;
-      const maxRetries = 3;
+      const maxRetries = 5; // Augmenté le nombre de tentatives
       
       const attemptVerification = async () => {
         try {
           await checkSubscription();
           
           // Wait a bit for the state to update
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
           // Check if subscription is now active
           if (isPremium) {
             toast({
               title: "Bienvenue dans Premium !",
-              description: "Votre abonnement est maintenant actif. Profitez des signaux de trading premium !",
+              description: "Votre abonnement est maintenant actif. Redirection vers les signaux...",
             });
             setVerifying(false);
+            setRedirecting(true);
+            
+            // Redirection automatique après 2 secondes
+            setTimeout(() => {
+              navigate("/");
+            }, 2000);
             return;
           } else if (retryCount < maxRetries) {
             retryCount++;
             console.log(`Tentative ${retryCount} de vérification de l'abonnement...`);
-            setTimeout(attemptVerification, 2000); // Retry after 2 seconds
+            setTimeout(attemptVerification, 3000); // Retry after 3 seconds
           } else {
             toast({
-              title: "Vérification en cours",
-              description: "Votre paiement a été traité. L'abonnement sera activé sous peu.",
+              title: "Paiement traité avec succès",
+              description: "Votre abonnement sera activé sous peu. Redirection automatique...",
             });
             setVerifying(false);
+            setRedirecting(true);
+            
+            // Redirection automatique même si la vérification échoue
+            setTimeout(() => {
+              navigate("/");
+            }, 3000);
           }
         } catch (error) {
           console.error("Erreur lors de la vérification de l'abonnement:", error);
           if (retryCount < maxRetries) {
             retryCount++;
-            setTimeout(attemptVerification, 2000);
+            setTimeout(attemptVerification, 3000);
           } else {
             toast({
               title: "Paiement réussi",
-              description: "Votre paiement a été traité. L'abonnement sera activé sous peu.",
+              description: "Votre paiement a été traité. Redirection vers les signaux...",
             });
             setVerifying(false);
+            setRedirecting(true);
+            
+            // Redirection automatique même en cas d'erreur
+            setTimeout(() => {
+              navigate("/");
+            }, 3000);
           }
         }
       };
@@ -63,7 +85,23 @@ const PaymentSuccess = () => {
     };
 
     verifyPayment();
-  }, [checkSubscription, isPremium, toast]);
+  }, [checkSubscription, isPremium, toast, navigate]);
+
+  // Redirection automatique après 30 secondes maximum
+  useEffect(() => {
+    const autoRedirect = setTimeout(() => {
+      if (!redirecting) {
+        setRedirecting(true);
+        toast({
+          title: "Redirection automatique",
+          description: "Redirection vers les signaux de trading...",
+        });
+        navigate("/");
+      }
+    }, 30000);
+
+    return () => clearTimeout(autoRedirect);
+  }, [redirecting, navigate, toast]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -86,6 +124,15 @@ const PaymentSuccess = () => {
               </div>
             </div>
           )}
+
+          {redirecting && (
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Redirection vers les signaux...</span>
+              </div>
+            </div>
+          )}
           
           <div className="space-y-3">
             <Button
@@ -94,7 +141,7 @@ const PaymentSuccess = () => {
               disabled={verifying}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour aux signaux de trading
+              {redirecting ? "Redirection en cours..." : "Retour aux signaux de trading"}
             </Button>
           </div>
         </div>
