@@ -13,7 +13,9 @@ import Logo from "../components/Logo";
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -81,12 +83,30 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      await signUp(email, password);
-      toast({
-        title: "Registration successful",
-        description: "Please check your email to confirm your account.",
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+          emailRedirectTo: `${window.location.origin}/`,
+        }
       });
-      setShowSignUp(false);
+
+      if (error) {
+        throw error;
+      }
+
+      // Si l'inscription réussit, connecter automatiquement l'utilisateur
+      if (data.user) {
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created and you are now logged in.",
+        });
+        setShowSignUp(false);
+        window.location.href = "/";
+      }
     } catch (error: any) {
       toast({
         title: "Registration error",
@@ -308,35 +328,58 @@ const SignIn = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Create a new account to access trading signals.
             </p>
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div>
-                <Label htmlFor="signup-email" className="text-sm text-muted-foreground">
-                  Email *
-                </Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="signup-password" className="text-sm text-muted-foreground">
-                  Password *
-                </Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  className="mt-1"
-                />
-              </div>
+                         <form onSubmit={handleSignUp} className="space-y-4">
+               <div>
+                 <Label htmlFor="signup-fullname" className="text-sm text-muted-foreground">
+                   Full Name *
+                 </Label>
+                 <Input
+                   id="signup-fullname"
+                   type="text"
+                   value={fullName}
+                   onChange={(e) => setFullName(e.target.value)}
+                   placeholder="Enter your full name"
+                   required
+                   className="mt-1"
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="signup-email" className="text-sm text-muted-foreground">
+                   Email *
+                 </Label>
+                 <Input
+                   id="signup-email"
+                   type="email"
+                   value={email}
+                   onChange={(e) => setEmail(e.target.value)}
+                   placeholder="Enter your email"
+                   required
+                   className="mt-1"
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="signup-password" className="text-sm text-muted-foreground">
+                   Password *
+                 </Label>
+                 <div className="relative mt-1">
+                   <Input
+                     id="signup-password"
+                     type={showSignUpPassword ? "text" : "password"}
+                     value={password}
+                     onChange={(e) => setPassword(e.target.value)}
+                     placeholder="Enter your password"
+                     required
+                     className="pr-10"
+                   />
+                   <button
+                     type="button"
+                     onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                   >
+                     {showSignUpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                   </button>
+                 </div>
+               </div>
               <div className="flex space-x-3">
                 <Button
                   type="button"
