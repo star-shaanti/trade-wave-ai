@@ -17,7 +17,8 @@ const SignIn = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const { signIn } = useAuth();
+  const [showSignUp, setShowSignUp] = useState(false);
+  const { signIn, signUp } = useAuth();
   const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -27,14 +28,14 @@ const SignIn = () => {
     try {
       await signIn(email, password);
       toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté.",
+        title: "Login successful",
+        description: "You are now logged in.",
       });
       window.location.href = "/";
     } catch (error: any) {
       toast({
-        title: "Erreur de connexion",
-        description: error.message || "Impossible de se connecter.",
+        title: "Login error",
+        description: error.message || "Unable to sign in.",
         variant: "destructive",
       });
     } finally {
@@ -45,8 +46,8 @@ const SignIn = () => {
   const handleForgotPassword = async () => {
     if (!email) {
       toast({
-        title: "Email requis",
-        description: "Veuillez entrer votre email pour réinitialiser le mot de passe.",
+        title: "Email required",
+        description: "Please enter your email to reset your password.",
         variant: "destructive",
       });
       return;
@@ -62,14 +63,57 @@ const SignIn = () => {
       }
 
       toast({
-        title: "Email envoyé",
-        description: "Un email de réinitialisation a été envoyé à votre adresse.",
+        title: "Email sent",
+        description: "A reset email has been sent to your address.",
       });
       setShowForgotPassword(false);
     } catch (error: any) {
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible d'envoyer l'email de réinitialisation.",
+        title: "Error",
+        description: error.message || "Unable to send reset email.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await signUp(email, password);
+      toast({
+        title: "Registration successful",
+        description: "Please check your email to confirm your account.",
+      });
+      setShowSignUp(false);
+    } catch (error: any) {
+      toast({
+        title: "Registration error",
+        description: error.message || "Unable to create account.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      toast({
+        title: "Google login error",
+        description: error.message || "Unable to sign in with Google.",
         variant: "destructive",
       });
     }
@@ -96,10 +140,10 @@ const SignIn = () => {
             <p className="text-sm text-muted-foreground">
               Not registered yet?{" "}
               <button 
-                onClick={() => window.location.href = "/signup"}
+                onClick={() => setShowSignUp(true)}
                 className="text-blue-500 hover:underline"
               >
-                Registration
+                Create Account
               </button>
             </p>
           </CardHeader>
@@ -190,13 +234,7 @@ const SignIn = () => {
             <Button
               variant="outline"
               className="w-full bg-background border-border text-foreground hover:bg-accent"
-              onClick={() => {
-                // Google login logic here
-                toast({
-                  title: "Google Login",
-                  description: "Google login functionality coming soon.",
-                });
-              }}
+              onClick={handleGoogleSignIn}
             >
               <div className="flex items-center space-x-2">
                 <div className="w-5 h-5 bg-white rounded flex items-center justify-center">
@@ -258,6 +296,65 @@ const SignIn = () => {
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Sign Up */}
+      {showSignUp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">Create Account</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Create a new account to access trading signals.
+            </p>
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div>
+                <Label htmlFor="signup-email" className="text-sm text-muted-foreground">
+                  Email *
+                </Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="signup-password" className="text-sm text-muted-foreground">
+                  Password *
+                </Label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex space-x-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowSignUp(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={loading}
+                >
+                  {loading ? "Creating..." : "Create Account"}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
