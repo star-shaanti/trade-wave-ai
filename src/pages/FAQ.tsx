@@ -118,9 +118,6 @@ const FAQ = () => {
                   Yes, you can cancel your subscription at any time through your account settings. 
                   Your access will continue until the end of your current billing period.
                 </p>
-                <p>
-                  We offer a 30-day money-back guarantee for new subscribers who are not satisfied with our service.
-                </p>
               </AccordionContent>
             </AccordionItem>
 

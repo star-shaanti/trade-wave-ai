@@ -765,7 +765,10 @@ const Index = () => {
           <div className="hidden md:flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Logo className="h-8 w-8 text-primary" />
-              <div className="flex flex-col">
+              <div 
+                className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => window.location.reload()}
+              >
                 <span className="text-lg font-bold leading-tight">Real-time</span>
                 <span className="text-lg font-bold leading-tight">Trading Signals</span>
               </div>
@@ -783,6 +786,17 @@ const Index = () => {
                 ) : (
                   <Moon className="h-5 w-5" />
                 )}
+              </Button>
+
+              {/* Bouton système */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.location.href = "/faq"}
+                className="p-2"
+                title="System Settings"
+              >
+                <Settings className="h-5 w-5" />
               </Button>
 
               {/* Menu utilisateur ou bouton de connexion */}
@@ -864,7 +878,10 @@ const Index = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-3">
                 <Logo className="h-8 w-8 text-primary" />
-                <div className="flex flex-col">
+                <div 
+                  className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => window.location.reload()}
+                >
                   <span className="text-base font-bold leading-tight">Real-time</span>
                   <span className="text-base font-bold leading-tight">Trading Signals</span>
                 </div>
@@ -882,6 +899,17 @@ const Index = () => {
                   ) : (
                     <Moon className="h-5 w-5" />
                   )}
+                </Button>
+
+                {/* Bouton système */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => window.location.href = "/faq"}
+                  className="p-2"
+                  title="System Settings"
+                >
+                  <Settings className="h-5 w-5" />
                 </Button>
 
                 {/* Menu utilisateur ou bouton de connexion */}
@@ -1179,8 +1207,9 @@ const Index = () => {
 
         {/* Compteur d'utilisateurs actifs */}
         <div className="flex items-center justify-center mb-6">
-          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 text-sm sm:text-lg font-semibold text-foreground bg-card border border-border rounded-lg px-4 sm:px-6 py-3 shadow-lg">
+          <div className="flex items-center space-x-3 text-sm sm:text-lg font-semibold text-foreground bg-card border border-border rounded-lg px-4 sm:px-6 py-3 shadow-lg">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <span className="text-xl sm:text-2xl font-bold">{activeUsers.toLocaleString()}</span>
             <span className="text-xs sm:text-base">active traders online</span>
           </div>
