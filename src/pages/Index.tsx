@@ -15,6 +15,7 @@ import { Label } from "../components/ui/label";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
+import { ThemeToggle } from "../components/theme-toggle";
 
 // Constantes pour l'API Gemini
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
@@ -775,29 +776,7 @@ const Index = () => {
             </div>
             <div className="flex items-center space-x-4">
               {/* Icône de thème */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={toggleTheme}
-                className="p-2"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </Button>
-
-              {/* Bouton système */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => window.location.href = "/faq"}
-                className="p-2"
-                title="System Settings"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
+              <ThemeToggle />
 
               {/* Menu utilisateur ou bouton de connexion */}
               {user ? (
@@ -888,29 +867,7 @@ const Index = () => {
               </div>
               <div className="flex items-center space-x-2">
                 {/* Icône de thème */}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={toggleTheme}
-                  className="p-2"
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </Button>
-
-                {/* Bouton système */}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => window.location.href = "/faq"}
-                  className="p-2"
-                  title="System Settings"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button>
+                <ThemeToggle />
 
                 {/* Menu utilisateur ou bouton de connexion */}
                 {user ? (
