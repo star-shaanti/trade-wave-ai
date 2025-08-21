@@ -942,15 +942,6 @@ const Index = () => {
                 )}
               </div>
             </div>
-            {/* Titre du site en dessous du logo sur mobile */}
-            <div className="text-center">
-              <button 
-                onClick={() => window.location.reload()}
-                className="text-lg font-bold hover:text-primary transition-colors cursor-pointer"
-              >
-                Real-time Trading Signals
-              </button>
-            </div>
           </div>
         </div>
       </header>
