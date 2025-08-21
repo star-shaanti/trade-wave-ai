@@ -93,30 +93,30 @@ const tradingHours = {
     open: "Sunday 22:00 GMT",
     close: "Friday 22:00 GMT",
     timezone: "GMT",
-    description: "Ouvert 24h/5j (Dimanche 22h - Vendredi 22h GMT)"
+    description: "Open 24h/5d (Sunday 22h - Friday 22h GMT)"
   },
   forex_otc: {
     open: "24/7",
     close: "24/7",
     timezone: "GMT",
-    description: "Ouvert 24h/24, 7j/7"
+    description: "Open 24/7"
   },
   cryptos: {
     open: "24/7",
     close: "24/7",
     timezone: "GMT",
-    description: "Ouvert 24h/24, 7j/7"
+    description: "Open 24/7"
   },
   indices: {
     // Horaires spécifiques par indice (exemples)
-    "S&P 500": { open: "09:30", close: "16:00", timezone: "EST", description: "Lun-Ven 9h30-16h EST" },
-    "NASDAQ": { open: "09:30", close: "16:00", timezone: "EST", description: "Lun-Ven 9h30-16h EST" },
-    "DOW JONES": { open: "09:30", close: "16:00", timezone: "EST", description: "Lun-Ven 9h30-16h EST" },
-    "FTSE 100": { open: "08:00", close: "16:30", timezone: "GMT", description: "Lun-Ven 8h-16h30 GMT" },
-    "DAX": { open: "09:00", close: "17:30", timezone: "CET", description: "Lun-Ven 9h-17h30 CET" },
-    "CAC 40": { open: "09:00", close: "17:30", timezone: "CET", description: "Lun-Ven 9h-17h30 CET" },
-    "NIKKEI 225": { open: "09:00", close: "15:00", timezone: "JST", description: "Lun-Ven 9h-15h JST" },
-    "HANG SENG": { open: "09:30", close: "16:00", timezone: "HKT", description: "Lun-Ven 9h30-16h HKT" }
+    "S&P 500": { open: "09:30", close: "16:00", timezone: "EST", description: "Mon-Fri 9:30-16:00 EST" },
+    "NASDAQ": { open: "09:30", close: "16:00", timezone: "EST", description: "Mon-Fri 9:30-16:00 EST" },
+    "DOW JONES": { open: "09:30", close: "16:00", timezone: "EST", description: "Mon-Fri 9:30-16:00 EST" },
+    "FTSE 100": { open: "08:00", close: "16:30", timezone: "GMT", description: "Mon-Fri 8:00-16:30 GMT" },
+    "DAX": { open: "09:00", close: "17:30", timezone: "CET", description: "Mon-Fri 9:00-17:30 CET" },
+    "CAC 40": { open: "09:00", close: "17:30", timezone: "CET", description: "Mon-Fri 9:00-17:30 CET" },
+    "NIKKEI 225": { open: "09:00", close: "15:00", timezone: "JST", description: "Mon-Fri 9:00-15:00 JST" },
+    "HANG SENG": { open: "09:30", close: "16:00", timezone: "HKT", description: "Mon-Fri 9:30-16:00 HKT" }
   }
 };
 
@@ -763,9 +763,12 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <Logo className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Real-time Trading Signals</span>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold leading-tight">Real-time</span>
+                <span className="text-lg font-bold leading-tight">Trading Signals</span>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               {/* Icône de thème */}
@@ -859,8 +862,12 @@ const Index = () => {
           {/* Mobile Layout */}
           <div className="md:hidden">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Logo className="h-8 w-8 text-primary" />
+                <div className="flex flex-col">
+                  <span className="text-base font-bold leading-tight">Real-time</span>
+                  <span className="text-base font-bold leading-tight">Trading Signals</span>
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 {/* Icône de thème */}
@@ -1520,7 +1527,14 @@ const Index = () => {
                     Become an Affiliate
                   </a>
                 </li>
-                <li>FAQ</li>
+                <li>
+                  <a 
+                    href="/faq"
+                    className="hover:text-white transition-colors"
+                  >
+                    FAQ
+                  </a>
+                </li>
               </ul>
           </div>
             <div>
@@ -1534,9 +1548,30 @@ const Index = () => {
                     Terms & Conditions
                   </a>
                 </li>
-                <li>Privacy Policy</li>
-                <li>Trading Risks</li>
-                <li>Legal Notice</li>
+                <li>
+                  <a 
+                    href="/privacy-policy"
+                    className="hover:text-white transition-colors"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="/trading-risks"
+                    className="hover:text-white transition-colors"
+                  >
+                    Trading Risks
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="/legal-notice"
+                    className="hover:text-white transition-colors"
+                  >
+                    Legal Notice
+                  </a>
+                </li>
               </ul>
           </div>
         </div>

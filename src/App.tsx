@@ -10,6 +10,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import PricingPlans from "./pages/PricingPlans";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
+import FAQ from "./pages/FAQ";
+import TradingRisks from "./pages/TradingRisks";
+import LegalNotice from "./pages/LegalNotice";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +32,9 @@ const App = () => {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/trading-risks" element={<TradingRisks />} />
+            <Route path="/legal-notice" element={<LegalNotice />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
