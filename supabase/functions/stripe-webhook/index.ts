@@ -14,47 +14,83 @@ const logStep = (step: string, details?: any) => {
 };
 
 serve(async (req) => {
+  // Log all request details for debugging
+  logStep("Request received", {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries()),
+    hasBody: !!req.body
+  });
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    logStep("Webhook received");
+    logStep("Processing webhook request");
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    // Check if required environment variables are set
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!stripeSecretKey) {
+      logStep("ERROR: STRIPE_SECRET_KEY not set");
+      return new Response(JSON.stringify({ error: "STRIPE_SECRET_KEY not configured" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    if (!webhookSecret) {
+      logStep("ERROR: STRIPE_WEBHOOK_SECRET not set");
+      return new Response(JSON.stringify({ error: "STRIPE_WEBHOOK_SECRET not configured" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      logStep("ERROR: Supabase configuration missing");
+      return new Response(JSON.stringify({ error: "Supabase configuration missing" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey, { 
+      auth: { persistSession: false } 
+    });
 
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
     if (!signature) {
-      throw new Error("No stripe signature found");
-    }
-
-    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    if (!webhookSecret) {
-      throw new Error("STRIPE_WEBHOOK_SECRET is not set");
+      logStep("ERROR: No stripe signature found in headers");
+      return new Response(JSON.stringify({ error: "No stripe signature found" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
 
     let event: Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      logStep("Webhook signature verified successfully", { eventType: event.type, eventId: event.id });
     } catch (err) {
-      logStep("Webhook signature verification failed", { error: err.message });
+      logStep("ERROR: Webhook signature verification failed", { error: err.message });
       return new Response(JSON.stringify({ error: "Webhook signature verification failed" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
 
-    logStep("Processing event", { type: event.type });
+    logStep("Processing event", { type: event.type, eventId: event.id });
 
     switch (event.type) {
       case "checkout.session.completed":
@@ -85,12 +121,13 @@ serve(async (req) => {
         logStep("Unhandled event type", { type: event.type });
     }
 
-    return new Response(JSON.stringify({ received: true }), {
+    logStep("Webhook processed successfully", { eventType: event.type, eventId: event.id });
+    return new Response(JSON.stringify({ received: true, eventType: event.type }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    logStep("ERROR in webhook", { error: error.message });
+    logStep("ERROR in webhook processing", { error: error.message, stack: error.stack });
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
