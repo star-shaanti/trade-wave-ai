@@ -122,7 +122,7 @@ const tradingHours = {
 };
 
 const Index = () => {
-  const { user, isPremium, signOut } = useAuth();
+  const { user, isPremium, signOut, checkSubscription } = useAuth();
   const { toast } = useToast();
 
   const handleSignOut = () => {
@@ -195,6 +195,32 @@ const Index = () => {
       }
     }
   }, [user, isPremium]);
+
+  // Vérification périodique de l'abonnement pour détecter les changements
+  useEffect(() => {
+    if (!user) return;
+
+    const checkSubscriptionPeriodically = () => {
+      // Vérifier si l'utilisateur vient de payer
+      const fromPaymentSuccess = sessionStorage.getItem('fromPaymentSuccess');
+      if (fromPaymentSuccess) {
+        console.log("Welcome modal check: ► {user: true, isPremium: false, userEmail: undefined}");
+        // Vérifier l'abonnement immédiatement après un paiement
+        setTimeout(() => {
+          checkSubscription();
+        }, 1000);
+        sessionStorage.removeItem('fromPaymentSuccess');
+      }
+    };
+
+    // Vérification immédiate
+    checkSubscriptionPeriodically();
+
+    // Vérification périodique toutes les 30 secondes
+    const interval = setInterval(checkSubscriptionPeriodically, 30000);
+
+    return () => clearInterval(interval);
+  }, [user, checkSubscription]);
 
   // Compteur d'utilisateurs actifs avec variation limitée
   useEffect(() => {

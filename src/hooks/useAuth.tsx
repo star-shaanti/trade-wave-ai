@@ -16,8 +16,12 @@ export const useAuth = () => {
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
   const checkSubscription = useCallback(async () => {
-    if (!session?.access_token) return;
+    if (!session?.access_token) {
+      console.log("Pas d'utilisateur, pas de vérification d'abonnement");
+      return;
+    }
     
+    console.log(`Vérification de l'abonnement pour: ${session.user?.email}`);
     setSubscriptionLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -32,40 +36,64 @@ export const useAuth = () => {
         return;
       }
 
-      setSubscriptionData(data || { subscribed: false });
+      const subscriptionData = data || { subscribed: false };
+      console.log(`Abonnement trouvé dans subscribers: ${subscriptionData.subscribed}`);
+      setSubscriptionData(subscriptionData);
     } catch (error) {
       console.error("Subscription check failed:", error);
       setSubscriptionData({ subscribed: false });
     } finally {
       setSubscriptionLoading(false);
     }
-  }, [session?.access_token]);
+  }, [session?.access_token, session?.user?.email]);
 
   // Vérification plus fréquente après paiement
-  const checkSubscriptionWithRetry = useCallback(async (maxRetries = 3) => {
+  const checkSubscriptionWithRetry = useCallback(async (maxRetries = 5) => {
     if (!session?.access_token) return;
+    
+    console.log(`Tentative de vérification de l'abonnement pour: ${session.user?.email}`);
     
     for (let i = 0; i < maxRetries; i++) {
       try {
-        await checkSubscription();
+        console.log(`Tentative ${i + 1} de vérification de l'abonnement...`);
         
-        // Si l'abonnement est actif, on arrête les tentatives
-        if (subscriptionData.subscribed) {
-          break;
+        setSubscriptionLoading(true);
+        const { data, error } = await supabase.functions.invoke('check-subscription', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (error) {
+          console.error("Error checking subscription:", error);
+          setSubscriptionData({ subscribed: false });
+        } else {
+          const newSubscriptionData = data || { subscribed: false };
+          console.log(`Abonnement trouvé dans subscribers: ${newSubscriptionData.subscribed}`);
+          setSubscriptionData(newSubscriptionData);
+          
+          // Si l'abonnement est actif, on arrête les tentatives
+          if (newSubscriptionData.subscribed) {
+            console.log("Abonnement confirmé, arrêt des tentatives");
+            break;
+          }
         }
+        
+        setSubscriptionLoading(false);
         
         // Attendre avant la prochaine tentative
         if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
       } catch (error) {
         console.error(`Subscription check attempt ${i + 1} failed:`, error);
+        setSubscriptionLoading(false);
         if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
       }
     }
-  }, [session?.access_token, checkSubscription, subscriptionData.subscribed]);
+  }, [session?.access_token, session?.user?.email]);
 
   useEffect(() => {
     // Set up auth state listener
