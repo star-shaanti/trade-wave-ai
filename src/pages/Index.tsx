@@ -16,6 +16,7 @@ import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
 import { ThemeToggle } from "../components/theme-toggle";
+import { getAffiliationTranslation, detectBrowserLanguage } from "../lib/translations";
 
 // Constantes pour l'API Gemini
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
@@ -61,9 +62,47 @@ const tradingPairs = {
     ]
   },
   forex_otc: [
+    // Paires majeures (les plus importantes)
     "EUR/USD OTC", "GBP/USD OTC", "USD/JPY OTC", "USD/CHF OTC", "AUD/USD OTC", "USD/CAD OTC", "NZD/USD OTC",
-    "EUR/GBP OTC", "EUR/JPY OTC", "GBP/JPY OTC", "EUR/CHF OTC", "GBP/CHF OTC", "AUD/JPY OTC", "CAD/JPY OTC",
-    "NZD/JPY OTC", "AUD/CAD OTC", "AUD/CHF OTC", "CAD/CHF OTC", "NZD/CAD OTC", "NZD/CHF OTC", "AUD/NZD OTC"
+    
+    // Paires mineures EUR (Euro crosses)
+    "EUR/GBP OTC", "EUR/JPY OTC", "EUR/CHF OTC", "EUR/AUD OTC", "EUR/CAD OTC", "EUR/NZD OTC",
+    
+    // Paires mineures GBP (Sterling crosses)
+    "GBP/JPY OTC", "GBP/CHF OTC", "GBP/AUD OTC", "GBP/CAD OTC", "GBP/NZD OTC",
+    
+    // Paires mineures JPY (Yen crosses)
+    "AUD/JPY OTC", "CAD/JPY OTC", "NZD/JPY OTC", "CHF/JPY OTC",
+    
+    // Paires mineures CHF (Swiss Franc crosses)
+    "AUD/CHF OTC", "CAD/CHF OTC", "NZD/CHF OTC",
+    
+    // Paires mineures AUD (Australian Dollar crosses)
+    "AUD/CAD OTC", "AUD/NZD OTC",
+    
+    // Paires mineures CAD (Canadian Dollar crosses)
+    "NZD/CAD OTC",
+    
+    // Paires exotiques populaires
+    "USD/SEK OTC", "USD/NOK OTC", "USD/DKK OTC", "USD/PLN OTC", "USD/CZK OTC", "USD/HUF OTC",
+    "EUR/SEK OTC", "EUR/NOK OTC", "EUR/DKK OTC", "EUR/PLN OTC", "EUR/CZK OTC", "EUR/HUF OTC",
+    "GBP/SEK OTC", "GBP/NOK OTC", "GBP/DKK OTC", "GBP/PLN OTC", "GBP/CZK OTC", "GBP/HUF OTC",
+    
+    // Paires asiatiques
+    "USD/SGD OTC", "USD/HKD OTC", "USD/CNY OTC", "USD/KRW OTC", "USD/THB OTC", "USD/MYR OTC",
+    "EUR/SGD OTC", "EUR/HKD OTC", "EUR/CNY OTC", "EUR/KRW OTC", "EUR/THB OTC", "EUR/MYR OTC",
+    "GBP/SGD OTC", "GBP/HKD OTC", "GBP/CNY OTC", "GBP/KRW OTC", "GBP/THB OTC", "GBP/MYR OTC",
+    
+    // Paires émergentes
+    "USD/ZAR OTC", "USD/TRY OTC", "USD/RUB OTC", "USD/BRL OTC", "USD/MXN OTC", "USD/INR OTC",
+    "EUR/ZAR OTC", "EUR/TRY OTC", "EUR/RUB OTC", "EUR/BRL OTC", "EUR/MXN OTC", "EUR/INR OTC",
+    "GBP/ZAR OTC", "GBP/TRY OTC", "GBP/RUB OTC", "GBP/BRL OTC", "GBP/MXN OTC", "GBP/INR OTC",
+    
+    // Paires croisées supplémentaires
+    "AUD/SEK OTC", "AUD/NOK OTC", "AUD/DKK OTC", "AUD/PLN OTC", "AUD/CZK OTC", "AUD/HUF OTC",
+    "CAD/SEK OTC", "CAD/NOK OTC", "CAD/DKK OTC", "CAD/PLN OTC", "CAD/CZK OTC", "CAD/HUF OTC",
+    "NZD/SEK OTC", "NZD/NOK OTC", "NZD/DKK OTC", "NZD/PLN OTC", "NZD/CZK OTC", "NZD/HUF OTC",
+    "CHF/SEK OTC", "CHF/NOK OTC", "CHF/DKK OTC", "CHF/PLN OTC", "CHF/CZK OTC", "CHF/HUF OTC"
   ],
   cryptos: [
     "BTC/USD", "ETH/USD", "BNB/USD", "SOL/USD", "ADA/USD", "XRP/USD", "DOT/USD",
@@ -172,6 +211,9 @@ const Index = () => {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  
+  // État pour la langue d'affiliation
+  const [affiliationLanguage, setAffiliationLanguage] = useState(detectBrowserLanguage());
 
   // Gestion du thème
   useEffect(() => {
@@ -1455,6 +1497,31 @@ const Index = () => {
       {/* Cartes promotionnelles - au-dessus du footer */}
       <section className="bg-background border-t border-border py-6 md:py-8">
         <div className="container mx-auto px-4">
+          {/* Sélecteur de langue pour l'affiliation */}
+          <div className="mb-6 text-center">
+            <div className="inline-flex items-center space-x-2 bg-card border border-border rounded-lg p-2">
+              <span className="text-sm text-muted-foreground">Langue:</span>
+              <Select value={affiliationLanguage} onValueChange={setAffiliationLanguage}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">🇺🇸 English</SelectItem>
+                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                  <SelectItem value="es">🇪🇸 Español</SelectItem>
+                  <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
+                  <SelectItem value="it">🇮🇹 Italiano</SelectItem>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="ru">🇷🇺 Русский</SelectItem>
+                  <SelectItem value="zh">🇨🇳 中文</SelectItem>
+                  <SelectItem value="ja">🇯🇵 日本語</SelectItem>
+                  <SelectItem value="ko">🇰🇷 한국어</SelectItem>
+                  <SelectItem value="ar">🇸🇦 العربية</SelectItem>
+                  <SelectItem value="hi">🇮🇳 हिन्दी</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {/* Carte 1: Celebrating 1,000,000 Traders! */}
             <Card className="bg-gradient-to-br from-blue-600 to-purple-700 border-0">
@@ -1478,12 +1545,12 @@ const Index = () => {
                   <div className="flex items-center justify-center space-x-3 mb-4">
                     <Award className="h-8 w-8 text-white" />
                     <div>
-                      <h3 className="font-bold text-lg text-white">Partner with Us & Earn!</h3>
-                      <p className="text-green-100 text-sm">Become an affiliate partner</p>
+                      <h3 className="font-bold text-lg text-white">{getAffiliationTranslation(affiliationLanguage).title}</h3>
+                      <p className="text-green-100 text-sm">{getAffiliationTranslation(affiliationLanguage).description}</p>
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-white text-base font-medium">realtimetradingsignal@gmail.com</div>
+                    <div className="text-white text-base font-medium">{getAffiliationTranslation(affiliationLanguage).email}</div>
                   </div>
                 </div>
               </CardContent>
