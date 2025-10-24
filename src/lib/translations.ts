@@ -190,7 +190,23 @@ export const globalTranslations = {
     affiliateButton: "Juntar-se ao programa",
     affiliateLink: "Clique aqui para se juntar ao programa de afiliados",
     affiliateStats: "COMISSÕES PAGAS",
-    affiliateEmail: "realtimetradingsignal@gmail.com"
+    affiliateEmail: "realtimetradingsignal@gmail.com",
+    
+    // Trading Bot Settings
+    tradingBotSettings: "Configurações do Bot de Trading",
+    configureTradingSettings: "Configure suas configurações de trading",
+    category: "Categoria",
+    asset: "Ativo",
+    timeframe: "Timeframe",
+    open: "Aberto",
+    closed: "Fechado",
+    logInToGetSignals: "Entrar para obter sinais",
+    
+    // Active Signals
+    activeSignals: "SINAIS ATIVOS",
+    noActiveSignals: "Nenhum sinal ativo.",
+    selectSettingsFirst: "Primeiro selecione as configurações, depois clique em Iniciar Sinais, e você verá o sinal ativo aqui.",
+    startSignals: "Iniciar Sinais"
   },
   ru: {
     // Contenu principal
@@ -212,7 +228,23 @@ export const globalTranslations = {
     affiliateButton: "Присоединиться к программе",
     affiliateLink: "Нажмите здесь, чтобы присоединиться к партнерской программе",
     affiliateStats: "ВЫПЛАЧЕННЫЕ КОМИССИИ",
-    affiliateEmail: "realtimetradingsignal@gmail.com"
+    affiliateEmail: "realtimetradingsignal@gmail.com",
+    
+    // Trading Bot Settings
+    tradingBotSettings: "Настройки Торгового Бота",
+    configureTradingSettings: "Настройте параметры торговли",
+    category: "Категория",
+    asset: "Актив",
+    timeframe: "Временной интервал",
+    open: "Открыто",
+    closed: "Закрыто",
+    logInToGetSignals: "Войти для получения сигналов",
+    
+    // Active Signals
+    activeSignals: "АКТИВНЫЕ СИГНАЛЫ",
+    noActiveSignals: "Нет активных сигналов.",
+    selectSettingsFirst: "Сначала выберите настройки, затем нажмите Начать Сигналы, и вы увидите активный сигнал здесь.",
+    startSignals: "Начать Сигналы"
   },
   ar: {
     // Contenu principal
@@ -234,7 +266,23 @@ export const globalTranslations = {
     affiliateButton: "انضم إلى البرنامج",
     affiliateLink: "انقر هنا للانضمام إلى برنامج الشراكة",
     affiliateStats: "العمولات المدفوعة",
-    affiliateEmail: "realtimetradingsignal@gmail.com"
+    affiliateEmail: "realtimetradingsignal@gmail.com",
+    
+    // Trading Bot Settings
+    tradingBotSettings: "إعدادات بوت التداول",
+    configureTradingSettings: "قم بتكوين إعدادات التداول الخاصة بك",
+    category: "الفئة",
+    asset: "الأصل",
+    timeframe: "الإطار الزمني",
+    open: "مفتوح",
+    closed: "مغلق",
+    logInToGetSignals: "تسجيل الدخول للحصول على الإشارات",
+    
+    // Active Signals
+    activeSignals: "الإشارات النشطة",
+    noActiveSignals: "لا توجد إشارات نشطة.",
+    selectSettingsFirst: "أولاً اختر الإعدادات، ثم انقر على بدء الإشارات، وسترى الإشارة النشطة هنا.",
+    startSignals: "بدء الإشارات"
   },
   hi: {
     // Contenu principal
@@ -256,7 +304,23 @@ export const globalTranslations = {
     affiliateButton: "कार्यक्रम में शामिल हों",
     affiliateLink: "सहयोग कार्यक्रम में शामिल होने के लिए यहां क्लिक करें",
     affiliateStats: "भुगतान किए गए कमीशन",
-    affiliateEmail: "realtimetradingsignal@gmail.com"
+    affiliateEmail: "realtimetradingsignal@gmail.com",
+    
+    // Trading Bot Settings
+    tradingBotSettings: "ट्रेडिंग बॉट सेटिंग्स",
+    configureTradingSettings: "अपनी ट्रेडिंग सेटिंग्स कॉन्फ़िगर करें",
+    category: "श्रेणी",
+    asset: "संपत्ति",
+    timeframe: "समय सीमा",
+    open: "खुला",
+    closed: "बंद",
+    logInToGetSignals: "सिग्नल प्राप्त करने के लिए लॉग इन करें",
+    
+    // Active Signals
+    activeSignals: "सक्रिय सिग्नल",
+    noActiveSignals: "कोई सक्रिय सिग्नल नहीं।",
+    selectSettingsFirst: "पहले सेटिंग्स चुनें, फिर स्टार्ट सिग्नल पर क्लिक करें, और आप यहां सक्रिय सिग्नल देखेंगे।",
+    startSignals: "सिग्नल शुरू करें"
   }
 };
 

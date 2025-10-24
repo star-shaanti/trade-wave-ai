@@ -1403,14 +1403,7 @@ const Index = () => {
                     </div>
                     <h3 className="text-lg font-semibold mb-2">{translations.noActiveSignals || "No active signals."}</h3>
                     <p className="text-muted-foreground">
-                      First select settings, then click on{" "}
-                      <span 
-                        className="text-blue-500 cursor-pointer hover:underline"
-                        onClick={handleStartSignals}
-                      >
-                        Start Signals
-                      </span>
-                      , and you will see the active signal here.
+                      {translations.selectSettingsFirst || "First select settings, then click on Start Signals, and you will see the active signal here."}
                     </p>
                     </div>
                   ) : (
