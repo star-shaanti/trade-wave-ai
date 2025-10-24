@@ -16,7 +16,12 @@ import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
 import { ThemeToggle } from "../components/theme-toggle";
-import { getAffiliationTranslation, detectBrowserLanguage } from "../lib/translations";
+import { supportedLanguages, detectBrowserLanguage, getTranslations } from "../lib/translations";
+import { LanguageSelector } from "../components/LanguageSelector";
+import { LanguageSelectorSimple } from "../components/LanguageSelectorSimple";
+import { LanguageSelectorFixed } from "../components/LanguageSelectorFixed";
+import { LanguageButton } from "../components/LanguageButton";
+import { useLanguage } from "../hooks/useLanguage";
 
 // Constantes pour l'API Gemini
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
@@ -58,51 +63,81 @@ const tradingPairs = {
     ],
     minors: [
       "EUR/GBP", "EUR/JPY", "GBP/JPY", "EUR/CHF", "GBP/CHF", "AUD/JPY", "CAD/JPY",
-      "NZD/JPY", "AUD/CAD", "AUD/CHF", "CAD/CHF", "NZD/CAD", "NZD/CHF", "AUD/NZD"
+      "NZD/JPY", "AUD/CAD", "AUD/CHF", "CAD/CHF", "NZD/CAD", "NZD/CHF", "AUD/NZD",
+      "EUR/AUD", "EUR/CAD", "EUR/NZD", "GBP/AUD", "GBP/CAD", "GBP/NZD", "CHF/JPY",
+      "AUD/CHF", "CAD/CHF", "NZD/CHF", "EUR/SEK", "EUR/NOK", "EUR/DKK", "EUR/PLN",
+      "EUR/CZK", "EUR/HUF", "EUR/RON", "EUR/BGN", "EUR/HRK", "EUR/RSD", "EUR/TRY",
+      "GBP/SEK", "GBP/NOK", "GBP/DKK", "GBP/PLN", "GBP/CZK", "GBP/HUF", "GBP/RON",
+      "GBP/BGN", "GBP/HRK", "GBP/RSD", "GBP/TRY", "USD/SEK", "USD/NOK", "USD/DKK",
+      "USD/PLN", "USD/CZK", "USD/HUF", "USD/RON", "USD/BGN", "USD/HRK", "USD/RSD",
+      "USD/TRY", "USD/ZAR", "USD/MXN", "USD/BRL", "USD/ARS", "USD/CLP", "USD/COP",
+      "USD/PEN", "USD/UYU", "USD/PYG", "USD/BOL", "USD/VES", "USD/RUB", "USD/UAH",
+      "USD/BYN", "USD/KZT", "USD/UZS", "USD/KGS", "USD/TJS", "USD/TMT", "USD/AZN",
+      "USD/GEL", "USD/AMD", "USD/KGS", "USD/TJS", "USD/TMT", "USD/AZN", "USD/GEL",
+      "USD/AMD", "USD/KGS", "USD/TJS", "USD/TMT", "USD/AZN", "USD/GEL", "USD/AMD",
+      "JPY/SEK", "JPY/NOK", "JPY/DKK", "JPY/PLN", "JPY/CZK", "JPY/HUF", "JPY/RON",
+      "JPY/BGN", "JPY/HRK", "JPY/RSD", "JPY/TRY", "JPY/ZAR", "JPY/MXN", "JPY/BRL",
+      "JPY/ARS", "JPY/CLP", "JPY/COP", "JPY/PEN", "JPY/UYU", "JPY/PYG", "JPY/BOL",
+      "JPY/VES", "JPY/RUB", "JPY/UAH", "JPY/BYN", "JPY/KZT", "JPY/UZS", "JPY/KGS",
+      "JPY/TJS", "JPY/TMT", "JPY/AZN", "JPY/GEL", "JPY/AMD", "CHF/SEK", "CHF/NOK",
+      "CHF/DKK", "CHF/PLN", "CHF/CZK", "CHF/HUF", "CHF/RON", "CHF/BGN", "CHF/HRK",
+      "CHF/RSD", "CHF/TRY", "CHF/ZAR", "CHF/MXN", "CHF/BRL", "CHF/ARS", "CHF/CLP",
+      "CHF/COP", "CHF/PEN", "CHF/UYU", "CHF/PYG", "CHF/BOL", "CHF/VES", "CHF/RUB",
+      "CHF/UAH", "CHF/BYN", "CHF/KZT", "CHF/UZS", "CHF/KGS", "CHF/TJS", "CHF/TMT",
+      "CHF/AZN", "CHF/GEL", "CHF/AMD", "AUD/SEK", "AUD/NOK", "AUD/DKK", "AUD/PLN",
+      "AUD/CZK", "AUD/HUF", "AUD/RON", "AUD/BGN", "AUD/HRK", "AUD/RSD", "AUD/TRY",
+      "AUD/ZAR", "AUD/MXN", "AUD/BRL", "AUD/ARS", "AUD/CLP", "AUD/COP", "AUD/PEN",
+      "AUD/UYU", "AUD/PYG", "AUD/BOL", "AUD/VES", "AUD/RUB", "AUD/UAH", "AUD/BYN",
+      "AUD/KZT", "AUD/UZS", "AUD/KGS", "AUD/TJS", "AUD/TMT", "AUD/AZN", "AUD/GEL",
+      "AUD/AMD", "CAD/SEK", "CAD/NOK", "CAD/DKK", "CAD/PLN", "CAD/CZK", "CAD/HUF",
+      "CAD/RON", "CAD/BGN", "CAD/HRK", "CAD/RSD", "CAD/TRY", "CAD/ZAR", "CAD/MXN",
+      "CAD/BRL", "CAD/ARS", "CAD/CLP", "CAD/COP", "CAD/PEN", "CAD/UYU", "CAD/PYG",
+      "CAD/BOL", "CAD/VES", "CAD/RUB", "CAD/UAH", "CAD/BYN", "CAD/KZT", "CAD/UZS",
+      "CAD/KGS", "CAD/TJS", "CAD/TMT", "CAD/AZN", "CAD/GEL", "CAD/AMD", "NZD/SEK",
+      "NZD/NOK", "NZD/DKK", "NZD/PLN", "NZD/CZK", "NZD/HUF", "NZD/RON", "NZD/BGN",
+      "NZD/HRK", "NZD/RSD", "NZD/TRY", "NZD/ZAR", "NZD/MXN", "NZD/BRL", "NZD/ARS",
+      "NZD/CLP", "NZD/COP", "NZD/PEN", "NZD/UYU", "NZD/PYG", "NZD/BOL", "NZD/VES",
+      "NZD/RUB", "NZD/UAH", "NZD/BYN", "NZD/KZT", "NZD/UZS", "NZD/KGS", "NZD/TJS",
+      "NZD/TMT", "NZD/AZN", "NZD/GEL", "NZD/AMD"
     ]
   },
   forex_otc: [
-    // Paires majeures (les plus importantes)
     "EUR/USD OTC", "GBP/USD OTC", "USD/JPY OTC", "USD/CHF OTC", "AUD/USD OTC", "USD/CAD OTC", "NZD/USD OTC",
-    
-    // Paires mineures EUR (Euro crosses)
-    "EUR/GBP OTC", "EUR/JPY OTC", "EUR/CHF OTC", "EUR/AUD OTC", "EUR/CAD OTC", "EUR/NZD OTC",
-    
-    // Paires mineures GBP (Sterling crosses)
-    "GBP/JPY OTC", "GBP/CHF OTC", "GBP/AUD OTC", "GBP/CAD OTC", "GBP/NZD OTC",
-    
-    // Paires mineures JPY (Yen crosses)
-    "AUD/JPY OTC", "CAD/JPY OTC", "NZD/JPY OTC", "CHF/JPY OTC",
-    
-    // Paires mineures CHF (Swiss Franc crosses)
-    "AUD/CHF OTC", "CAD/CHF OTC", "NZD/CHF OTC",
-    
-    // Paires mineures AUD (Australian Dollar crosses)
-    "AUD/CAD OTC", "AUD/NZD OTC",
-    
-    // Paires mineures CAD (Canadian Dollar crosses)
-    "NZD/CAD OTC",
-    
-    // Paires exotiques populaires
-    "USD/SEK OTC", "USD/NOK OTC", "USD/DKK OTC", "USD/PLN OTC", "USD/CZK OTC", "USD/HUF OTC",
-    "EUR/SEK OTC", "EUR/NOK OTC", "EUR/DKK OTC", "EUR/PLN OTC", "EUR/CZK OTC", "EUR/HUF OTC",
-    "GBP/SEK OTC", "GBP/NOK OTC", "GBP/DKK OTC", "GBP/PLN OTC", "GBP/CZK OTC", "GBP/HUF OTC",
-    
-    // Paires asiatiques
-    "USD/SGD OTC", "USD/HKD OTC", "USD/CNY OTC", "USD/KRW OTC", "USD/THB OTC", "USD/MYR OTC",
-    "EUR/SGD OTC", "EUR/HKD OTC", "EUR/CNY OTC", "EUR/KRW OTC", "EUR/THB OTC", "EUR/MYR OTC",
-    "GBP/SGD OTC", "GBP/HKD OTC", "GBP/CNY OTC", "GBP/KRW OTC", "GBP/THB OTC", "GBP/MYR OTC",
-    
-    // Paires émergentes
-    "USD/ZAR OTC", "USD/TRY OTC", "USD/RUB OTC", "USD/BRL OTC", "USD/MXN OTC", "USD/INR OTC",
-    "EUR/ZAR OTC", "EUR/TRY OTC", "EUR/RUB OTC", "EUR/BRL OTC", "EUR/MXN OTC", "EUR/INR OTC",
-    "GBP/ZAR OTC", "GBP/TRY OTC", "GBP/RUB OTC", "GBP/BRL OTC", "GBP/MXN OTC", "GBP/INR OTC",
-    
-    // Paires croisées supplémentaires
-    "AUD/SEK OTC", "AUD/NOK OTC", "AUD/DKK OTC", "AUD/PLN OTC", "AUD/CZK OTC", "AUD/HUF OTC",
-    "CAD/SEK OTC", "CAD/NOK OTC", "CAD/DKK OTC", "CAD/PLN OTC", "CAD/CZK OTC", "CAD/HUF OTC",
-    "NZD/SEK OTC", "NZD/NOK OTC", "NZD/DKK OTC", "NZD/PLN OTC", "NZD/CZK OTC", "NZD/HUF OTC",
-    "CHF/SEK OTC", "CHF/NOK OTC", "CHF/DKK OTC", "CHF/PLN OTC", "CHF/CZK OTC", "CHF/HUF OTC"
+    "EUR/GBP OTC", "EUR/JPY OTC", "GBP/JPY OTC", "EUR/CHF OTC", "GBP/CHF OTC", "AUD/JPY OTC", "CAD/JPY OTC",
+    "NZD/JPY OTC", "AUD/CAD OTC", "AUD/CHF OTC", "CAD/CHF OTC", "NZD/CAD OTC", "NZD/CHF OTC", "AUD/NZD OTC",
+    "EUR/AUD OTC", "EUR/CAD OTC", "EUR/NZD OTC", "GBP/AUD OTC", "GBP/CAD OTC", "GBP/NZD OTC", "CHF/JPY OTC",
+    "AUD/CHF OTC", "CAD/CHF OTC", "NZD/CHF OTC", "EUR/SEK OTC", "EUR/NOK OTC", "EUR/DKK OTC", "EUR/PLN OTC",
+    "EUR/CZK OTC", "EUR/HUF OTC", "EUR/RON OTC", "EUR/BGN OTC", "EUR/HRK OTC", "EUR/RSD OTC", "EUR/TRY OTC",
+    "GBP/SEK OTC", "GBP/NOK OTC", "GBP/DKK OTC", "GBP/PLN OTC", "GBP/CZK OTC", "GBP/HUF OTC", "GBP/RON OTC",
+    "GBP/BGN OTC", "GBP/HRK OTC", "GBP/RSD OTC", "GBP/TRY OTC", "USD/SEK OTC", "USD/NOK OTC", "USD/DKK OTC",
+    "USD/PLN OTC", "USD/CZK OTC", "USD/HUF OTC", "USD/RON OTC", "USD/BGN OTC", "USD/HRK OTC", "USD/RSD OTC",
+    "USD/TRY OTC", "USD/ZAR OTC", "USD/MXN OTC", "USD/BRL OTC", "USD/ARS OTC", "USD/CLP OTC", "USD/COP OTC",
+    "USD/PEN OTC", "USD/UYU OTC", "USD/PYG OTC", "USD/BOL OTC", "USD/VES OTC", "USD/RUB OTC", "USD/UAH OTC",
+    "USD/BYN OTC", "USD/KZT OTC", "USD/UZS OTC", "USD/KGS OTC", "USD/TJS OTC", "USD/TMT OTC", "USD/AZN OTC",
+    "USD/GEL OTC", "USD/AMD OTC", "JPY/SEK OTC", "JPY/NOK OTC", "JPY/DKK OTC", "JPY/PLN OTC", "JPY/CZK OTC",
+    "JPY/HUF OTC", "JPY/RON OTC", "JPY/BGN OTC", "JPY/HRK OTC", "JPY/RSD OTC", "JPY/TRY OTC", "JPY/ZAR OTC",
+    "JPY/MXN OTC", "JPY/BRL OTC", "JPY/ARS OTC", "JPY/CLP OTC", "JPY/COP OTC", "JPY/PEN OTC", "JPY/UYU OTC",
+    "JPY/PYG OTC", "JPY/BOL OTC", "JPY/VES OTC", "JPY/RUB OTC", "JPY/UAH OTC", "JPY/BYN OTC", "JPY/KZT OTC",
+    "JPY/UZS OTC", "JPY/KGS OTC", "JPY/TJS OTC", "JPY/TMT OTC", "JPY/AZN OTC", "JPY/GEL OTC", "JPY/AMD OTC",
+    "CHF/SEK OTC", "CHF/NOK OTC", "CHF/DKK OTC", "CHF/PLN OTC", "CHF/CZK OTC", "CHF/HUF OTC", "CHF/RON OTC",
+    "CHF/BGN OTC", "CHF/HRK OTC", "CHF/RSD OTC", "CHF/TRY OTC", "CHF/ZAR OTC", "CHF/MXN OTC", "CHF/BRL OTC",
+    "CHF/ARS OTC", "CHF/CLP OTC", "CHF/COP OTC", "CHF/PEN OTC", "CHF/UYU OTC", "CHF/PYG OTC", "CHF/BOL OTC",
+    "CHF/VES OTC", "CHF/RUB OTC", "CHF/UAH OTC", "CHF/BYN OTC", "CHF/KZT OTC", "CHF/UZS OTC", "CHF/KGS OTC",
+    "CHF/TJS OTC", "CHF/TMT OTC", "CHF/AZN OTC", "CHF/GEL OTC", "CHF/AMD OTC", "AUD/SEK OTC", "AUD/NOK OTC",
+    "AUD/DKK OTC", "AUD/PLN OTC", "AUD/CZK OTC", "AUD/HUF OTC", "AUD/RON OTC", "AUD/BGN OTC", "AUD/HRK OTC",
+    "AUD/RSD OTC", "AUD/TRY OTC", "AUD/ZAR OTC", "AUD/MXN OTC", "AUD/BRL OTC", "AUD/ARS OTC", "AUD/CLP OTC",
+    "AUD/COP OTC", "AUD/PEN OTC", "AUD/UYU OTC", "AUD/PYG OTC", "AUD/BOL OTC", "AUD/VES OTC", "AUD/RUB OTC",
+    "AUD/UAH OTC", "AUD/BYN OTC", "AUD/KZT OTC", "AUD/UZS OTC", "AUD/KGS OTC", "AUD/TJS OTC", "AUD/TMT OTC",
+    "AUD/AZN OTC", "AUD/GEL OTC", "AUD/AMD OTC", "CAD/SEK OTC", "CAD/NOK OTC", "CAD/DKK OTC", "CAD/PLN OTC",
+    "CAD/CZK OTC", "CAD/HUF OTC", "CAD/RON OTC", "CAD/BGN OTC", "CAD/HRK OTC", "CAD/RSD OTC", "CAD/TRY OTC",
+    "CAD/ZAR OTC", "CAD/MXN OTC", "CAD/BRL OTC", "CAD/ARS OTC", "CAD/CLP OTC", "CAD/COP OTC", "CAD/PEN OTC",
+    "CAD/UYU OTC", "CAD/PYG OTC", "CAD/BOL OTC", "CAD/VES OTC", "CAD/RUB OTC", "CAD/UAH OTC", "CAD/BYN OTC",
+    "CAD/KZT OTC", "CAD/UZS OTC", "CAD/KGS OTC", "CAD/TJS OTC", "CAD/TMT OTC", "CAD/AZN OTC", "CAD/GEL OTC",
+    "CAD/AMD OTC", "NZD/SEK OTC", "NZD/NOK OTC", "NZD/DKK OTC", "NZD/PLN OTC", "NZD/CZK OTC", "NZD/HUF OTC",
+    "NZD/RON OTC", "NZD/BGN OTC", "NZD/HRK OTC", "NZD/RSD OTC", "NZD/TRY OTC", "NZD/ZAR OTC", "NZD/MXN OTC",
+    "NZD/BRL OTC", "NZD/ARS OTC", "NZD/CLP OTC", "NZD/COP OTC", "NZD/PEN OTC", "NZD/UYU OTC", "NZD/PYG OTC",
+    "NZD/BOL OTC", "NZD/VES OTC", "NZD/RUB OTC", "NZD/UAH OTC", "NZD/BYN OTC", "NZD/KZT OTC", "NZD/UZS OTC",
+    "NZD/KGS OTC", "NZD/TJS OTC", "NZD/TMT OTC", "NZD/AZN OTC", "NZD/GEL OTC", "NZD/AMD OTC"
   ],
   cryptos: [
     "BTC/USD", "ETH/USD", "BNB/USD", "SOL/USD", "ADA/USD", "XRP/USD", "DOT/USD",
@@ -212,8 +247,9 @@ const Index = () => {
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   
-  // État pour la langue d'affiliation
-  const [affiliationLanguage, setAffiliationLanguage] = useState(detectBrowserLanguage());
+  // Gestion de la langue
+  const { selectedLanguage, changeLanguage } = useLanguage();
+  const translations = getTranslations(selectedLanguage);
 
   // Gestion du thème
   useEffect(() => {
@@ -779,7 +815,7 @@ const Index = () => {
 
   // Fonction pour obtenir le statut du bouton
   const getButtonStatus = () => {
-    if (!user) return { text: "Log In to Get Signals", icon: <LogIn className="h-4 w-4 mr-2" />, disabled: false };
+    if (!user) return { text: translations.logInToGetSignals || "Log In to Get Signals", icon: <LogIn className="h-4 w-4 mr-2" />, disabled: false };
     if (!isPremium) return { text: "Subscribe to Get Signals", icon: <Lock className="h-4 w-4 mr-2" />, disabled: false };
     if (signals.length > 0) return { text: "Signal Active", icon: <Clock className="h-4 w-4 mr-2" />, disabled: true };
     if (!isAssetOpen(asset, category)) return { text: "Market Closed", icon: <AlertTriangle className="h-4 w-4 mr-2" />, disabled: true };
@@ -843,6 +879,13 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Sélecteur de langue */}
+              <LanguageButton
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={changeLanguage}
+                className="w-16 h-8"
+              />
+              
               {/* Icône de thème */}
               <ThemeToggle />
 
@@ -934,6 +977,13 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
+                {/* Sélecteur de langue */}
+                <LanguageButton
+                  selectedLanguage={selectedLanguage}
+                  onLanguageChange={changeLanguage}
+                  className="w-12 h-8"
+                />
+                
                 {/* Icône de thème */}
                 <ThemeToggle />
 
@@ -1208,16 +1258,16 @@ const Index = () => {
 
       {/* Contenu principal */}
       <main className="container mx-auto px-4 py-8">
-        {/* Section Hero avec textes en anglais */}
+        {/* Section Hero avec traductions */}
         <div className="text-center mb-8 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 px-2">
-            AI-POWERED REAL-TIME TRADING SIGNALS
+            {translations.heroTitle}
           </h1>
           <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 md:mb-4 px-2">
-            AND OUR PROFESSIONAL TRADERS
+            {translations.heroSubtitle}
           </h2>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
-            Harness the power of our advanced AI to get institutional-grade BUY/SELL signals for Forex, Indices, and Crypto markets.
+            {translations.heroDescription}
           </p>
         </div>
 
@@ -1227,7 +1277,7 @@ const Index = () => {
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <span className="text-xl sm:text-2xl font-bold">{activeUsers.toLocaleString()}</span>
-            <span className="text-xs sm:text-base">active traders online</span>
+            <span className="text-xs sm:text-base">{translations.activeTraders}</span>
           </div>
         </div>
 
@@ -1239,15 +1289,15 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Lock className="h-5 w-5" />
-                  <span>Trading Bot Settings</span>
+                  <span>{translations.tradingBotSettings || "Trading Bot Settings"}</span>
                 </CardTitle>
                 <CardDescription>
-                  Configure your trading settings
+                  {translations.configureTradingSettings || "Configure your trading settings"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                   <div>
-                  <Label>Category</Label>
+                  <Label>{translations.category || "Category"}</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1269,13 +1319,13 @@ const Index = () => {
                       <div className={`w-2 h-2 rounded-full ${
                         isAssetOpen(asset, category) ? 'bg-green-500' : 'bg-red-500'
                       }`}></div>
-                      <span>{isAssetOpen(asset, category) ? 'Open' : 'Closed'}</span>
+                      <span>{isAssetOpen(asset, category) ? (translations.open || "Open") : (translations.closed || "Closed")}</span>
                     </div>
                   </div>
                   </div>
 
                   <div>
-                  <Label>Asset</Label>
+                  <Label>{translations.asset || "Asset"}</Label>
                     <Select value={asset} onValueChange={setAsset}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1291,7 +1341,7 @@ const Index = () => {
                   </div>
 
                   <div>
-                  <Label>Timeframe</Label>
+                  <Label>{translations.timeframe || "Timeframe"}</Label>
                   <Select value={timeframe} onValueChange={setTimeframe}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1341,7 +1391,7 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <SignalHigh className="h-5 w-5" />
-                  <span>ACTIVE SIGNALS</span>
+                  <span>{translations.activeSignals || "ACTIVE SIGNALS"}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1351,7 +1401,7 @@ const Index = () => {
                     <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                       <SignalHigh className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">No active signals.</h3>
+                    <h3 className="text-lg font-semibold mb-2">{translations.noActiveSignals || "No active signals."}</h3>
                     <p className="text-muted-foreground">
                       First select settings, then click on{" "}
                       <span 
@@ -1494,70 +1544,64 @@ const Index = () => {
               </div>
       </main>
 
-      {/* Cartes promotionnelles - au-dessus du footer */}
+      {/* Section d'affiliation centrée */}
       <section className="bg-background border-t border-border py-6 md:py-8">
         <div className="container mx-auto px-4">
-          {/* Sélecteur de langue pour l'affiliation */}
-          <div className="mb-6 text-center">
-            <div className="inline-flex items-center space-x-2 bg-card border border-border rounded-lg p-2">
-              <span className="text-sm text-muted-foreground">Langue:</span>
-              <Select value={affiliationLanguage} onValueChange={setAffiliationLanguage}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">🇺🇸 English</SelectItem>
-                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                  <SelectItem value="es">🇪🇸 Español</SelectItem>
-                  <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
-                  <SelectItem value="it">🇮🇹 Italiano</SelectItem>
-                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
-                  <SelectItem value="ru">🇷🇺 Русский</SelectItem>
-                  <SelectItem value="zh">🇨🇳 中文</SelectItem>
-                  <SelectItem value="ja">🇯🇵 日本語</SelectItem>
-                  <SelectItem value="ko">🇰🇷 한국어</SelectItem>
-                  <SelectItem value="ar">🇸🇦 العربية</SelectItem>
-                  <SelectItem value="hi">🇮🇳 हिन्दी</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        {/* Carte 1: Celebrating 1,000,000 Traders! */}
-            <Card className="bg-gradient-to-br from-blue-600 to-purple-700 border-0">
-              <CardContent className="p-6">
+          <div className="flex justify-center">
+            {/* Programme d'affiliation - Affiliate Trading Signals */}
+            <Card className="bg-gradient-to-br from-blue-500 to-purple-600 border-0 max-w-2xl w-full">
+              <CardContent className="p-8">
                 <div className="text-center">
-                  <div className="flex items-center justify-center space-x-3 mb-4">
+                  {/* Section Celebrating 1,000,000 Traders! */}
+                  <div className="flex items-center justify-center space-x-3 mb-6">
                     <Users className="h-8 w-8 text-white" />
                     <div>
                       <h3 className="font-bold text-lg text-white">Celebrating 1,000,000 Traders!</h3>
                       <p className="text-blue-100 text-sm">Join our growing community</p>
-            </div>
-          </div>
-          </div>
-              </CardContent>
-            </Card>
-
-            {/* Carte 2: Partner with Us & Earn! */}
-            <Card className="bg-gradient-to-br from-green-600 to-emerald-700 border-0">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="flex items-center justify-center space-x-3 mb-4">
-                    <Award className="h-8 w-8 text-white" />
-                    <div>
-                      <h3 className="font-bold text-lg text-white">{getAffiliationTranslation(affiliationLanguage).title}</h3>
-                      <p className="text-green-100 text-sm">{getAffiliationTranslation(affiliationLanguage).description}</p>
                     </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-white text-base font-medium">{getAffiliationTranslation(affiliationLanguage).email}</div>
+                  
+                  {/* Section Programme d'affiliation */}
+                  <div className="flex items-center justify-center space-x-3 mb-6">
+                    <Award className="h-8 w-8 text-white" />
+                    <div>
+                      <h3 className="font-bold text-lg text-white">{translations.affiliateTitle}</h3>
+                      <p className="text-blue-100 text-sm">{translations.affiliateDescription}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Bouton principal avec URL */}
+                  <div className="mb-4">
+                    <Button 
+                      className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-6 py-3 rounded-lg flex items-center space-x-2 mx-auto"
+                      onClick={() => window.open('https://affiliate-trading-signals.com/', '_blank')}
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>{translations.affiliateButton}</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Lien alternatif */}
+                  <div className="mb-4">
+                    <button 
+                      className="text-white underline text-sm hover:text-blue-200"
+                      onClick={() => window.open('https://affiliate-trading-signals.com/', '_blank')}
+                    >
+                      {translations.affiliateLink}
+                    </button>
+                  </div>
+                  
+                  {/* Statistiques */}
+                  <div className="bg-purple-500/30 rounded-lg p-4">
+                    <div className="text-white text-2xl font-bold">$1.7000K+</div>
+                    <div className="text-purple-100 text-sm">{translations.affiliateStats}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-t border-purple-800 mt-8 md:mt-16">
