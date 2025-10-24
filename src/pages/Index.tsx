@@ -990,13 +990,6 @@ const Index = () => {
                 {/* Menu utilisateur ou bouton de connexion */}
                 {user ? (
                   <div className="flex items-center space-x-2">
-                    {/* Badge couronne pour les utilisateurs premium */}
-                    {isPremium && (
-                      <Badge variant="secondary" className="bg-green-500 text-white border-green-500">
-                        <Crown className="h-3 w-3 mr-1" />
-                        Premium
-                      </Badge>
-                    )}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="p-2">
@@ -1284,6 +1277,16 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Colonne de gauche - Paramètres */}
           <div className="space-y-6">
+            {/* Badge Premium */}
+            {user && isPremium && (
+              <div className="flex justify-center">
+                <Badge variant="secondary" className="bg-green-500 text-white border-green-500 px-4 py-2 text-sm">
+                  <Crown className="h-4 w-4 mr-2" />
+                  Premium
+                </Badge>
+              </div>
+            )}
+            
             {/* Trading Bot Settings */}
             <Card>
               <CardHeader>
