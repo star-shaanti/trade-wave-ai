@@ -22,6 +22,7 @@ import { LanguageSelectorSimple } from "../components/LanguageSelectorSimple";
 import { LanguageSelectorFixed } from "../components/LanguageSelectorFixed";
 import { LanguageButton } from "../components/LanguageButton";
 import { useLanguage } from "../hooks/useLanguage";
+import { HeaderAd, FooterAd, SidebarAd } from "../components/AdSense";
 
 // Constantes pour l'API Gemini
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
@@ -1051,6 +1052,11 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Publicité en-tête */}
+      <div className="w-full bg-gray-50 dark:bg-gray-800 py-2">
+        <HeaderAd />
+      </div>
+
       {/* Modal d'authentification */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
         <DialogContent className="sm:max-w-md">
@@ -1525,9 +1531,20 @@ const Index = () => {
               </div>
       </main>
 
-      {/* Section d'affiliation centrée */}
-      <section className="bg-background border-t border-border py-6 md:py-8">
-        <div className="container mx-auto px-4">
+      {/* Layout avec sidebars pour les publicités */}
+      <div className="flex flex-col lg:flex-row">
+        {/* Sidebar gauche (desktop seulement) */}
+        <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
+          <div className="sticky top-4 p-4">
+            <SidebarAd />
+          </div>
+        </div>
+
+        {/* Contenu principal */}
+        <div className="flex-1 min-w-0">
+          {/* Section d'affiliation centrée */}
+          <section className="bg-background border-t border-border py-6 md:py-8">
+            <div className="container mx-auto px-4">
           <div className="flex justify-center">
             {/* Programme d'affiliation - Affiliate Trading Signals */}
             <Card className="bg-gradient-to-br from-blue-500 to-purple-600 border-0 max-w-2xl w-full">
@@ -1583,6 +1600,20 @@ const Index = () => {
           </div>
         </div>
       </section>
+        </div>
+
+        {/* Sidebar droite (desktop seulement) */}
+        <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
+          <div className="sticky top-4 p-4">
+            <SidebarAd />
+          </div>
+        </div>
+      </div>
+
+      {/* Publicité pied de page */}
+      <div className="w-full bg-gray-50 dark:bg-gray-800 py-4 mt-8">
+        <FooterAd />
+      </div>
 
       {/* Footer */}
       <footer className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-t border-purple-800 mt-8 md:mt-16">
