@@ -94,7 +94,8 @@ const PricingPlans = () => {
         body: {
           priceId: plan.priceId,
           amount: plan.amount,
-          planName: plan.name
+          planName: plan.name,
+          email: user.email
         },
         headers: {
           Authorization: `Bearer ${session.data.session?.access_token}`,
