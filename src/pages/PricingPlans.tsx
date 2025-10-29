@@ -20,9 +20,9 @@ const PricingPlans = () => {
   const plans = [
     {
       name: "24-Hour Pass",
-      price: "€7",
-      priceId: "price_1RrhLMEHHHdPbMazyyK4L0Yi",
-      amount: 700,
+      price: "$9",
+      priceId: "price_1ReZ3qEHHHdPbMaz8UPrXcAk",
+      amount: 900,
       features: [
         "Full access to signals",
         "All asset classes", 
@@ -32,9 +32,9 @@ const PricingPlans = () => {
     },
     {
       name: "48-Hour Pass", 
-      price: "€12",
-      priceId: "price_1RrhKFEHHHdPbMazw8GHJobk",
-      amount: 1200,
+      price: "$14",
+      priceId: "price_1ReZ2nEHHHdPbMazWCU2qQgx",
+      amount: 1400,
       features: [
         "Full access to signals",
         "All asset classes",
@@ -44,9 +44,9 @@ const PricingPlans = () => {
     },
     {
       name: "Weekly",
-      price: "€30", 
-      priceId: "price_1RrhIxEHHHdPbMazBeWWXRur",
-      amount: 3000,
+      price: "$35", 
+      priceId: "price_1ReZ4TEHHHdPbMazNiX4iOFk",
+      amount: 3500,
       features: [
         "Full access to signals",
         "All asset classes",
@@ -56,9 +56,9 @@ const PricingPlans = () => {
     },
     {
       name: "Monthly",
-      price: "€85",
-      priceId: "price_1RrhH9EHHHdPbMazFfMVdz8E",
-      amount: 8500,
+      price: "$99.00",
+      priceId: "price_1ReZ54EHHHdPbMazyJYlIbzx",
+      amount: 9900,
       features: [
         "Full access to signals",
         "All asset classes",
