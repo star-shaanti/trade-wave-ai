@@ -1052,10 +1052,7 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Publicité en-tête */}
-      <div className="w-full bg-gray-50 dark:bg-gray-800 py-2">
-        <HeaderAd />
-      </div>
+      {/* Publicité en-tête désactivée */}
 
       {/* Modal d'authentification */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
