@@ -89,6 +89,10 @@ const PricingPlans = () => {
     
     try {
       const session = await supabase.auth.getSession();
+      
+      if (!session.data.session?.access_token) {
+        throw new Error("Session expired. Please sign in again.");
+      }
 
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -98,21 +102,39 @@ const PricingPlans = () => {
           email: user.email
         },
         headers: {
-          Authorization: `Bearer ${session.data.session?.access_token}`,
+          Authorization: `Bearer ${session.data.session.access_token}`,
         },
       });
 
+      // Vérifier les erreurs du SDK Supabase
       if (error) {
-        throw new Error(`Supabase error: ${error.message}`);
+        console.error('Supabase function error:', error);
+        throw new Error(`Supabase error: ${error.message || 'Edge Function returned a non-2xx status code'}`);
+      }
+
+      // Vérifier si data existe et contient une erreur (cas où Edge Function retourne 500 mais pas d'erreur SDK)
+      if (!data) {
+        throw new Error("No response from payment service. Please try again.");
+      }
+
+      if (data.error) {
+        console.error('Edge Function error response:', data.error);
+        throw new Error(data.error || "Payment service error. Please try again or contact support.");
       }
 
       if (data?.url) {
+        // Sauvegarder les infos dans sessionStorage pour le tracking
+        sessionStorage.setItem('subscriptionPlan', plan.name);
+        sessionStorage.setItem('subscriptionAmount', (plan.amount / 100).toString());
+        sessionStorage.setItem('userEmail', user.email);
+        sessionStorage.setItem('userName', user.user_metadata?.full_name || user.email);
         window.location.href = data.url;
       } else {
-        throw new Error("No redirect URL received");
+        throw new Error("No redirect URL received from payment service.");
       }
     } catch (error: any) {
-      const errorMessage = error.message || "Unknown error during payment session creation";
+      console.error('Subscription error:', error);
+      const errorMessage = error.message || "Unknown error during payment session creation. Please try again or contact support.";
       setError(errorMessage);
       toast({
         title: "Error",
