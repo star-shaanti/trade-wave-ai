@@ -1,3 +1,14 @@
+# Code complet pour Supabase Dashboard - create-payment
+
+## Instructions :
+1. Ouvrez Supabase Dashboard > Edge Functions > create-payment
+2. Sélectionnez TOUT le code existant et supprimez-le
+3. Copiez le code ci-dessous et collez-le dans l'éditeur
+4. Cliquez sur "Deploy" ou "Save"
+
+---
+
+```typescript
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -174,3 +185,31 @@ serve(async (req) => {
     );
   }
 });
+```
+
+---
+
+## Améliorations apportées :
+
+✅ **Validation des variables d'environnement** - Vérifie que toutes les clés nécessaires sont présentes
+
+✅ **Gestion d'erreurs robuste** - Messages d'erreur explicites pour chaque cas
+
+✅ **Fallback pour l'authentification** - Utilise l'email du body si le token échoue
+
+✅ **Gestion de la devise** - Détecte automatiquement la devise (USD par défaut, ou EUR si déjà utilisé)
+
+✅ **Meilleur logging** - Console.error et console.warn pour faciliter le débogage
+
+✅ **Gestion des erreurs Stripe** - Messages spécifiques pour les erreurs Stripe courantes
+
+✅ **Validation des données** - Vérifie que priceId et email sont présents et valides
+
+---
+
+## Vérifications après déploiement :
+
+1. Vérifiez que `STRIPE_SECRET_KEY` est défini dans Supabase Dashboard > Project Settings > Edge Functions > Secrets
+2. Testez un abonnement sur votre site
+3. Consultez les logs dans Supabase Dashboard > Edge Functions > create-payment > Logs
+
