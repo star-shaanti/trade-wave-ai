@@ -22,7 +22,7 @@ import { LanguageSelectorSimple } from "../components/LanguageSelectorSimple";
 import { LanguageSelectorFixed } from "../components/LanguageSelectorFixed";
 import { LanguageButton } from "../components/LanguageButton";
 import { useLanguage } from "../hooks/useLanguage";
-import { HeaderAd, FooterAd, SidebarAd } from "../components/AdSense";
+import { HeaderAd, FooterAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
 
 // Constantes pour l'API Gemini
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
@@ -1533,7 +1533,7 @@ const Index = () => {
         {/* Sidebar gauche (desktop seulement) */}
         <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
           <div className="sticky top-4 p-4">
-            <SidebarAd />
+            <SidebarAdLeft />
           </div>
         </div>
 
@@ -1602,7 +1602,7 @@ const Index = () => {
         {/* Sidebar droite (desktop seulement) */}
         <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
           <div className="sticky top-4 p-4">
-            <SidebarAd />
+            <SidebarAdRight />
           </div>
         </div>
       </div>

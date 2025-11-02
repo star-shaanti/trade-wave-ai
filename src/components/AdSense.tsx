@@ -68,16 +68,37 @@ export const FooterAd: React.FC = () => (
   </div>
 );
 
-export const SidebarAd: React.FC = () => (
-  <div className="w-full max-w-[300px] mx-auto my-4">
-    <AdSense
-      adSlot="1234567892"
-      adFormat="vertical"
-      className="w-full"
-      adStyle={{ display: 'block', width: '300px', height: '600px' }}
-    />
-  </div>
-);
+// Composants séparés pour gauche et droite
+export const SidebarAdLeft: React.FC = () => {
+  const adSlot = import.meta.env.VITE_ADSENSE_SLOT_LEFT || "1234567892";
+  return (
+    <div className="w-full max-w-[300px] mx-auto my-4">
+      <AdSense
+        adSlot={adSlot}
+        adFormat="vertical"
+        className="w-full"
+        adStyle={{ display: 'block', width: '300px', height: '600px' }}
+      />
+    </div>
+  );
+};
+
+export const SidebarAdRight: React.FC = () => {
+  const adSlot = import.meta.env.VITE_ADSENSE_SLOT_RIGHT || "1234567893";
+  return (
+    <div className="w-full max-w-[300px] mx-auto my-4">
+      <AdSense
+        adSlot={adSlot}
+        adFormat="vertical"
+        className="w-full"
+        adStyle={{ display: 'block', width: '300px', height: '600px' }}
+      />
+    </div>
+  );
+};
+
+// Compatibilité : garder SidebarAd pour l'ancien code (utilise le slot gauche par défaut)
+export const SidebarAd: React.FC = () => <SidebarAdLeft />;
 
 export const MobileAd: React.FC = () => (
   <div className="w-full max-w-4xl mx-auto my-4">
