@@ -205,16 +205,21 @@ const Index = () => {
   };
 
   const confirmSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
       console.error("Error signing out:", error);
-    } else {
-      setShowLogoutConfirmModal(false);
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account.",
-      });
     }
+
+    setShowLogoutConfirmModal(false);
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
+
+    // Optionnel: recharger pour repartir sur une session propre
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 150);
   };
 
   const handleCustomerService = () => {

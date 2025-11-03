@@ -135,10 +135,16 @@ export const useAuth = () => {
   }, [checkSubscriptionWithRetry]);
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
+    // Utilise la déconnexion locale pour éviter les erreurs 403 quand la session serveur est manquante
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
       console.error("Error signing out:", error);
     }
+
+    // Nettoyage côté client pour garantir l'état déconnecté
+    setSession(null);
+    setUser(null);
+    setSubscriptionData({ subscribed: false });
   };
 
   const signIn = async (email: string, password: string) => {
