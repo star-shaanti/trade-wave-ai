@@ -7,7 +7,7 @@ import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
-import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown } from "lucide-react";
+import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, Download } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "../components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
@@ -199,6 +199,7 @@ const tradingHours = {
 const Index = () => {
   const { user, isPremium, signOut, checkSubscription } = useAuth();
   const { toast } = useToast();
+  const DOWNLOAD_URL = (import.meta as any).env?.VITE_DOWNLOAD_URL;
 
   const handleSignOut = () => {
     setShowLogoutConfirmModal(true);
@@ -890,6 +891,26 @@ const Index = () => {
               {/* Icône de thème */}
               <ThemeToggle />
 
+              {/* Icône de téléchargement */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (DOWNLOAD_URL) {
+                    window.open(DOWNLOAD_URL, "_blank");
+                  } else {
+                    toast({
+                      title: "Téléchargement",
+                      description: "Lien de téléchargement indisponible",
+                    });
+                  }
+                }}
+                aria-label="Télécharger"
+                title="Télécharger"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+
               {/* Menu utilisateur ou bouton de connexion */}
               {user ? (
                 <div className="flex items-center space-x-2">
@@ -981,6 +1002,26 @@ const Index = () => {
                 
                 {/* Icône de thème */}
                 <ThemeToggle />
+
+                {/* Icône de téléchargement */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (DOWNLOAD_URL) {
+                      window.open(DOWNLOAD_URL, "_blank");
+                    } else {
+                      toast({
+                        title: "Téléchargement",
+                        description: "Lien de téléchargement indisponible",
+                      });
+                    }
+                  }}
+                  aria-label="Télécharger"
+                  title="Télécharger"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
 
                 {/* Menu utilisateur ou bouton de connexion */}
                 {user ? (
