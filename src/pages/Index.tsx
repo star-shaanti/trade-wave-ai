@@ -205,9 +205,10 @@ const Index = () => {
   };
 
   const confirmSignOut = async () => {
-    const { error } = await supabase.auth.signOut({ scope: 'local' });
-    if (error) {
-      console.error("Error signing out:", error);
+    try {
+      await signOut();
+    } catch (e) {
+      console.error("Error signing out:", e);
     }
 
     setShowLogoutConfirmModal(false);
