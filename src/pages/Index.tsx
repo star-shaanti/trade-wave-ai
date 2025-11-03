@@ -7,7 +7,7 @@ import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
-import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, MonitorDown } from "lucide-react";
+import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, Download } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "../components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
@@ -199,34 +199,8 @@ const tradingHours = {
 const Index = () => {
   const { user, isPremium, signOut, checkSubscription } = useAuth();
   const { toast } = useToast();
-
-  // Installation PWA (icône téléchargement)
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [canInstallApp, setCanInstallApp] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setCanInstallApp(true);
-    };
-    window.addEventListener('beforeinstallprompt', handler as any);
-    return () => window.removeEventListener('beforeinstallprompt', handler as any);
-  }, []);
-
-  const handleInstallApp = async () => {
-    if (deferredPrompt && typeof deferredPrompt.prompt === 'function') {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        toast({ title: "Installation", description: "Application installée." });
-      }
-      setDeferredPrompt(null);
-      setCanInstallApp(false);
-      return;
-    }
-    toast({ title: "Téléchargement", description: "Installation non disponible sur ce navigateur." });
-  };
+  // PWA install prompt
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   const handleSignOut = () => {
     setShowLogoutConfirmModal(true);
@@ -286,6 +260,29 @@ const Index = () => {
     setTheme(savedTheme);
     document.documentElement.className = savedTheme;
   }, []);
+
+  // Capturer l'événement d'installation PWA pour afficher l'icône de téléchargement
+  useEffect(() => {
+    const handleBeforeInstall = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallClick = async () => {
+    try {
+      if (installPrompt) {
+        installPrompt.prompt();
+        await installPrompt.userChoice;
+        setInstallPrompt(null);
+      } else {
+        // Fallback: ouvrir la page d'aide d'installation (si souhaité)
+        toast({ title: "Installation", description: "Ajoutez ce site à votre écran d'accueil depuis votre navigateur." });
+      }
+    } catch (_) {}
+  };
 
   // Afficher le modal de bienvenue pour les utilisateurs premium (uniquement à la connexion)
   useEffect(() => {
@@ -918,9 +915,15 @@ const Index = () => {
               {/* Icône de thème */}
               <ThemeToggle />
 
-              {/* Icône téléchargement / installation */}
-              <Button variant="outline" size="sm" onClick={handleInstallApp} className="p-2" aria-label="Installer l'application">
-                <MonitorDown className={`h-5 w-5 ${canInstallApp ? 'text-green-600' : ''}`} />
+              {/* Icône téléchargement/installation PWA */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2"
+                aria-label="Installer l'application"
+                onClick={handleInstallClick}
+              >
+                <Download className="h-5 w-5" />
               </Button>
 
               {/* Menu utilisateur ou bouton de connexion */}
@@ -1015,12 +1018,18 @@ const Index = () => {
                 {/* Icône de thème */}
                 <ThemeToggle />
 
-                {/* Icône téléchargement / installation (mobile) */}
-                <Button variant="outline" size="sm" onClick={handleInstallApp} className="p-2" aria-label="Installer l'application">
-                  <MonitorDown className={`h-5 w-5 ${canInstallApp ? 'text-green-600' : ''}`} />
+                {/* Icône téléchargement/installation PWA (mobile) */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2"
+                  aria-label="Installer l'application"
+                  onClick={handleInstallClick}
+                >
+                  <Download className="h-5 w-5" />
                 </Button>
 
-              {/* Menu utilisateur ou bouton de connexion */}
+                {/* Menu utilisateur ou bouton de connexion */}
                 {user ? (
                   <div className="flex items-center space-x-2">
                     <DropdownMenu>
