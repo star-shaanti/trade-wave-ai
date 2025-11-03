@@ -7,7 +7,7 @@ import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
-import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, Download } from "lucide-react";
+import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, MonitorDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "../components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
@@ -199,7 +199,34 @@ const tradingHours = {
 const Index = () => {
   const { user, isPremium, signOut, checkSubscription } = useAuth();
   const { toast } = useToast();
-  const DOWNLOAD_URL = (import.meta as any).env?.VITE_DOWNLOAD_URL;
+
+  // Installation PWA (icône téléchargement)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [canInstallApp, setCanInstallApp] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setCanInstallApp(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler as any);
+    return () => window.removeEventListener('beforeinstallprompt', handler as any);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt && typeof deferredPrompt.prompt === 'function') {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        toast({ title: "Installation", description: "Application installée." });
+      }
+      setDeferredPrompt(null);
+      setCanInstallApp(false);
+      return;
+    }
+    toast({ title: "Téléchargement", description: "Installation non disponible sur ce navigateur." });
+  };
 
   const handleSignOut = () => {
     setShowLogoutConfirmModal(true);
@@ -891,24 +918,9 @@ const Index = () => {
               {/* Icône de thème */}
               <ThemeToggle />
 
-              {/* Icône de téléchargement */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (DOWNLOAD_URL) {
-                    window.open(DOWNLOAD_URL, "_blank");
-                  } else {
-                    toast({
-                      title: "Téléchargement",
-                      description: "Lien de téléchargement indisponible",
-                    });
-                  }
-                }}
-                aria-label="Télécharger"
-                title="Télécharger"
-              >
-                <Download className="h-4 w-4" />
+              {/* Icône téléchargement / installation */}
+              <Button variant="outline" size="sm" onClick={handleInstallApp} className="p-2" aria-label="Installer l'application">
+                <MonitorDown className={`h-5 w-5 ${canInstallApp ? 'text-green-600' : ''}`} />
               </Button>
 
               {/* Menu utilisateur ou bouton de connexion */}
@@ -1003,27 +1015,12 @@ const Index = () => {
                 {/* Icône de thème */}
                 <ThemeToggle />
 
-                {/* Icône de téléchargement */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (DOWNLOAD_URL) {
-                      window.open(DOWNLOAD_URL, "_blank");
-                    } else {
-                      toast({
-                        title: "Téléchargement",
-                        description: "Lien de téléchargement indisponible",
-                      });
-                    }
-                  }}
-                  aria-label="Télécharger"
-                  title="Télécharger"
-                >
-                  <Download className="h-4 w-4" />
+                {/* Icône téléchargement / installation (mobile) */}
+                <Button variant="outline" size="sm" onClick={handleInstallApp} className="p-2" aria-label="Installer l'application">
+                  <MonitorDown className={`h-5 w-5 ${canInstallApp ? 'text-green-600' : ''}`} />
                 </Button>
 
-                {/* Menu utilisateur ou bouton de connexion */}
+              {/* Menu utilisateur ou bouton de connexion */}
                 {user ? (
                   <div className="flex items-center space-x-2">
                     <DropdownMenu>
