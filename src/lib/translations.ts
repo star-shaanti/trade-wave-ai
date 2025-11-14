@@ -19,6 +19,12 @@ export const supportedLanguages: Language[] = [
 // Traductions globales pour tout le site
 export const globalTranslations = {
   en: {
+    pricingTitle: "Choose your plan",
+    pricingSubtitle: "Unlock premium trading signals and improve your strategy.",
+    buyWithStripe: "Buy with Stripe",
+    buyWithLabel: "Or pay with crypto",
+    cryptoInstantTagline: "Instant crypto payment",
+    cryptoPayCta: "Pay",
     // Contenu principal
     heroTitle: "AI-POWERED REAL-TIME TRADING SIGNALS",
     heroSubtitle: "AND OUR PROFESSIONAL TRADERS",
@@ -75,6 +81,12 @@ export const globalTranslations = {
     copyright: "© 2025 Real-time Trading Signals. All rights reserved."
   },
   fr: {
+    pricingTitle: "Choisissez votre plan",
+    pricingSubtitle: "Débloquez des signaux premium et optimisez votre stratégie.",
+    buyWithStripe: "Acheter avec Stripe",
+    buyWithLabel: "Ou payez en crypto",
+    cryptoInstantTagline: "Paiement crypto instantané",
+    cryptoPayCta: "Payer",
     // Contenu principal
     heroTitle: "SIGNAUX DE TRADING EN TEMPS RÉEL ALIMENTÉS PAR IA",
     heroSubtitle: "ET NOS TRADERS PROFESSIONNELS",
@@ -131,6 +143,12 @@ export const globalTranslations = {
     copyright: "© 2025 Signaux de Trading en Temps Réel. Tous droits réservés."
   },
   es: {
+    pricingTitle: "Elige tu plan",
+    pricingSubtitle: "Desbloquea señales premium y mejora tu estrategia.",
+    buyWithStripe: "Comprar con Stripe",
+    buyWithLabel: "O paga con crypto",
+    cryptoInstantTagline: "Pago cripto instantáneo",
+    cryptoPayCta: "Pagar",
     // Contenu principal
     heroTitle: "SEÑALES DE TRADING EN TIEMPO REAL IMPULSADAS POR IA",
     heroSubtitle: "Y NUESTROS TRADERS PROFESIONALES",
@@ -187,6 +205,12 @@ export const globalTranslations = {
     copyright: "© 2025 Señales de Trading en Tiempo Real. Todos los derechos reservados."
   },
   it: {
+    pricingTitle: "Scegli il tuo piano",
+    pricingSubtitle: "Sblocca segnali premium e migliora la tua strategia.",
+    buyWithStripe: "Acquista con Stripe",
+    buyWithLabel: "Oppure paga in cripto",
+    cryptoInstantTagline: "Pagamento cripto istantaneo",
+    cryptoPayCta: "Paga",
     // Contenu principal
     heroTitle: "SEGNALI DI TRADING IN TEMPO REALE ALIMENTATI DA IA",
     heroSubtitle: "E I NOSTRI TRADER PROFESSIONISTI",
@@ -243,6 +267,12 @@ export const globalTranslations = {
     copyright: "© 2025 Segnali di Trading in Tempo Reale. Tutti i diritti riservati."
   },
   pt: {
+    pricingTitle: "Escolha seu plano",
+    pricingSubtitle: "Desbloqueie sinais premium e melhore sua estratégia.",
+    buyWithStripe: "Comprar com Stripe",
+    buyWithLabel: "Ou pague com cripto",
+    cryptoInstantTagline: "Pagamento cripto instantâneo",
+    cryptoPayCta: "Pagar",
     // Contenu principal
     heroTitle: "SINAIS DE TRADING EM TEMPO REAL ALIMENTADOS POR IA",
     heroSubtitle: "E NOSSOS TRADERS PROFISSIONAIS",
@@ -281,6 +311,12 @@ export const globalTranslations = {
     startSignals: "Iniciar Sinais"
   },
   ru: {
+    pricingTitle: "Выберите тариф",
+    pricingSubtitle: "Получайте премиальные сигналы и улучшайте стратегию.",
+    buyWithStripe: "Оплатить через Stripe",
+    buyWithLabel: "Или оплатите криптовалютой",
+    cryptoInstantTagline: "Мгновенный крипто-платеж",
+    cryptoPayCta: "Оплатить",
     // Contenu principal
     heroTitle: "СИГНАЛЫ ТОРГОВЛИ В РЕАЛЬНОМ ВРЕМЕНИ НА ОСНОВЕ ИИ",
     heroSubtitle: "И НАШИ ПРОФЕССИОНАЛЬНЫЕ ТРЕЙДЕРЫ",
@@ -319,6 +355,12 @@ export const globalTranslations = {
     startSignals: "Начать Сигналы"
   },
   ar: {
+    pricingTitle: "اختر خطتك",
+    pricingSubtitle: "افتح إشارات مميزة وحسّن استراتيجيتك.",
+    buyWithStripe: "اشترِ عبر Stripe",
+    buyWithLabel: "أو ادفع بالعملات المشفرة",
+    cryptoInstantTagline: "دفع فوري بالعملات المشفرة",
+    cryptoPayCta: "ادفع",
     // Contenu principal
     heroTitle: "إشارات التداول في الوقت الفعلي مدعومة بالذكاء الاصطناعي",
     heroSubtitle: "وتجارنا المحترفون",
@@ -357,6 +399,12 @@ export const globalTranslations = {
     startSignals: "بدء الإشارات"
   },
   hi: {
+    pricingTitle: "अपनी योजना चुनें",
+    pricingSubtitle: "प्रीमियम सिग्नल अनलॉक करें और अपनी रणनीति सुधारें।",
+    buyWithStripe: "Stripe से खरीदें",
+    buyWithLabel: "या क्रिप्टो से भुगतान करें",
+    cryptoInstantTagline: "तुरंत क्रिप्टो भुगतान",
+    cryptoPayCta: "भुगतान करें",
     // Contenu principal
     heroTitle: "AI-संचालित रियल-टाइम ट्रेडिंग सिग्नल",
     heroSubtitle: "और हमारे पेशेवर ट्रेडर",
