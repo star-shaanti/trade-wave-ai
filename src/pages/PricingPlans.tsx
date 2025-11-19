@@ -20,7 +20,7 @@ type Plan = {
   popular: boolean;
 };
 
-const cryptoOptions = [
+const baseCryptoOptions = [
   {
     label: "USDT (Solana)",
     value: "usdtsol",
@@ -43,6 +43,17 @@ const cryptoOptions = [
     accentClass: "bg-black/20 text-black",
   },
 ];
+
+const btcOption = {
+  label: "BTC",
+  value: "btc",
+  bgClass: "bg-[#F7931A]",
+  hoverClass: "hover:bg-[#d27b16]",
+  accentClass: "bg-white/30 text-[#5f3a0c]",
+};
+
+const getCryptoOptionsForPlan = (planName: string) =>
+  planName === "24-Hour Pass" ? baseCryptoOptions : [...baseCryptoOptions, btcOption];
 
 const CryptoIcon = ({ label, accentClass }: { label: string; accentClass: string }) => (
   <span
@@ -373,7 +384,7 @@ const PricingPlans = () => {
               </p>
 
               <div className="mt-3 grid grid-cols-1 gap-2">
-                {cryptoOptions.map((option) => (
+                {getCryptoOptionsForPlan(plan.name).map((option) => (
                   <Button
                     key={option.value}
                     variant="secondary"
