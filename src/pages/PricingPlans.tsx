@@ -20,31 +20,17 @@ type Plan = {
   popular: boolean;
 };
 
-const baseCryptoOptions = [
-  {
-    label: "USDT (Solana)",
-    value: "usdtsol",
-    bgClass: "bg-[#26A17B]",
-    hoverClass: "hover:bg-[#1f8a69]",
-    accentClass: "bg-white/30 text-[#0f4a37]",
-  },
-  {
-    label: "ETH",
-    value: "eth",
-    bgClass: "bg-gradient-to-r from-[#3C3C3D] to-[#5C5C5C]",
-    hoverClass: "hover:from-[#2b2b2b] hover:to-[#4a4a4a]",
-    accentClass: "bg-white/30 text-white",
-  },
-  {
-    label: "SOL",
-    value: "sol",
-    bgClass: "bg-gradient-to-r from-[#9945FF] via-[#14F195] to-[#00FFA3]",
-    hoverClass: "hover:brightness-95",
-    accentClass: "bg-black/20 text-black",
-  },
-];
+type cryptoOption = {
+  label: string;
+  value: string;
+  bgClass: string;
+  hoverClass: string;
+  accentClass: string;
+};
 
-const btcOption = {
+const baseCryptoOptions: cryptoOption[] = [];
+
+const btcOption: cryptoOption = {
   label: "BTC",
   value: "btc",
   bgClass: "bg-[#F7931A]",
@@ -379,40 +365,48 @@ const PricingPlans = () => {
                  !isAuthenticated ? 'Sign in first' : t.buyWithStripe}
               </Button>
 
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t.buyWithLabel}
-              </p>
+              {(() => {
+                const planCryptoOptions = getCryptoOptionsForPlan(plan.name);
+                if (!planCryptoOptions.length) return null;
+                return (
+                  <>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t.buyWithLabel}
+                    </p>
 
-              <div className="mt-3 grid grid-cols-1 gap-2">
-                {getCryptoOptionsForPlan(plan.name).map((option) => (
-                  <Button
-                    key={option.value}
-                    variant="secondary"
-                    onClick={() => handleCryptoPayment(plan, option.value)}
-                    disabled={loadingPlan === getCryptoLoadingId(plan, option.value)}
-                    className={`w-full justify-start gap-3 px-4 text-white ${option.bgClass} ${option.hoverClass} ${
-                      !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {loadingPlan === getCryptoLoadingId(plan, option.value)
-                      ? 'Loading...'
-                      : !isAuthenticated ? 'Sign in first' : (
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-3">
-                            <CryptoIcon label={option.label} accentClass={option.accentClass} />
-                            <div className="text-left">
-                              <div className="text-sm font-semibold leading-tight">{option.label}</div>
-                              <div className="text-xs text-white/80">{t.cryptoInstantTagline}</div>
-                            </div>
-                          </div>
-                          <span className="text-xs font-semibold uppercase tracking-wide">
-                            {t.cryptoPayCta}
-                          </span>
-                        </div>
-                      )}
-                  </Button>
-                ))}
-              </div>
+                    <div className="mt-3 grid grid-cols-1 gap-2">
+                      {planCryptoOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant="secondary"
+                          onClick={() => handleCryptoPayment(plan, option.value)}
+                          disabled={loadingPlan === getCryptoLoadingId(plan, option.value)}
+                          className={`w-full justify-start gap-3 px-4 text-white ${option.bgClass} ${option.hoverClass} ${
+                            !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          {loadingPlan === getCryptoLoadingId(plan, option.value)
+                            ? 'Loading...'
+                            : !isAuthenticated ? 'Sign in first' : (
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-3">
+                                  <CryptoIcon label={option.label} accentClass={option.accentClass} />
+                                  <div className="text-left">
+                                    <div className="text-sm font-semibold leading-tight">{option.label}</div>
+                                    <div className="text-xs text-white/80">{t.cryptoInstantTagline}</div>
+                                  </div>
+                                </div>
+                                <span className="text-xs font-semibold uppercase tracking-wide">
+                                  {t.cryptoPayCta}
+                                </span>
+                              </div>
+                            )}
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           ))}
         </div>
