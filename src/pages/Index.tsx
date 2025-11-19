@@ -825,11 +825,11 @@ const Index = () => {
   // Fonction pour obtenir le statut du bouton
   const getButtonStatus = () => {
     if (!user) return { text: translations.logInToGetSignals || "Log In to Get Signals", icon: <LogIn className="h-4 w-4 mr-2" />, disabled: false };
-    if (!isPremium) return { text: "Subscribe to Get Signals", icon: <Lock className="h-4 w-4 mr-2" />, disabled: false };
+    if (!isPremium) return { text: translations.startSignals || "Start Signals", icon: <SignalHigh className="h-4 w-4 mr-2" />, disabled: false };
     if (signals.length > 0) return { text: "Signal Active", icon: <Clock className="h-4 w-4 mr-2" />, disabled: true };
     if (!isAssetOpen(asset, category)) return { text: "Market Closed", icon: <AlertTriangle className="h-4 w-4 mr-2" />, disabled: true };
     if (isWaitingForSignal) return { text: "Connecting to Satellite...", icon: <Satellite className="h-4 w-4 mr-2 animate-spin text-green-500" />, disabled: true };
-    return { text: "Start Signals", icon: <SignalHigh className="h-4 w-4 mr-2" />, disabled: false };
+    return { text: translations.startSignals || "Start Signals", icon: <SignalHigh className="h-4 w-4 mr-2" />, disabled: false };
   };
 
   useEffect(() => {
@@ -1363,7 +1363,11 @@ const Index = () => {
                   onClick={handleStartSignals}
                   disabled={isGeneratingSignals || isWaitingForSignal || getButtonStatus().disabled}
                   className={`w-full ${
-                    user && isPremium && !getButtonStatus().disabled && !isWaitingForSignal ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
+                    user && isPremium && !getButtonStatus().disabled && !isWaitingForSignal 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                      : user && !isPremium 
+                        ? 'bg-white hover:bg-gray-100 text-gray-900 border border-gray-300' 
+                        : ''
                   }`}
                 >
                   {isGeneratingSignals ? (
