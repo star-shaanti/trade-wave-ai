@@ -22,7 +22,7 @@ import { LanguageSelectorSimple } from "../components/LanguageSelectorSimple";
 import { LanguageSelectorFixed } from "../components/LanguageSelectorFixed";
 import { LanguageButton } from "../components/LanguageButton";
 import { useLanguage } from "../hooks/useLanguage";
-import { HeaderAd, FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
+import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
 
 // Constantes pour l'API Gemini
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
@@ -1061,11 +1061,6 @@ const Index = () => {
           </div>
         </div>
       </header>
-
-      {/* Publicité en-tête */}
-      <div className="w-full bg-gray-50 dark:bg-gray-800 py-2">
-        <HeaderAd />
-      </div>
 
       {/* Modal d'authentification */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
