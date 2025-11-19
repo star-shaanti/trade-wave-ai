@@ -94,9 +94,22 @@ serve(async (req) => {
 
     const invoice = await response.json();
 
+    // Ajouter l'email comme paramètre dans l'URL de l'invoice pour pré-remplir le champ
+    let invoiceUrl = invoice.invoice_url;
+    if (customerEmail && invoiceUrl) {
+      try {
+        const url = new URL(invoiceUrl);
+        url.searchParams.set("email", customerEmail);
+        invoiceUrl = url.toString();
+      } catch (e) {
+        // Si l'URL n'est pas valide, utiliser l'URL originale
+        console.warn("Could not modify invoice URL:", e);
+      }
+    }
+
     return new Response(
       JSON.stringify({
-        invoice_url: invoice.invoice_url,
+        invoice_url: invoiceUrl,
         invoice_id: invoice.id || invoice.invoice_id,
       }),
       {
