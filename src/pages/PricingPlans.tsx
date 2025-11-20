@@ -10,6 +10,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/hooks/useLanguage";
 import { getTranslations } from "@/lib/translations";
 
+type CryptoPricing = Record<
+  string,
+  {
+    fiatAmount: number;
+    displayPrice?: string;
+  }
+>;
+
 type Plan = {
   name: string;
   price: string;
@@ -18,6 +26,7 @@ type Plan = {
   fiatAmount: number;
   features: string[];
   popular: boolean;
+  cryptoPricing?: CryptoPricing;
 };
 
 type cryptoOption = {
@@ -28,18 +37,24 @@ type cryptoOption = {
   accentClass: string;
 };
 
-const baseCryptoOptions: cryptoOption[] = [];
-
-const btcOption: cryptoOption = {
-  label: "BTC",
-  value: "btc",
-  bgClass: "bg-[#F7931A]",
-  hoverClass: "hover:bg-[#d27b16]",
-  accentClass: "bg-white/30 text-[#5f3a0c]",
+const ethOption: cryptoOption = {
+  label: "ETH",
+  value: "eth",
+  bgClass: "bg-[#627EEA]",
+  hoverClass: "hover:bg-[#4b64b8]",
+  accentClass: "bg-white/30 text-[#2a3469]",
 };
 
-const getCryptoOptionsForPlan = (planName: string) =>
-  planName === "24-Hour Pass" ? baseCryptoOptions : [...baseCryptoOptions, btcOption];
+const baseCryptoOptions: cryptoOption[] = [ethOption];
+
+const getCryptoOptionsForPlan = () => baseCryptoOptions;
+
+const getCryptoFiatAmountForPlan = (plan: Plan, payCurrency?: string) => {
+  if (payCurrency && plan.cryptoPricing?.[payCurrency]?.fiatAmount) {
+    return plan.cryptoPricing[payCurrency].fiatAmount;
+  }
+  return plan.fiatAmount;
+};
 
 const CryptoIcon = ({ label, accentClass }: { label: string; accentClass: string }) => (
   <span
@@ -63,7 +78,7 @@ const PricingPlans = () => {
   const plans: Plan[] = [
     {
       name: "24-Hour Pass",
-      price: "$9",
+      price: "$9 (Stripe) / $11 (ETH)",
       priceId: "price_1ReZ3qEHHHdPbMaz8UPrXcAk",
       amount: 900,
       fiatAmount: 9,
@@ -72,11 +87,17 @@ const PricingPlans = () => {
         "All asset classes", 
         "AI-powered analysis"
       ],
-      popular: false
+      popular: false,
+      cryptoPricing: {
+        eth: {
+          fiatAmount: 11,
+          displayPrice: "$11 via ETH"
+        }
+      }
     },
     {
       name: "48-Hour Pass", 
-      price: "$14",
+      price: "$14 (Stripe) / $16 (ETH)",
       priceId: "price_1ReZ2nEHHHdPbMazWCU2qQgx",
       amount: 1400,
       fiatAmount: 14,
@@ -85,7 +106,13 @@ const PricingPlans = () => {
         "All asset classes",
         "AI-powered analysis"
       ],
-      popular: false
+      popular: false,
+      cryptoPricing: {
+        eth: {
+          fiatAmount: 16,
+          displayPrice: "$16 via ETH"
+        }
+      }
     },
     {
       name: "Weekly",
@@ -223,12 +250,13 @@ const PricingPlans = () => {
     setLoadingPlan(cryptoLoadingId);
 
     try {
+      const fiatAmountForCrypto = getCryptoFiatAmountForPlan(plan, payCurrency);
       const session = await supabase.auth.getSession();
 
       const { data, error } = await supabase.functions.invoke("create-nowpayments-invoice", {
         body: {
           planName: plan.name,
-          fiatAmount: plan.fiatAmount,
+          fiatAmount: fiatAmountForCrypto,
           origin: window.location.origin,
           customerEmail: user.email,
           payCurrency,
@@ -247,6 +275,22 @@ const PricingPlans = () => {
       }
 
       if (data?.invoice_url) {
+        // Stocker l'invoice_id pour vérification ultérieure si nécessaire (dans sessionStorage et localStorage)
+        if (data.invoice_id) {
+          sessionStorage.setItem('nowpayments_invoice_id', data.invoice_id);
+          localStorage.setItem('nowpayments_invoice_id', data.invoice_id);
+        }
+        // Extraire aussi l'invoice_id depuis l'URL si disponible
+        try {
+          const invoiceUrl = new URL(data.invoice_url);
+          const iid = invoiceUrl.searchParams.get('iid');
+          if (iid) {
+            sessionStorage.setItem('nowpayments_invoice_id', iid);
+            localStorage.setItem('nowpayments_invoice_id', iid);
+          }
+        } catch (e) {
+          // Ignorer les erreurs d'URL
+        }
         window.location.href = data.invoice_url;
       } else {
         throw new Error("No invoice URL received");
@@ -366,7 +410,7 @@ const PricingPlans = () => {
               </Button>
 
               {(() => {
-                const planCryptoOptions = getCryptoOptionsForPlan(plan.name);
+                const planCryptoOptions = getCryptoOptionsForPlan();
                 if (!planCryptoOptions.length) return null;
                 return (
                   <>
@@ -393,7 +437,12 @@ const PricingPlans = () => {
                                   <CryptoIcon label={option.label} accentClass={option.accentClass} />
                                   <div className="text-left">
                                     <div className="text-sm font-semibold leading-tight">{option.label}</div>
-                                    <div className="text-xs text-white/80">{t.cryptoInstantTagline}</div>
+                                    <div className="text-xs text-white/80">
+                                      {plan.cryptoPricing?.[option.value]?.displayPrice ??
+                                        `$${getCryptoFiatAmountForPlan(plan, option.value)} via ${option.label}`}
+                                      {" · "}
+                                      {t.cryptoInstantTagline}
+                                    </div>
                                   </div>
                                 </div>
                                 <span className="text-xs font-semibold uppercase tracking-wide">

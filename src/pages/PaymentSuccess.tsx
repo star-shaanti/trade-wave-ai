@@ -16,6 +16,20 @@ const PaymentSuccess = () => {
     // Marquer que l'utilisateur vient de payer
     sessionStorage.setItem('fromPaymentSuccess', 'true');
     
+    // Extraire l'invoice_id et payment_id depuis l'URL si disponibles
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceId = urlParams.get('iid') || urlParams.get('invoice_id');
+    const paymentId = urlParams.get('payment_id') || urlParams.get('paymentId');
+    
+    if (invoiceId) {
+      sessionStorage.setItem('nowpayments_invoice_id', invoiceId);
+      localStorage.setItem('nowpayments_invoice_id', invoiceId);
+    }
+    if (paymentId) {
+      sessionStorage.setItem('nowpayments_payment_id', paymentId);
+      localStorage.setItem('nowpayments_payment_id', paymentId);
+    }
+    
     // Check subscription status after payment with retry logic
     const verifyPayment = async () => {
       setVerifying(true);

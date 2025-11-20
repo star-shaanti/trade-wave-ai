@@ -73,7 +73,7 @@ serve(async (req) => {
       payload.customer_email = customerEmail;
     }
 
-    const allowedCurrencies = new Set(["btc"]);
+    const allowedCurrencies = new Set(["btc", "eth"]);
     if (payCurrency && allowedCurrencies.has(payCurrency)) {
       payload.pay_currency = payCurrency;
     }

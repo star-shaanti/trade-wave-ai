@@ -230,6 +230,94 @@ const Index = () => {
       description: "realtimetradingsignal@gmail.com",
     });
   };
+
+  // Fonction pour vérifier le statut du paiement
+  const checkPaymentStatus = async (paymentId?: string, invoiceId?: string) => {
+    setCheckingPayment(true);
+    try {
+      const finalPaymentId = paymentId || manualPaymentId;
+      const finalInvoiceId = invoiceId || manualInvoiceId;
+      
+      if (!finalPaymentId && !finalInvoiceId) {
+        toast({
+          title: "Identifiant requis",
+          description: "Veuillez saisir un Payment ID ou Invoice ID.",
+          variant: "destructive"
+        });
+        setCheckingPayment(false);
+        return;
+      }
+
+      const session = await supabase.auth.getSession();
+      if (!session.data.session?.access_token) {
+        throw new Error("Session expirée. Veuillez vous reconnecter.");
+      }
+
+      console.log('Vérification du paiement avec:', { paymentId: finalPaymentId, invoiceId: finalInvoiceId });
+
+      const { data, error } = await supabase.functions.invoke('check-nowpayments-payment', {
+        body: { 
+          ...(finalPaymentId && { payment_id: finalPaymentId }),
+          ...(finalInvoiceId && { invoice_id: finalInvoiceId })
+        },
+        headers: {
+          Authorization: `Bearer ${session.data.session.access_token}`,
+        },
+      });
+
+      console.log('Réponse de la fonction:', { data, error });
+
+      if (error) {
+        console.error('Error invoking check-nowpayments-payment:', error);
+        // Améliorer le message d'erreur selon le type d'erreur
+        if (error.message?.includes('Failed to send') || error.message?.includes('fetch')) {
+          throw new Error("Impossible de contacter le serveur. La fonction Edge Function n'est peut-être pas déployée. Veuillez contacter le support.");
+        }
+        if (error.message?.includes('404') || error.message?.includes('not found')) {
+          throw new Error("Fonction non trouvée. Veuillez contacter le support technique.");
+        }
+        throw new Error(error.message || "Erreur lors de la vérification du paiement");
+      }
+
+      // Vérifier si data contient une erreur
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      if (data?.subscription_activated) {
+        toast({
+          title: "Abonnement activé !",
+          description: "Votre paiement a été confirmé et votre abonnement est maintenant actif.",
+        });
+        setShowPaymentCheckModal(false);
+        // Recharger la page après un court délai pour mettre à jour l'état
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+                                } else {
+                                  // Afficher un message détaillé selon le statut
+                                  const message = data?.message || 
+                                    (data?.needs_more_payment 
+                                      ? `Paiement partiel: ${data?.payment_percentage || 0}% payé. Veuillez compléter le paiement pour activer l'abonnement.`
+                                      : `Statut du paiement: ${data?.payment_status || 'inconnu'}. Le webhook sera traité automatiquement une fois le paiement confirmé.`);
+                                  
+                                  toast({
+                                    title: data?.needs_more_payment ? "Paiement incomplet" : "Paiement en attente",
+                                    description: message,
+                                    variant: data?.needs_more_payment ? "destructive" : "default",
+                                  });
+                                  setShowPaymentCheckModal(false);
+                                }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de vérifier le statut du paiement.",
+        variant: "destructive"
+      });
+    } finally {
+      setCheckingPayment(false);
+    }
+  };
   // États pour les paramètres de trading
   const [category, setCategory] = useState("forex_otc"); // Forex OTC par défaut
   const [asset, setAsset] = useState("EUR/USD OTC");
@@ -249,6 +337,10 @@ const Index = () => {
   const [expiredSignal, setExpiredSignal] = useState<TradingSignal | null>(null);
   const [showSignalActivated, setShowSignalActivated] = useState(false);
   const [activatedSignalInfo, setActivatedSignalInfo] = useState("");
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [showPaymentCheckModal, setShowPaymentCheckModal] = useState(false);
+  const [manualPaymentId, setManualPaymentId] = useState("");
+  const [manualInvoiceId, setManualInvoiceId] = useState("");
   const [showCancelSubscriptionModal, setShowCancelSubscriptionModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
@@ -303,8 +395,8 @@ const Index = () => {
     // Vérification immédiate
     checkSubscriptionPeriodically();
 
-    // Vérification périodique toutes les 30 secondes
-    const interval = setInterval(checkSubscriptionPeriodically, 30000);
+    // Vérification périodique toutes les 10 secondes (plus rapide après paiement)
+    const interval = setInterval(checkSubscriptionPeriodically, 10000);
 
     return () => clearInterval(interval);
   }, [user, checkSubscription]);
@@ -1382,6 +1474,49 @@ const Index = () => {
                           </>
                         )}
                       </Button>
+
+                      {/* Bouton pour vérifier le paiement NOWPayments si l'utilisateur n'est pas premium */}
+                      {user && !isPremium && (
+                        <div className="mt-3">
+                          <Button
+                            variant="outline"
+                            onClick={async () => {
+                              // Récupérer le payment_id ou invoice_id depuis l'URL, sessionStorage ou localStorage
+                              const urlParams = new URLSearchParams(window.location.search);
+                              const paymentId = urlParams.get('payment_id') || 
+                                                sessionStorage.getItem('nowpayments_payment_id') ||
+                                                localStorage.getItem('nowpayments_payment_id');
+                              const invoiceId = urlParams.get('invoice_id') || 
+                                               urlParams.get('iid') ||
+                                               sessionStorage.getItem('nowpayments_invoice_id') ||
+                                               localStorage.getItem('nowpayments_invoice_id');
+                              
+                              if (!paymentId && !invoiceId) {
+                                // Ouvrir le modal pour saisir manuellement
+                                setShowPaymentCheckModal(true);
+                                return;
+                              }
+
+                              // Vérifier le paiement avec les identifiants trouvés
+                              await checkPaymentStatus(paymentId || undefined, invoiceId || undefined);
+                            }}
+                            disabled={checkingPayment}
+                            className="w-full"
+                          >
+                            {checkingPayment ? (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                Vérification en cours...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Vérifier le paiement
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
               </CardContent>
               </Card>
 
@@ -1767,6 +1902,75 @@ const Index = () => {
             <p className="text-sm text-muted-foreground">
               Your premium subscription is active. Enjoy unlimited access to our AI-powered trading signals!
             </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal pour vérifier le paiement manuellement */}
+      <Dialog open={showPaymentCheckModal} onOpenChange={setShowPaymentCheckModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <RefreshCw className="h-5 w-5" />
+              <span>Vérifier le paiement</span>
+            </DialogTitle>
+            <DialogDescription>
+              Si vous avez effectué un paiement, saisissez votre Payment ID ou Invoice ID pour vérifier le statut.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="invoice-id">Invoice ID (recommandé)</Label>
+              <Input
+                id="invoice-id"
+                type="text"
+                placeholder="Ex: 4704457232"
+                value={manualInvoiceId}
+                onChange={(e) => setManualInvoiceId(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Trouvable dans l'URL de la page de paiement NOWPayments (paramètre "iid")
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="payment-id">Payment ID (optionnel)</Label>
+              <Input
+                id="payment-id"
+                type="text"
+                placeholder="Ex: 6226313058"
+                value={manualPaymentId}
+                onChange={(e) => setManualPaymentId(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex space-x-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowPaymentCheckModal(false);
+                  setManualPaymentId("");
+                  setManualInvoiceId("");
+                }}
+                className="flex-1"
+              >
+                Annuler
+              </Button>
+              <Button 
+                onClick={() => checkPaymentStatus()}
+                disabled={checkingPayment || (!manualPaymentId && !manualInvoiceId)}
+                className="flex-1"
+              >
+                {checkingPayment ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Vérification...
+                  </>
+                ) : (
+                  "Vérifier"
+                )}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
