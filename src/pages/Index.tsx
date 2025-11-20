@@ -290,11 +290,16 @@ const Index = () => {
           description: "Votre paiement a été confirmé et votre abonnement est maintenant actif.",
         });
         setShowPaymentCheckModal(false);
+        // Nettoyer les identifiants de paiement une fois l'abonnement activé
+        sessionStorage.removeItem('nowpayments_payment_id');
+        sessionStorage.removeItem('nowpayments_invoice_id');
+        localStorage.removeItem('nowpayments_payment_id');
+        localStorage.removeItem('nowpayments_invoice_id');
         // Recharger la page après un court délai pour mettre à jour l'état
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-                                } else {
+      } else {
                                   // Afficher un message détaillé selon le statut
                                   const message = data?.message || 
                                     (data?.needs_more_payment 
@@ -362,6 +367,12 @@ const Index = () => {
   // Afficher le modal de bienvenue pour les utilisateurs premium (uniquement à la connexion)
   useEffect(() => {
     if (user && isPremium) {
+      // Nettoyer les identifiants de paiement si l'utilisateur est premium
+      sessionStorage.removeItem('nowpayments_payment_id');
+      sessionStorage.removeItem('nowpayments_invoice_id');
+      localStorage.removeItem('nowpayments_payment_id');
+      localStorage.removeItem('nowpayments_invoice_id');
+      
       // Vérifier si c'est une nouvelle connexion en utilisant sessionStorage
       const hasShownWelcome = sessionStorage.getItem('welcomeShown');
       if (!hasShownWelcome) {
@@ -1475,48 +1486,49 @@ const Index = () => {
                         )}
                       </Button>
 
-                      {/* Bouton pour vérifier le paiement NOWPayments si l'utilisateur n'est pas premium */}
-                      {user && !isPremium && (
-                        <div className="mt-3">
-                          <Button
-                            variant="outline"
-                            onClick={async () => {
-                              // Récupérer le payment_id ou invoice_id depuis l'URL, sessionStorage ou localStorage
-                              const urlParams = new URLSearchParams(window.location.search);
-                              const paymentId = urlParams.get('payment_id') || 
-                                                sessionStorage.getItem('nowpayments_payment_id') ||
-                                                localStorage.getItem('nowpayments_payment_id');
-                              const invoiceId = urlParams.get('invoice_id') || 
-                                               urlParams.get('iid') ||
-                                               sessionStorage.getItem('nowpayments_invoice_id') ||
-                                               localStorage.getItem('nowpayments_invoice_id');
-                              
-                              if (!paymentId && !invoiceId) {
-                                // Ouvrir le modal pour saisir manuellement
-                                setShowPaymentCheckModal(true);
-                                return;
-                              }
+                      {/* Bouton pour vérifier le paiement NOWPayments - visible uniquement si un paiement est en attente */}
+                      {user && !isPremium && (() => {
+                        // Vérifier si un paiement est en attente
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const hasPaymentId = urlParams.get('payment_id') || 
+                                            sessionStorage.getItem('nowpayments_payment_id') ||
+                                            localStorage.getItem('nowpayments_payment_id');
+                        const hasInvoiceId = urlParams.get('invoice_id') || 
+                                            urlParams.get('iid') ||
+                                            sessionStorage.getItem('nowpayments_invoice_id') ||
+                                            localStorage.getItem('nowpayments_invoice_id');
+                        
+                        // Afficher le bouton uniquement si un paiement est détecté
+                        if (!hasPaymentId && !hasInvoiceId) {
+                          return null;
+                        }
 
-                              // Vérifier le paiement avec les identifiants trouvés
-                              await checkPaymentStatus(paymentId || undefined, invoiceId || undefined);
-                            }}
-                            disabled={checkingPayment}
-                            className="w-full"
-                          >
-                            {checkingPayment ? (
-                              <>
-                                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                Vérification en cours...
-                              </>
-                            ) : (
-                              <>
-                                <RefreshCw className="h-4 w-4 mr-2" />
-                                Vérifier le paiement
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      )}
+                        return (
+                          <div className="mt-3">
+                            <Button
+                              variant="outline"
+                              onClick={async () => {
+                                // Vérifier le paiement avec les identifiants trouvés
+                                await checkPaymentStatus(hasPaymentId || undefined, hasInvoiceId || undefined);
+                              }}
+                              disabled={checkingPayment}
+                              className="w-full"
+                            >
+                              {checkingPayment ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                  Vérification en cours...
+                                </>
+                              ) : (
+                                <>
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Vérifier le paiement
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        );
+                      })()}
               </CardContent>
               </Card>
 
