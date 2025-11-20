@@ -78,7 +78,7 @@ const PricingPlans = () => {
   const plans: Plan[] = [
     {
       name: "24-Hour Pass",
-      price: "$9 (Stripe) / $11 (ETH)",
+      price: "$9",
       priceId: "price_1ReZ3qEHHHdPbMaz8UPrXcAk",
       amount: 900,
       fiatAmount: 9,
@@ -97,7 +97,7 @@ const PricingPlans = () => {
     },
     {
       name: "48-Hour Pass", 
-      price: "$14 (Stripe) / $16 (ETH)",
+      price: "$14",
       priceId: "price_1ReZ2nEHHHdPbMazWCU2qQgx",
       amount: 1400,
       fiatAmount: 14,
@@ -411,14 +411,29 @@ const PricingPlans = () => {
               <Button
                 onClick={() => handleSubscribe(plan)}
                 disabled={loadingPlan === getStripeLoadingId(plan)}
-                className={`w-full ${
+                className={`w-full justify-start gap-3 px-3 py-2 overflow-hidden ${
                   plan.popular 
                     ? 'bg-primary hover:bg-primary/90' 
                     : 'bg-primary/90 hover:bg-primary'
                 } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {loadingPlan === getStripeLoadingId(plan) ? 'Loading...' : 
-                 !isAuthenticated ? 'Sign in first' : t.buyWithStripe}
+                {loadingPlan === getStripeLoadingId(plan) ? (
+                  'Loading...'
+                ) : !isAuthenticated ? (
+                  'Sign in first'
+                ) : (
+                  <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                      <div className="text-left min-w-0 flex-1 overflow-hidden">
+                        <div className="text-sm font-semibold leading-tight truncate">Stripe</div>
+                        <div className="text-xs text-white/80 truncate">${plan.fiatAmount}</div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-wide flex-shrink-0 whitespace-nowrap">
+                      {t.buyWithStripe}
+                    </span>
+                  </div>
+                )}
               </Button>
 
               {(() => {
