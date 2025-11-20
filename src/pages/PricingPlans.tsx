@@ -91,7 +91,7 @@ const PricingPlans = () => {
       cryptoPricing: {
         eth: {
           fiatAmount: 11,
-          displayPrice: "$11 via ETH"
+          displayPrice: "$11"
         }
       }
     },
@@ -110,7 +110,7 @@ const PricingPlans = () => {
       cryptoPricing: {
         eth: {
           fiatAmount: 16,
-          displayPrice: "$16 via ETH"
+          displayPrice: "$16"
         }
       }
     },
@@ -125,7 +125,13 @@ const PricingPlans = () => {
         "All asset classes",
         "AI-powered analysis"
       ],
-      popular: true
+      popular: true,
+      cryptoPricing: {
+        eth: {
+          fiatAmount: 35,
+          displayPrice: "$35"
+        }
+      }
     },
     {
       name: "Monthly",
@@ -138,7 +144,13 @@ const PricingPlans = () => {
         "All asset classes",
         "AI-powered analysis"
       ],
-      popular: false
+      popular: false,
+      cryptoPricing: {
+        eth: {
+          fiatAmount: 99,
+          displayPrice: "$99"
+        }
+      }
     }
   ];
 
@@ -425,27 +437,25 @@ const PricingPlans = () => {
                           variant="secondary"
                           onClick={() => handleCryptoPayment(plan, option.value)}
                           disabled={loadingPlan === getCryptoLoadingId(plan, option.value)}
-                          className={`w-full justify-start gap-3 px-4 text-white ${option.bgClass} ${option.hoverClass} ${
+                          className={`w-full justify-start gap-3 px-3 py-2 text-white overflow-hidden ${option.bgClass} ${option.hoverClass} ${
                             !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
                           }`}
                         >
                           {loadingPlan === getCryptoLoadingId(plan, option.value)
                             ? 'Loading...'
                             : !isAuthenticated ? 'Sign in first' : (
-                              <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                                   <CryptoIcon label={option.label} accentClass={option.accentClass} />
-                                  <div className="text-left">
-                                    <div className="text-sm font-semibold leading-tight">{option.label}</div>
-                                    <div className="text-xs text-white/80">
+                                  <div className="text-left min-w-0 flex-1 overflow-hidden">
+                                    <div className="text-sm font-semibold leading-tight truncate">{option.label}</div>
+                                    <div className="text-xs text-white/80 truncate">
                                       {plan.cryptoPricing?.[option.value]?.displayPrice ??
-                                        `$${getCryptoFiatAmountForPlan(plan, option.value)} via ${option.label}`}
-                                      {" · "}
-                                      {t.cryptoInstantTagline}
+                                        `$${getCryptoFiatAmountForPlan(plan, option.value)}`}
                                     </div>
                                   </div>
                                 </div>
-                                <span className="text-xs font-semibold uppercase tracking-wide">
+                                <span className="text-xs font-semibold uppercase tracking-wide flex-shrink-0 whitespace-nowrap">
                                   {t.cryptoPayCta}
                                 </span>
                               </div>
