@@ -425,11 +425,11 @@ const PricingPlans = () => {
                   <div className="flex items-center justify-between w-full min-w-0 gap-2">
                     <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                       <div className="text-left min-w-0 flex-1 overflow-hidden">
-                        <div className="text-sm font-semibold leading-tight truncate">Stripe</div>
-                        <div className="text-xs text-white/80 truncate">${plan.fiatAmount}</div>
+                        <div className="text-sm font-semibold leading-tight truncate text-primary-foreground">Stripe</div>
+                        <div className="text-xs text-primary-foreground/80 truncate">${plan.fiatAmount}</div>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-wide flex-shrink-0 whitespace-nowrap">
+                    <span className="text-xs font-semibold uppercase tracking-wide flex-shrink-0 whitespace-nowrap text-primary-foreground">
                       {t.buyWithStripe}
                     </span>
                   </div>
