@@ -25,6 +25,7 @@ export const globalTranslations = {
     buyWithLabel: "Or pay with crypto",
     cryptoInstantTagline: "Instant crypto payment",
     cryptoPayCta: "Pay",
+    payWithCrypto: "Pay with crypto",
     // Contenu principal
     heroTitle: "AI-POWERED REAL-TIME TRADING SIGNALS",
     heroSubtitle: "AND OUR PROFESSIONAL TRADERS",
@@ -87,6 +88,7 @@ export const globalTranslations = {
     buyWithLabel: "Ou payez en crypto",
     cryptoInstantTagline: "Paiement crypto instantané",
     cryptoPayCta: "Payer",
+    payWithCrypto: "Payer avec cryptos",
     // Contenu principal
     heroTitle: "SIGNAUX DE TRADING EN TEMPS RÉEL ALIMENTÉS PAR IA",
     heroSubtitle: "ET NOS TRADERS PROFESSIONNELS",
@@ -149,6 +151,7 @@ export const globalTranslations = {
     buyWithLabel: "O paga con crypto",
     cryptoInstantTagline: "Pago cripto instantáneo",
     cryptoPayCta: "Pagar",
+    payWithCrypto: "Pagar con criptos",
     // Contenu principal
     heroTitle: "SEÑALES DE TRADING EN TIEMPO REAL IMPULSADAS POR IA",
     heroSubtitle: "Y NUESTROS TRADERS PROFESIONALES",
@@ -211,6 +214,7 @@ export const globalTranslations = {
     buyWithLabel: "Oppure paga in cripto",
     cryptoInstantTagline: "Pagamento cripto istantaneo",
     cryptoPayCta: "Paga",
+    payWithCrypto: "Paga con cripto",
     // Contenu principal
     heroTitle: "SEGNALI DI TRADING IN TEMPO REALE ALIMENTATI DA IA",
     heroSubtitle: "E I NOSTRI TRADER PROFESSIONISTI",
@@ -273,6 +277,7 @@ export const globalTranslations = {
     buyWithLabel: "Ou pague com cripto",
     cryptoInstantTagline: "Pagamento cripto instantâneo",
     cryptoPayCta: "Pagar",
+    payWithCrypto: "Pagar com criptos",
     // Contenu principal
     heroTitle: "SINAIS DE TRADING EM TEMPO REAL ALIMENTADOS POR IA",
     heroSubtitle: "E NOSSOS TRADERS PROFISSIONAIS",
@@ -317,6 +322,7 @@ export const globalTranslations = {
     buyWithLabel: "Или оплатите криптовалютой",
     cryptoInstantTagline: "Мгновенный крипто-платеж",
     cryptoPayCta: "Оплатить",
+    payWithCrypto: "Оплатить криптовалютой",
     // Contenu principal
     heroTitle: "СИГНАЛЫ ТОРГОВЛИ В РЕАЛЬНОМ ВРЕМЕНИ НА ОСНОВЕ ИИ",
     heroSubtitle: "И НАШИ ПРОФЕССИОНАЛЬНЫЕ ТРЕЙДЕРЫ",
@@ -361,6 +367,7 @@ export const globalTranslations = {
     buyWithLabel: "أو ادفع بالعملات المشفرة",
     cryptoInstantTagline: "دفع فوري بالعملات المشفرة",
     cryptoPayCta: "ادفع",
+    payWithCrypto: "ادفع بالعملات المشفرة",
     // Contenu principal
     heroTitle: "إشارات التداول في الوقت الفعلي مدعومة بالذكاء الاصطناعي",
     heroSubtitle: "وتجارنا المحترفون",
@@ -405,6 +412,7 @@ export const globalTranslations = {
     buyWithLabel: "या क्रिप्टो से भुगतान करें",
     cryptoInstantTagline: "तुरंत क्रिप्टो भुगतान",
     cryptoPayCta: "भुगतान करें",
+    payWithCrypto: "क्रिप्टो से भुगतान करें",
     // Contenu principal
     heroTitle: "AI-संचालित रियल-टाइम ट्रेडिंग सिग्नल",
     heroSubtitle: "और हमारे पेशेवर ट्रेडर",
