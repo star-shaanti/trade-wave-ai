@@ -4,6 +4,7 @@ import { Check, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -35,6 +36,40 @@ const PaymentSuccess = () => {
       setVerifying(true);
       let retryCount = 0;
       const maxRetries = 5; // Augmenté le nombre de tentatives
+      
+      // Étape 1: Vérifier et activer le paiement NOWPayments si on a les identifiants
+      if (invoiceId || paymentId) {
+        try {
+          console.log('Vérification du paiement NOWPayments...', { invoiceId, paymentId });
+          
+          const session = await supabase.auth.getSession();
+          if (session.data.session?.access_token) {
+            const { data: paymentData, error: paymentError } = await supabase.functions.invoke('check-nowpayments-payment', {
+              body: {
+                ...(paymentId && { payment_id: paymentId }),
+                ...(invoiceId && { invoice_id: invoiceId })
+              },
+              headers: {
+                Authorization: `Bearer ${session.data.session.access_token}`,
+              },
+            });
+
+            if (paymentError) {
+              console.error('Erreur lors de la vérification du paiement:', paymentError);
+              // Continuer quand même avec la vérification d'abonnement
+            } else if (paymentData?.subscription_activated) {
+              console.log('Paiement vérifié et abonnement activé via check-nowpayments-payment');
+              // Attendre un peu pour que la base de données se mette à jour
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+              console.log('Statut du paiement:', paymentData?.payment_status);
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'appel à check-nowpayments-payment:', error);
+          // Continuer quand même avec la vérification d'abonnement
+        }
+      }
       
       const attemptVerification = async () => {
         try {

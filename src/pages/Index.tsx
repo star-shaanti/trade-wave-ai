@@ -235,8 +235,9 @@ const Index = () => {
   const checkPaymentStatus = async (paymentId?: string, invoiceId?: string) => {
     setCheckingPayment(true);
     try {
-      const finalPaymentId = paymentId || manualPaymentId;
-      const finalInvoiceId = invoiceId || manualInvoiceId;
+      // Utiliser les paramètres passés directement, ou les valeurs manuelles comme fallback
+      const finalPaymentId = paymentId !== undefined ? paymentId : manualPaymentId;
+      const finalInvoiceId = invoiceId !== undefined ? invoiceId : manualInvoiceId;
       
       if (!finalPaymentId && !finalInvoiceId) {
         toast({
@@ -385,6 +386,58 @@ const Index = () => {
       }
     }
   }, [user, isPremium]);
+
+  // Vérification automatique du paiement NOWPayments quand un paiement est détecté
+  useEffect(() => {
+    if (!user || isPremium || checkingPayment) return;
+
+    const autoCheckPayment = async () => {
+      // Vérifier si l'utilisateur vient de payer
+      const fromPaymentSuccess = sessionStorage.getItem('fromPaymentSuccess');
+      const urlParams = new URLSearchParams(window.location.search);
+      const invoiceId = urlParams.get('iid') || urlParams.get('invoice_id') || 
+                       sessionStorage.getItem('nowpayments_invoice_id') ||
+                       localStorage.getItem('nowpayments_invoice_id');
+      const paymentId = urlParams.get('payment_id') || urlParams.get('paymentId') ||
+                       sessionStorage.getItem('nowpayments_payment_id') ||
+                       localStorage.getItem('nowpayments_payment_id');
+
+      // Vérifier automatiquement le paiement si on a les identifiants
+      if (invoiceId || paymentId) {
+        console.log('Vérification automatique du paiement détecté...', { invoiceId, paymentId });
+        
+        // Attendre un peu pour éviter les vérifications multiples
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Vérifier le paiement
+        try {
+          await checkPaymentStatus(paymentId || undefined, invoiceId || undefined);
+          
+          // Après vérification, vérifier aussi l'abonnement
+          setTimeout(() => {
+            checkSubscription();
+          }, 2000);
+        } catch (error) {
+          console.error('Erreur lors de la vérification automatique du paiement:', error);
+        }
+      }
+
+      if (fromPaymentSuccess) {
+        console.log("Welcome modal check: ► {user: true, isPremium: false, userEmail: undefined}");
+        // Vérifier l'abonnement immédiatement après un paiement
+        setTimeout(() => {
+          checkSubscription();
+        }, 1000);
+        sessionStorage.removeItem('fromPaymentSuccess');
+      }
+    };
+
+    // Vérification automatique après un court délai (seulement une fois)
+    const timeout = setTimeout(autoCheckPayment, 1500);
+
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isPremium, checkingPayment]);
 
   // Vérification périodique de l'abonnement pour détecter les changements
   useEffect(() => {

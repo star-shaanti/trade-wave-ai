@@ -49,6 +49,7 @@ serve(async (req) => {
     const { payment_id, invoice_id } = await req.json();
     
     let actualPaymentId = payment_id;
+    let invoiceData: any = null;
     
     // Si on a un invoice_id mais pas de payment_id, récupérer le payment depuis l'invoice
     if (!actualPaymentId && invoice_id) {
@@ -61,18 +62,53 @@ serve(async (req) => {
       });
       
       if (invoiceResponse.ok) {
-        const invoiceData = await invoiceResponse.json();
+        invoiceData = await invoiceResponse.json();
         if (invoiceData.payment_id) {
           actualPaymentId = invoiceData.payment_id;
           logStep("Payment ID found from invoice", { payment_id: actualPaymentId });
+        } else {
+          logStep("Invoice found but no payment_id yet", { invoice_id, invoice_status: invoiceData.status });
+          // L'invoice existe mais n'a pas encore de payment_id - c'est normal au début
+          // On retourne un message informatif au lieu d'une erreur
+          return new Response(JSON.stringify({
+            error: "Paiement en attente",
+            message: "L'invoice a été créée mais le paiement n'a pas encore été initié. Veuillez patienter quelques instants.",
+            payment_status: "waiting",
+            invoice_status: invoiceData.status || "pending",
+            processed: false,
+            subscription_activated: false
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200, // Retourner 200 au lieu de 400 pour indiquer que c'est un état valide
+          });
         }
+      } else if (invoiceResponse.status === 404) {
+        logStep("Invoice not found", { invoice_id });
+        return new Response(JSON.stringify({ error: "Invoice introuvable" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        });
       }
     }
     
-    if (!actualPaymentId) {
+    if (!actualPaymentId && !invoice_id) {
       return new Response(JSON.stringify({ error: "payment_id or invoice_id is required" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
+      });
+    }
+    
+    if (!actualPaymentId) {
+      // Si on n'a toujours pas de payment_id après avoir essayé avec l'invoice
+      return new Response(JSON.stringify({
+        error: "Paiement en attente",
+        message: "Le paiement n'a pas encore été initié. Veuillez patienter quelques instants et réessayer.",
+        payment_status: "waiting",
+        processed: false,
+        subscription_activated: false
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       });
     }
 
