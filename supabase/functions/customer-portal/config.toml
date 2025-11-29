@@ -1,0 +1,3 @@
+[functions.customer-portal]
+verify_jwt = false
+

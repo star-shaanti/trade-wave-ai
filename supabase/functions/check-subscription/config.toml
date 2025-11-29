@@ -1,0 +1,3 @@
+[functions.check-subscription]
+verify_jwt = false
+

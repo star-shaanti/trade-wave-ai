@@ -1,0 +1,3 @@
+[functions.check-nowpayments-payment]
+verify_jwt = false
+

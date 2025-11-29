@@ -268,6 +268,18 @@ const Index = () => {
 
       console.log('Réponse de la fonction:', { data, error });
 
+      // Si data est vide ou undefined, la fonction n'a peut-être pas retourné de réponse valide
+      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+        console.warn('Réponse vide de la fonction Edge - peut-être que l\'invoice n\'existe pas encore');
+        toast({
+          title: "Vérification en cours",
+          description: "L'invoice n'a pas encore été créée dans NOWPayments. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+          variant: "default",
+        });
+        setCheckingPayment(false);
+        return;
+      }
+
       if (error) {
         console.error('Error invoking check-nowpayments-payment:', error);
         // Améliorer le message d'erreur selon le type d'erreur
@@ -280,14 +292,34 @@ const Index = () => {
         throw new Error(error.message || "Erreur lors de la vérification du paiement");
       }
 
-      // Vérifier si data contient une erreur (sauf si c'est juste un statut "waiting")
-      if (data?.error && data?.payment_status !== "waiting" && !data?.subscription_activated) {
-        // Ne pas lancer d'erreur si c'est juste un paiement en attente
+      // Vérifier si data contient une erreur (sauf si c'est juste un statut "waiting" ou "not_found")
+      if (data?.error && data?.payment_status !== "waiting" && data?.payment_status !== "not_found" && !data?.subscription_activated) {
+        // Ne pas lancer d'erreur si c'est juste un paiement en attente ou une invoice introuvable
         if (data.error === "Paiement en attente" || data.payment_status === "waiting") {
           // Traiter comme un statut normal, pas une erreur
+        } else if (data.error === "Invoice introuvable" || data.payment_status === "not_found") {
+          // Invoice introuvable n'est pas une erreur fatale - le webhook activera l'abonnement plus tard
+          toast({
+            title: "Vérification en cours",
+            description: data.message || "L'invoice n'a pas encore été créée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+            variant: "default",
+          });
+          setShowPaymentCheckModal(false);
+          return; // Sortir de la fonction sans erreur
         } else {
           throw new Error(data.error);
         }
+      }
+      
+      // Gérer spécifiquement le cas "Invoice introuvable" même si pas dans data.error
+      if (data?.payment_status === "not_found") {
+        toast({
+          title: "Vérification en cours",
+          description: data.message || "L'invoice n'a pas encore été créée dans NOWPayments. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+          variant: "default",
+        });
+        setShowPaymentCheckModal(false);
+        return;
       }
 
       if (data?.subscription_activated) {
