@@ -280,9 +280,14 @@ const Index = () => {
         throw new Error(error.message || "Erreur lors de la vérification du paiement");
       }
 
-      // Vérifier si data contient une erreur
-      if (data?.error) {
-        throw new Error(data.error);
+      // Vérifier si data contient une erreur (sauf si c'est juste un statut "waiting")
+      if (data?.error && data?.payment_status !== "waiting" && !data?.subscription_activated) {
+        // Ne pas lancer d'erreur si c'est juste un paiement en attente
+        if (data.error === "Paiement en attente" || data.payment_status === "waiting") {
+          // Traiter comme un statut normal, pas une erreur
+        } else {
+          throw new Error(data.error);
+        }
       }
 
       if (data?.subscription_activated) {
@@ -301,19 +306,28 @@ const Index = () => {
           window.location.reload();
         }, 2000);
       } else {
-                                  // Afficher un message détaillé selon le statut
-                                  const message = data?.message || 
-                                    (data?.needs_more_payment 
-                                      ? `Paiement partiel: ${data?.payment_percentage || 0}% payé. Veuillez compléter le paiement pour activer l'abonnement.`
-                                      : `Statut du paiement: ${data?.payment_status || 'inconnu'}. Le webhook sera traité automatiquement une fois le paiement confirmé.`);
-                                  
-                                  toast({
-                                    title: data?.needs_more_payment ? "Paiement incomplet" : "Paiement en attente",
-                                    description: message,
-                                    variant: data?.needs_more_payment ? "destructive" : "default",
-                                  });
-                                  setShowPaymentCheckModal(false);
-                                }
+        // Afficher un message détaillé selon le statut
+        const message = data?.message || 
+          (data?.needs_more_payment 
+            ? `Paiement partiel: ${data?.payment_percentage || 0}% payé. Veuillez compléter le paiement pour activer l'abonnement.`
+            : data?.payment_status === "waiting"
+            ? "Le paiement est en cours de traitement. L'abonnement sera activé automatiquement une fois le paiement confirmé."
+            : `Statut du paiement: ${data?.payment_status || 'inconnu'}. Le webhook sera traité automatiquement une fois le paiement confirmé.`);
+        
+        toast({
+          title: data?.needs_more_payment ? "Paiement incomplet" : data?.payment_status === "waiting" ? "Paiement en cours" : "Paiement en attente",
+          description: message,
+          variant: data?.needs_more_payment ? "destructive" : "default",
+        });
+        setShowPaymentCheckModal(false);
+        
+        // Si le paiement est en attente, vérifier à nouveau l'abonnement après quelques secondes
+        if (data?.payment_status === "waiting") {
+          setTimeout(() => {
+            checkSubscription();
+          }, 5000);
+        }
+      }
     } catch (error: any) {
       toast({
         title: "Erreur",

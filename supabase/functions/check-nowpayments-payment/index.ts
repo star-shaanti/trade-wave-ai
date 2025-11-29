@@ -46,64 +46,248 @@ serve(async (req) => {
       });
     }
 
-    const { payment_id, invoice_id } = await req.json();
+    let requestBody;
+    try {
+      const bodyText = await req.text();
+      logStep("Request body received", { bodyLength: bodyText.length, bodyPreview: bodyText.substring(0, 200) });
+      
+      if (!bodyText || bodyText.trim().length === 0) {
+        logStep("WARNING: Empty request body");
+        requestBody = {};
+      } else {
+        requestBody = JSON.parse(bodyText);
+      }
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      logStep("ERROR parsing request body", { error: errorMsg });
+      return new Response(JSON.stringify({ 
+        error: "Invalid request body",
+        message: "Le corps de la requête est invalide ou vide. Veuillez vérifier que invoice_id ou payment_id est fourni.",
+        processed: false,
+        subscription_activated: false
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
     
-    let actualPaymentId = payment_id;
+    const { payment_id, invoice_id } = requestBody;
+    
+    // Normaliser les valeurs - s'assurer qu'on n'a pas de chaînes vides
+    const normalizedPaymentId = payment_id && typeof payment_id === 'string' && payment_id.trim() ? payment_id.trim() : null;
+    const normalizedInvoiceId = invoice_id && typeof invoice_id === 'string' && invoice_id.trim() ? invoice_id.trim() : null;
+    
+    logStep("Request received", { 
+      payment_id: normalizedPaymentId, 
+      invoice_id: normalizedInvoiceId,
+      original_payment_id: payment_id,
+      original_invoice_id: invoice_id
+    });
+    
+    let actualPaymentId = normalizedPaymentId;
     let invoiceData: any = null;
     
     // Si on a un invoice_id mais pas de payment_id, récupérer le payment depuis l'invoice
-    if (!actualPaymentId && invoice_id) {
-      logStep("Fetching payment from invoice", { invoice_id });
-      const invoiceResponse = await fetch(`https://api.nowpayments.io/v1/invoice/${invoice_id}`, {
-        method: "GET",
-        headers: {
-          "x-api-key": apiKey,
-        },
-      });
-      
-      if (invoiceResponse.ok) {
-        invoiceData = await invoiceResponse.json();
-        if (invoiceData.payment_id) {
-          actualPaymentId = invoiceData.payment_id;
-          logStep("Payment ID found from invoice", { payment_id: actualPaymentId });
-        } else {
-          logStep("Invoice found but no payment_id yet", { invoice_id, invoice_status: invoiceData.status });
-          // L'invoice existe mais n'a pas encore de payment_id - c'est normal au début
-          // On retourne un message informatif au lieu d'une erreur
-          return new Response(JSON.stringify({
-            error: "Paiement en attente",
-            message: "L'invoice a été créée mais le paiement n'a pas encore été initié. Veuillez patienter quelques instants.",
-            payment_status: "waiting",
-            invoice_status: invoiceData.status || "pending",
+    if (!actualPaymentId && normalizedInvoiceId) {
+      logStep("Fetching payment from invoice", { invoice_id: normalizedInvoiceId });
+      try {
+        const invoiceResponse = await fetch(`https://api.nowpayments.io/v1/invoice/${normalizedInvoiceId}`, {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+          },
+        });
+        
+        logStep("Invoice API response", { 
+          status: invoiceResponse.status, 
+          ok: invoiceResponse.ok,
+          invoice_id: normalizedInvoiceId 
+        });
+        
+        if (invoiceResponse.ok) {
+          invoiceData = await invoiceResponse.json();
+          logStep("Invoice data retrieved", { 
+            invoice_id: normalizedInvoiceId, 
+            invoice_keys: Object.keys(invoiceData),
+            status: invoiceData.status,
+            invoice_status: invoiceData.invoice_status,
+            payment_id: invoiceData.payment_id,
+            payment_status: invoiceData.payment_status,
+            full_data: JSON.stringify(invoiceData).substring(0, 500) // Log partiel pour debug
+          });
+          
+          if (invoiceData.payment_id) {
+            actualPaymentId = invoiceData.payment_id;
+            logStep("Payment ID found from invoice", { payment_id: actualPaymentId });
+          } else {
+            // Vérifier si l'invoice est payée même sans payment_id
+            // NOWPayments peut utiliser différents noms de champs pour le statut
+            const invoiceStatus = (invoiceData.status || invoiceData.invoice_status || "").toLowerCase();
+            const paymentStatus = (invoiceData.payment_status || "").toLowerCase();
+            
+            logStep("Checking invoice payment status", { 
+              invoice_id: normalizedInvoiceId,
+              invoiceStatus,
+              paymentStatus,
+              has_payment_id: !!invoiceData.payment_id
+            });
+            
+            const isInvoicePaid = invoiceStatus === "paid" || 
+                                 invoiceStatus === "finished" || 
+                                 invoiceStatus === "confirmed" ||
+                                 invoiceStatus === "completed" ||
+                                 paymentStatus === "finished" ||
+                                 paymentStatus === "confirmed" ||
+                                 paymentStatus === "paid";
+            
+            logStep("Invoice payment check result", { invoice_id: normalizedInvoiceId, isInvoicePaid });
+            
+            if (isInvoicePaid) {
+              logStep("Invoice is paid but no payment_id - activating subscription directly", { invoice_id: normalizedInvoiceId, invoice_status: invoiceStatus });
+              
+              // Activer l'abonnement directement basé sur l'invoice
+              const serviceRoleClient = createClient(
+                Deno.env.get("SUPABASE_URL") ?? "",
+                Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+                { auth: { persistSession: false } }
+              );
+
+              // Extract user_id from order_id if available
+              let userId: string | null = userData.user.id;
+              if (invoiceData.order_id) {
+                const parts = invoiceData.order_id.split("-");
+                if (parts.length > 0) {
+                  const possibleUserId = parts.slice(0, 5).join("-");
+                  if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+                    userId = possibleUserId;
+                  }
+                }
+              }
+
+              // Determine subscription tier
+              let subscriptionTier: string | null = null;
+              const amount = Number(invoiceData.price_amount) || 0;
+              
+              if (amount <= 9) {
+                subscriptionTier = "Basic";
+              } else if (amount <= 19) {
+                subscriptionTier = "Premium";
+              } else {
+                subscriptionTier = "Enterprise";
+              }
+
+              // Calculate subscription end date
+              const subscriptionEnd = new Date();
+              subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
+              const subscriptionEndISO = subscriptionEnd.toISOString();
+
+              // Update subscribers table
+              const result = await serviceRoleClient.from("subscribers").upsert({
+                email: invoiceData.customer_email || userData.user.email || "",
+                user_id: userId,
+                stripe_customer_id: null,
+                subscribed: true,
+                subscription_tier: subscriptionTier,
+                subscription_end: subscriptionEndISO,
+                updated_at: new Date().toISOString(),
+              }, { onConflict: 'email' });
+
+              if (result.error) {
+                logStep("ERROR updating database from invoice", { error: result.error.message });
+                throw new Error(`Database update failed: ${result.error.message}`);
+              }
+
+              logStep("Successfully updated subscription from invoice", {
+                email: invoiceData.customer_email || userData.user.email,
+                subscribed: true,
+                subscriptionTier,
+              });
+
+              return new Response(JSON.stringify({
+                payment_status: invoiceData.payment_status || "finished",
+                processed: true,
+                subscription_activated: true,
+                from_invoice: true
+              }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+                status: 200,
+              });
+            } else {
+              logStep("Invoice found but not paid yet", { invoice_id: normalizedInvoiceId, invoice_status: invoiceData.status });
+              return new Response(JSON.stringify({
+                error: "Paiement en attente",
+                message: "L'invoice a été créée mais le paiement n'a pas encore été complété. Veuillez patienter quelques instants.",
+                payment_status: "waiting",
+                invoice_status: invoiceData.status || "pending",
+                processed: false,
+                subscription_activated: false
+              }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+                status: 200,
+              });
+            }
+          }
+        } else if (invoiceResponse.status === 404) {
+          logStep("Invoice not found in NOWPayments", { invoice_id: normalizedInvoiceId });
+          // Retourner un status 200 pour ne pas bloquer l'utilisateur
+          // L'invoice peut ne pas exister encore ou avoir été supprimée
+          return new Response(JSON.stringify({ 
+            error: "Invoice introuvable",
+            message: "L'invoice n'a pas été trouvée dans NOWPayments. Elle peut ne pas exister encore ou avoir été supprimée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+            payment_status: "not_found",
+            invoice_id: normalizedInvoiceId,
             processed: false,
             subscription_activated: false
           }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200, // Retourner 200 au lieu de 400 pour indiquer que c'est un état valide
+            status: 200, // Retourner 200 pour ne pas bloquer l'utilisateur
+          });
+        } else {
+          const errorText = await invoiceResponse.text();
+          logStep("Error fetching invoice", { invoice_id: normalizedInvoiceId, status: invoiceResponse.status, error: errorText });
+          return new Response(JSON.stringify({ 
+            error: "Erreur lors de la récupération de l'invoice",
+            message: `L'API NOWPayments a retourné une erreur: ${invoiceResponse.status}`,
+            processed: false,
+            subscription_activated: false
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200, // Retourner 200 pour ne pas bloquer l'utilisateur
           });
         }
-      } else if (invoiceResponse.status === 404) {
-        logStep("Invoice not found", { invoice_id });
-        return new Response(JSON.stringify({ error: "Invoice introuvable" }), {
+      } catch (invoiceError) {
+        const errorMsg = invoiceError instanceof Error ? invoiceError.message : String(invoiceError);
+        logStep("Exception while fetching invoice", { invoice_id: normalizedInvoiceId, error: errorMsg, stack: invoiceError instanceof Error ? invoiceError.stack : undefined });
+        // En cas d'erreur, retourner un message informatif au lieu de continuer silencieusement
+        return new Response(JSON.stringify({
+          error: "Erreur lors de la récupération de l'invoice",
+          message: `Une erreur s'est produite lors de la vérification de l'invoice. Veuillez réessayer dans quelques instants.`,
+          payment_status: "error",
+          processed: false,
+          subscription_activated: false
+        }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
+          status: 200, // Retourner 200 pour ne pas bloquer l'utilisateur
         });
       }
     }
     
-    if (!actualPaymentId && !invoice_id) {
+    if (!actualPaymentId && !normalizedInvoiceId) {
+      logStep("ERROR: No payment_id or invoice_id provided");
       return new Response(JSON.stringify({ error: "payment_id or invoice_id is required" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
     
-    if (!actualPaymentId) {
+    if (!actualPaymentId && normalizedInvoiceId) {
       // Si on n'a toujours pas de payment_id après avoir essayé avec l'invoice
+      logStep("No payment_id found, returning waiting status", { invoice_id: normalizedInvoiceId });
       return new Response(JSON.stringify({
         error: "Paiement en attente",
         message: "Le paiement n'a pas encore été initié. Veuillez patienter quelques instants et réessayer.",
         payment_status: "waiting",
+        invoice_id: normalizedInvoiceId,
         processed: false,
         subscription_activated: false
       }), {

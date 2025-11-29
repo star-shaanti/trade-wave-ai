@@ -63,6 +63,11 @@ const PaymentSuccess = () => {
               await new Promise(resolve => setTimeout(resolve, 2000));
             } else {
               console.log('Statut du paiement:', paymentData?.payment_status);
+              // Si le paiement est en attente, on continue quand même avec la vérification d'abonnement
+              // car le webhook peut avoir déjà activé l'abonnement
+              if (paymentData?.payment_status === "waiting") {
+                console.log('Paiement en attente, vérification de l\'abonnement en cours...');
+              }
             }
           }
         } catch (error) {
