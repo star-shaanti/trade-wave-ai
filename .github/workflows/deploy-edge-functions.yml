@@ -1,0 +1,56 @@
+name: Deploy Supabase Edge Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/deploy-edge-functions.yml'
+      - 'supabase/config.toml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Link to Supabase project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: taadbjuelxonszosfrsk
+        run: |
+          supabase link --project-ref $SUPABASE_PROJECT_ID --password ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Deploy Edge Functions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: taadbjuelxonszosfrsk
+        run: |
+          echo "Deploying all Edge Functions..."
+          
+          # Fonctions NOWPayments
+          supabase functions deploy check-nowpayments-payment || echo "Failed to deploy check-nowpayments-payment"
+          supabase functions deploy create-nowpayments-invoice || echo "Failed to deploy create-nowpayments-invoice"
+          supabase functions deploy nowpayments-webhook || echo "Failed to deploy nowpayments-webhook"
+          
+          # Fonctions Stripe
+          supabase functions deploy create-payment || echo "Failed to deploy create-payment"
+          supabase functions deploy create-checkout || echo "Failed to deploy create-checkout"
+          supabase functions deploy stripe-webhook || echo "Failed to deploy stripe-webhook"
+          
+          # Autres fonctions
+          supabase functions deploy check-subscription || echo "Failed to deploy check-subscription"
+          supabase functions deploy customer-portal || echo "Failed to deploy customer-portal"
+          
+          echo "✅ Deployment completed!"
+
