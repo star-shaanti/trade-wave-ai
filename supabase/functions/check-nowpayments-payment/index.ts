@@ -271,58 +271,87 @@ serve(async (req) => {
             }
           }
         } else if (invoiceResponse.status === 404) {
-          logStep("Invoice not found in NOWPayments - checking if user is already subscribed", { 
+          logStep("Invoice not found as invoice - trying as payment_id", { 
             invoice_id: normalizedInvoiceId,
             user_email: userData.user.email 
           });
           
-          // Si l'invoice n'existe pas (404), vérifier à nouveau si l'utilisateur est déjà abonné
-          // Le webhook peut avoir déjà traité le paiement et l'invoice peut avoir été supprimée
-          const { data: subscriptionCheck, error: checkError } = await serviceRoleClient
-            .from("subscribers")
-            .select("*")
-            .eq("email", userData.user.email || "")
-            .single();
-          
-          if (!checkError && subscriptionCheck && subscriptionCheck.subscribed) {
-            const subscriptionEnd = subscriptionCheck.subscription_end 
-              ? new Date(subscriptionCheck.subscription_end) 
-              : null;
-            const isActive = subscriptionEnd && subscriptionEnd > new Date();
+          // Si l'invoice n'existe pas (404), essayer de l'utiliser comme payment_id
+          // NP_id peut être un payment_id plutôt qu'un invoice_id
+          try {
+            logStep("Trying invoice_id as payment_id", { id: normalizedInvoiceId });
+            const paymentResponse = await fetch(`https://api.nowpayments.io/v1/payment/${normalizedInvoiceId}`, {
+              method: "GET",
+              headers: {
+                "x-api-key": apiKey,
+              },
+            });
             
-            if (isActive) {
-              logStep("User is already subscribed despite 404 invoice - webhook processed payment", {
+            if (paymentResponse.ok) {
+              // C'était un payment_id, pas un invoice_id !
+              logStep("Found payment using invoice_id as payment_id", { payment_id: normalizedInvoiceId });
+              actualPaymentId = normalizedInvoiceId;
+              // Continuer avec la logique de vérification du payment plus bas
+            } else {
+              // Ce n'est ni un invoice_id ni un payment_id
+              logStep("Not found as payment_id either - checking if user is already subscribed", { 
                 invoice_id: normalizedInvoiceId,
-                subscription_tier: subscriptionCheck.subscription_tier
+                user_email: userData.user.email 
               });
               
+              // Si l'invoice n'existe pas (404), vérifier à nouveau si l'utilisateur est déjà abonné
+              // Le webhook peut avoir déjà traité le paiement et l'invoice peut avoir été supprimée
+              const { data: subscriptionCheck, error: checkError } = await serviceRoleClient
+                .from("subscribers")
+                .select("*")
+                .eq("email", userData.user.email || "")
+                .single();
+              
+              if (!checkError && subscriptionCheck && subscriptionCheck.subscribed) {
+                const subscriptionEnd = subscriptionCheck.subscription_end 
+                  ? new Date(subscriptionCheck.subscription_end) 
+                  : null;
+                const isActive = subscriptionEnd && subscriptionEnd > new Date();
+                
+                if (isActive) {
+                  logStep("User is already subscribed despite 404 invoice/payment - webhook processed payment", {
+                    invoice_id: normalizedInvoiceId,
+                    subscription_tier: subscriptionCheck.subscription_tier
+                  });
+                  
+                  return new Response(JSON.stringify({ 
+                    payment_status: "already_processed",
+                    processed: true,
+                    subscription_activated: true,
+                    already_subscribed: true,
+                    message: "Votre abonnement est déjà actif. Le paiement a été traité avec succès par le webhook.",
+                    invoice_id: normalizedInvoiceId
+                  }), {
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                    status: 200,
+                  });
+                }
+              }
+              
+              // L'invoice n'existe pas et l'utilisateur n'est pas encore abonné
+              logStep("Invoice/payment not found and user not subscribed yet", { invoice_id: normalizedInvoiceId });
               return new Response(JSON.stringify({ 
-                payment_status: "already_processed",
-                processed: true,
-                subscription_activated: true,
-                already_subscribed: true,
-                message: "Votre abonnement est déjà actif. Le paiement a été traité avec succès par le webhook.",
-                invoice_id: normalizedInvoiceId
+                error: "Invoice introuvable",
+                message: "L'invoice n'a pas été trouvée dans NOWPayments. Elle peut ne pas exister encore ou avoir été supprimée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+                payment_status: "not_found",
+                invoice_id: normalizedInvoiceId,
+                processed: false,
+                subscription_activated: false
               }), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
-                status: 200,
+                status: 200, // Retourner 200 pour ne pas bloquer l'utilisateur
               });
             }
+          } catch (paymentError) {
+            const errorMsg = paymentError instanceof Error ? paymentError.message : String(paymentError);
+            logStep("Error checking invoice_id as payment_id", { invoice_id: normalizedInvoiceId, error: errorMsg });
+            // Continuer avec la logique normale
           }
-          
-          // L'invoice n'existe pas et l'utilisateur n'est pas encore abonné
-          logStep("Invoice not found and user not subscribed yet", { invoice_id: normalizedInvoiceId });
-          return new Response(JSON.stringify({ 
-            error: "Invoice introuvable",
-            message: "L'invoice n'a pas été trouvée dans NOWPayments. Elle peut ne pas exister encore ou avoir été supprimée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
-            payment_status: "not_found",
-            invoice_id: normalizedInvoiceId,
-            processed: false,
-            subscription_activated: false
-          }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200, // Retourner 200 pour ne pas bloquer l'utilisateur
-          });
         } else {
           const errorText = await invoiceResponse.text();
           logStep("Error fetching invoice", { invoice_id: normalizedInvoiceId, status: invoiceResponse.status, error: errorText });

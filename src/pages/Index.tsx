@@ -275,12 +275,18 @@ const Index = () => {
 
       console.log('Réponse de la fonction:', { data, error });
 
-      // Si data est vide ou undefined, la fonction n'a peut-être pas retourné de réponse valide
+      // Si data est vide ou undefined, vérifier si c'est un objet vide avec seulement error
+      // Si data est un objet vide, la fonction a peut-être retourné une réponse valide mais vide
       if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
-        console.warn('Réponse vide de la fonction Edge - peut-être que l\'invoice n\'existe pas encore');
+        console.warn('Réponse vide de la fonction Edge - vérification de l\'abonnement directement');
+        // Si on a une invoiceId, le webhook pourrait avoir déjà traité le paiement
+        // Vérifier directement l'abonnement après un court délai
+        setTimeout(() => {
+          checkSubscription();
+        }, 3000);
         toast({
           title: "Vérification en cours",
-          description: "L'invoice n'a pas encore été créée dans NOWPayments. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+          description: "Vérification de votre abonnement. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
           variant: "default",
         });
         setCheckingPayment(false);
@@ -306,6 +312,11 @@ const Index = () => {
           // Traiter comme un statut normal, pas une erreur
         } else if (data.error === "Invoice introuvable" || data.payment_status === "not_found") {
           // Invoice introuvable n'est pas une erreur fatale - le webhook activera l'abonnement plus tard
+          // Vérifier quand même l'abonnement car le webhook pourrait avoir déjà traité le paiement
+          console.log('Invoice introuvable mais vérification de l\'abonnement en cours...');
+          setTimeout(() => {
+            checkSubscription();
+          }, 2000);
           toast({
             title: "Vérification en cours",
             description: data.message || "L'invoice n'a pas encore été créée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
@@ -320,6 +331,11 @@ const Index = () => {
       
       // Gérer spécifiquement le cas "Invoice introuvable" même si pas dans data.error
       if (data?.payment_status === "not_found") {
+        // Vérifier quand même l'abonnement car le webhook pourrait avoir déjà traité le paiement
+        console.log('Invoice not_found mais vérification de l\'abonnement en cours...');
+        setTimeout(() => {
+          checkSubscription();
+        }, 2000);
         toast({
           title: "Vérification en cours",
           description: data.message || "L'invoice n'a pas encore été créée dans NOWPayments. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
