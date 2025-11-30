@@ -81,8 +81,54 @@ serve(async (req) => {
       payment_id: normalizedPaymentId, 
       invoice_id: normalizedInvoiceId,
       original_payment_id: payment_id,
-      original_invoice_id: invoice_id
+      original_invoice_id: invoice_id,
+      user_id: userData.user.id,
+      user_email: userData.user.email
     });
+    
+    // IMPORTANT: Vérifier d'abord si l'utilisateur est déjà abonné
+    // Le webhook peut avoir déjà traité le paiement même si l'invoice n'existe plus
+    const serviceRoleClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    
+    const { data: existingSubscription, error: subscriptionError } = await serviceRoleClient
+      .from("subscribers")
+      .select("*")
+      .eq("email", userData.user.email || "")
+      .single();
+    
+    if (subscriptionError && subscriptionError.code !== "PGRST116") { // PGRST116 = no rows returned
+      logStep("ERROR checking existing subscription", { error: subscriptionError.message });
+    } else if (existingSubscription && existingSubscription.subscribed) {
+      const subscriptionEnd = existingSubscription.subscription_end 
+        ? new Date(existingSubscription.subscription_end) 
+        : null;
+      const isSubscriptionActive = subscriptionEnd && subscriptionEnd > new Date();
+      
+      logStep("User already has subscription", {
+        subscribed: existingSubscription.subscribed,
+        subscription_tier: existingSubscription.subscription_tier,
+        subscription_end: existingSubscription.subscription_end,
+        is_active: isSubscriptionActive
+      });
+      
+      if (isSubscriptionActive) {
+        // L'utilisateur est déjà abonné - le webhook a probablement déjà traité le paiement
+        return new Response(JSON.stringify({
+          payment_status: "already_processed",
+          processed: true,
+          subscription_activated: true,
+          already_subscribed: true,
+          message: "Votre abonnement est déjà actif. Le paiement a été traité avec succès."
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
     
     let actualPaymentId = normalizedPaymentId;
     let invoiceData: any = null;
@@ -146,11 +192,7 @@ serve(async (req) => {
               logStep("Invoice is paid but no payment_id - activating subscription directly", { invoice_id: normalizedInvoiceId, invoice_status: invoiceStatus });
               
               // Activer l'abonnement directement basé sur l'invoice
-              const serviceRoleClient = createClient(
-                Deno.env.get("SUPABASE_URL") ?? "",
-                Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-                { auth: { persistSession: false } }
-              );
+              // serviceRoleClient déjà créé plus haut
 
               // Extract user_id from order_id if available
               let userId: string | null = userData.user.id;
@@ -228,9 +270,47 @@ serve(async (req) => {
             }
           }
         } else if (invoiceResponse.status === 404) {
-          logStep("Invoice not found in NOWPayments", { invoice_id: normalizedInvoiceId });
-          // Retourner un status 200 pour ne pas bloquer l'utilisateur
-          // L'invoice peut ne pas exister encore ou avoir été supprimée
+          logStep("Invoice not found in NOWPayments - checking if user is already subscribed", { 
+            invoice_id: normalizedInvoiceId,
+            user_email: userData.user.email 
+          });
+          
+          // Si l'invoice n'existe pas (404), vérifier à nouveau si l'utilisateur est déjà abonné
+          // Le webhook peut avoir déjà traité le paiement et l'invoice peut avoir été supprimée
+          const { data: subscriptionCheck, error: checkError } = await serviceRoleClient
+            .from("subscribers")
+            .select("*")
+            .eq("email", userData.user.email || "")
+            .single();
+          
+          if (!checkError && subscriptionCheck && subscriptionCheck.subscribed) {
+            const subscriptionEnd = subscriptionCheck.subscription_end 
+              ? new Date(subscriptionCheck.subscription_end) 
+              : null;
+            const isActive = subscriptionEnd && subscriptionEnd > new Date();
+            
+            if (isActive) {
+              logStep("User is already subscribed despite 404 invoice - webhook processed payment", {
+                invoice_id: normalizedInvoiceId,
+                subscription_tier: subscriptionCheck.subscription_tier
+              });
+              
+              return new Response(JSON.stringify({ 
+                payment_status: "already_processed",
+                processed: true,
+                subscription_activated: true,
+                already_subscribed: true,
+                message: "Votre abonnement est déjà actif. Le paiement a été traité avec succès par le webhook.",
+                invoice_id: normalizedInvoiceId
+              }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+                status: 200,
+              });
+            }
+          }
+          
+          // L'invoice n'existe pas et l'utilisateur n'est pas encore abonné
+          logStep("Invoice not found and user not subscribed yet", { invoice_id: normalizedInvoiceId });
           return new Response(JSON.stringify({ 
             error: "Invoice introuvable",
             message: "L'invoice n'a pas été trouvée dans NOWPayments. Elle peut ne pas exister encore ou avoir été supprimée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
@@ -330,11 +410,7 @@ serve(async (req) => {
                          (payment.payment_status === "Partially_paid" && isFullyPaid);
     
     if (shouldProcess) {
-      const serviceRoleClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
+      // serviceRoleClient déjà créé plus haut
 
       // Extract user_id from order_id
       let userId: string | null = userData.user.id;

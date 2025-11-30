@@ -307,7 +307,7 @@ const Index = () => {
           setShowPaymentCheckModal(false);
           return; // Sortir de la fonction sans erreur
         } else {
-          throw new Error(data.error);
+        throw new Error(data.error);
         }
       }
       
@@ -322,10 +322,13 @@ const Index = () => {
         return;
       }
 
-      if (data?.subscription_activated) {
+      if (data?.subscription_activated || data?.already_subscribed) {
+        const isAlreadySubscribed = data?.already_subscribed;
         toast({
-          title: "Abonnement activé !",
-          description: "Votre paiement a été confirmé et votre abonnement est maintenant actif.",
+          title: isAlreadySubscribed ? "Abonnement déjà actif" : "Abonnement activé !",
+          description: isAlreadySubscribed 
+            ? (data?.message || "Votre abonnement est déjà actif. Le paiement a été traité avec succès.")
+            : "Votre paiement a été confirmé et votre abonnement est maintenant actif.",
         });
         setShowPaymentCheckModal(false);
         // Nettoyer les identifiants de paiement une fois l'abonnement activé
@@ -338,20 +341,20 @@ const Index = () => {
           window.location.reload();
         }, 2000);
       } else {
-        // Afficher un message détaillé selon le statut
-        const message = data?.message || 
-          (data?.needs_more_payment 
-            ? `Paiement partiel: ${data?.payment_percentage || 0}% payé. Veuillez compléter le paiement pour activer l'abonnement.`
+                                  // Afficher un message détaillé selon le statut
+                                  const message = data?.message || 
+                                    (data?.needs_more_payment 
+                                      ? `Paiement partiel: ${data?.payment_percentage || 0}% payé. Veuillez compléter le paiement pour activer l'abonnement.`
             : data?.payment_status === "waiting"
             ? "Le paiement est en cours de traitement. L'abonnement sera activé automatiquement une fois le paiement confirmé."
-            : `Statut du paiement: ${data?.payment_status || 'inconnu'}. Le webhook sera traité automatiquement une fois le paiement confirmé.`);
-        
-        toast({
+                                      : `Statut du paiement: ${data?.payment_status || 'inconnu'}. Le webhook sera traité automatiquement une fois le paiement confirmé.`);
+                                  
+                                  toast({
           title: data?.needs_more_payment ? "Paiement incomplet" : data?.payment_status === "waiting" ? "Paiement en cours" : "Paiement en attente",
-          description: message,
-          variant: data?.needs_more_payment ? "destructive" : "default",
-        });
-        setShowPaymentCheckModal(false);
+                                    description: message,
+                                    variant: data?.needs_more_payment ? "destructive" : "default",
+                                  });
+                                  setShowPaymentCheckModal(false);
         
         // Si le paiement est en attente, vérifier à nouveau l'abonnement après quelques secondes
         if (data?.payment_status === "waiting") {
@@ -359,7 +362,7 @@ const Index = () => {
             checkSubscription();
           }, 5000);
         }
-      }
+                                }
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -441,10 +444,14 @@ const Index = () => {
       // Vérifier si l'utilisateur vient de payer
       const fromPaymentSuccess = sessionStorage.getItem('fromPaymentSuccess');
       const urlParams = new URLSearchParams(window.location.search);
+      // NP_id est l'identifiant retourné par NOWPayments dans l'URL de redirection
+      const npId = urlParams.get('NP_id');
       const invoiceId = urlParams.get('iid') || urlParams.get('invoice_id') || 
+                       npId ||
                        sessionStorage.getItem('nowpayments_invoice_id') ||
                        localStorage.getItem('nowpayments_invoice_id');
       const paymentId = urlParams.get('payment_id') || urlParams.get('paymentId') ||
+                       npId ||
                        sessionStorage.getItem('nowpayments_payment_id') ||
                        localStorage.getItem('nowpayments_payment_id');
 

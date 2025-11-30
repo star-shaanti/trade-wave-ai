@@ -19,16 +19,25 @@ const PaymentSuccess = () => {
     
     // Extraire l'invoice_id et payment_id depuis l'URL si disponibles
     const urlParams = new URLSearchParams(window.location.search);
+    // NP_id est l'identifiant de paiement/invoice retourné par NOWPayments dans l'URL de redirection
+    const npId = urlParams.get('NP_id');
     const invoiceId = urlParams.get('iid') || urlParams.get('invoice_id');
     const paymentId = urlParams.get('payment_id') || urlParams.get('paymentId');
     
-    if (invoiceId) {
-      sessionStorage.setItem('nowpayments_invoice_id', invoiceId);
-      localStorage.setItem('nowpayments_invoice_id', invoiceId);
+    // NP_id peut être un payment_id ou un invoice_id - on va l'essayer comme les deux
+    // Utiliser NP_id comme payment_id ou invoice_id si disponible (priorité à NP_id)
+    const finalPaymentId = npId || paymentId;
+    const finalInvoiceId = npId || invoiceId;
+    
+    if (finalInvoiceId) {
+      sessionStorage.setItem('nowpayments_invoice_id', finalInvoiceId);
+      localStorage.setItem('nowpayments_invoice_id', finalInvoiceId);
+      console.log('Invoice ID stocké:', finalInvoiceId);
     }
-    if (paymentId) {
-      sessionStorage.setItem('nowpayments_payment_id', paymentId);
-      localStorage.setItem('nowpayments_payment_id', paymentId);
+    if (finalPaymentId) {
+      sessionStorage.setItem('nowpayments_payment_id', finalPaymentId);
+      localStorage.setItem('nowpayments_payment_id', finalPaymentId);
+      console.log('Payment ID stocké:', finalPaymentId);
     }
     
     // Check subscription status after payment with retry logic
@@ -38,16 +47,24 @@ const PaymentSuccess = () => {
       const maxRetries = 5; // Augmenté le nombre de tentatives
       
       // Étape 1: Vérifier et activer le paiement NOWPayments si on a les identifiants
-      if (invoiceId || paymentId) {
+      if (finalInvoiceId || finalPaymentId) {
         try {
-          console.log('Vérification du paiement NOWPayments...', { invoiceId, paymentId });
+          console.log('Vérification du paiement NOWPayments...', { 
+            invoiceId: finalInvoiceId, 
+            paymentId: finalPaymentId,
+            npId: npId,
+            originalInvoiceId: invoiceId,
+            originalPaymentId: paymentId
+          });
           
           const session = await supabase.auth.getSession();
           if (session.data.session?.access_token) {
+            // Essayer d'abord avec payment_id (NP_id peut être un payment_id)
+            // Si ça ne fonctionne pas, essayer avec invoice_id
             const { data: paymentData, error: paymentError } = await supabase.functions.invoke('check-nowpayments-payment', {
               body: {
-                ...(paymentId && { payment_id: paymentId }),
-                ...(invoiceId && { invoice_id: invoiceId })
+                ...(finalPaymentId && { payment_id: finalPaymentId }),
+                ...(finalInvoiceId && { invoice_id: finalInvoiceId })
               },
               headers: {
                 Authorization: `Bearer ${session.data.session.access_token}`,

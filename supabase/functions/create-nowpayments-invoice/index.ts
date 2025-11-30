@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CREATE-NOWPAYMENTS-INVOICE] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -93,6 +98,43 @@ serve(async (req) => {
     }
 
     const invoice = await response.json();
+    
+    logStep("Invoice created successfully", {
+      invoice_keys: Object.keys(invoice),
+      invoice_id: invoice.id,
+      invoice_invoice_id: invoice.invoice_id,
+      invoice_url: invoice.invoice_url,
+      invoice_status: invoice.status || invoice.invoice_status,
+      order_id: invoice.order_id,
+      price_amount: invoice.price_amount
+    });
+    
+    // Extraire l'invoice_id - NOWPayments peut utiliser différents champs
+    let invoiceId = invoice.id || invoice.invoice_id || invoice.invoiceId;
+    
+    // Si on n'a pas d'invoice_id dans la réponse, essayer de l'extraire de l'URL
+    if (!invoiceId && invoice.invoice_url) {
+      try {
+        const url = new URL(invoice.invoice_url);
+        const iidFromUrl = url.searchParams.get('iid') || url.searchParams.get('invoice_id');
+        if (iidFromUrl) {
+          invoiceId = iidFromUrl;
+          logStep("Invoice ID extracted from URL", { invoice_id: invoiceId });
+        }
+        
+        // L'invoice_id peut aussi être dans le path de l'URL
+        const pathParts = url.pathname.split('/');
+        const possibleInvoiceId = pathParts[pathParts.length - 1];
+        if (possibleInvoiceId && possibleInvoiceId.match(/^\d+$/)) {
+          invoiceId = possibleInvoiceId;
+          logStep("Invoice ID extracted from URL path", { invoice_id: invoiceId });
+        }
+      } catch (e) {
+        logStep("Could not extract invoice_id from URL", { error: e instanceof Error ? e.message : String(e) });
+      }
+    }
+    
+    logStep("Final invoice_id determined", { invoice_id: invoiceId, user_email: customerEmail });
 
     // Ajouter l'email comme paramètre dans l'URL de l'invoice pour pré-remplir le champ
     let invoiceUrl = invoice.invoice_url;
@@ -103,14 +145,18 @@ serve(async (req) => {
         invoiceUrl = url.toString();
       } catch (e) {
         // Si l'URL n'est pas valide, utiliser l'URL originale
-        console.warn("Could not modify invoice URL:", e);
+        logStep("Could not modify invoice URL", { error: e instanceof Error ? e.message : String(e) });
       }
+    }
+
+    if (!invoiceId) {
+      logStep("WARNING: No invoice_id found in response", { invoice_full_response: JSON.stringify(invoice).substring(0, 500) });
     }
 
     return new Response(
       JSON.stringify({
         invoice_url: invoiceUrl,
-        invoice_id: invoice.id || invoice.invoice_id,
+        invoice_id: invoiceId,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
