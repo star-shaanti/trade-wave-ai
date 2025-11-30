@@ -29,28 +29,27 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: taadbjuelxonszosfrsk
         run: |
-          supabase link --project-ref $SUPABASE_PROJECT_ID --password ${{ secrets.SUPABASE_DB_PASSWORD }}
+          supabase link --project-ref $SUPABASE_PROJECT_ID
 
       - name: Deploy Edge Functions
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_ID: taadbjuelxonszosfrsk
         run: |
           echo "Deploying all Edge Functions..."
           
           # Fonctions NOWPayments
-          supabase functions deploy check-nowpayments-payment || echo "Failed to deploy check-nowpayments-payment"
-          supabase functions deploy create-nowpayments-invoice || echo "Failed to deploy create-nowpayments-invoice"
-          supabase functions deploy nowpayments-webhook || echo "Failed to deploy nowpayments-webhook"
+          supabase functions deploy check-nowpayments-payment --no-verify-jwt || echo "Failed to deploy check-nowpayments-payment"
+          supabase functions deploy create-nowpayments-invoice --no-verify-jwt || echo "Failed to deploy create-nowpayments-invoice"
+          supabase functions deploy nowpayments-webhook --no-verify-jwt || echo "Failed to deploy nowpayments-webhook"
           
           # Fonctions Stripe
-          supabase functions deploy create-payment || echo "Failed to deploy create-payment"
-          supabase functions deploy create-checkout || echo "Failed to deploy create-checkout"
-          supabase functions deploy stripe-webhook || echo "Failed to deploy stripe-webhook"
+          supabase functions deploy create-payment --no-verify-jwt || echo "Failed to deploy create-payment"
+          supabase functions deploy create-checkout --no-verify-jwt || echo "Failed to deploy create-checkout"
+          supabase functions deploy stripe-webhook --no-verify-jwt || echo "Failed to deploy stripe-webhook"
           
           # Autres fonctions
-          supabase functions deploy check-subscription || echo "Failed to deploy check-subscription"
-          supabase functions deploy customer-portal || echo "Failed to deploy customer-portal"
+          supabase functions deploy check-subscription --no-verify-jwt || echo "Failed to deploy check-subscription"
+          supabase functions deploy customer-portal --no-verify-jwt || echo "Failed to deploy customer-portal"
           
           echo "✅ Deployment completed!"
 
