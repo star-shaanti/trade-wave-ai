@@ -24,10 +24,11 @@ const PaymentSuccess = () => {
     const invoiceId = urlParams.get('iid') || urlParams.get('invoice_id');
     const paymentId = urlParams.get('payment_id') || urlParams.get('paymentId');
     
-    // NP_id peut être un payment_id ou un invoice_id - on va l'essayer comme les deux
-    // Utiliser NP_id comme payment_id ou invoice_id si disponible (priorité à NP_id)
-    const finalPaymentId = npId || paymentId;
-    const finalInvoiceId = npId || invoiceId;
+    // NP_id peut être un payment_id ou un invoice_id
+    // Priorité : payment_id explicite > NP_id > invoice_id explicite
+    // On n'utilise pas NP_id comme les deux en même temps pour éviter les conflits
+    const finalPaymentId = paymentId || npId || null;
+    const finalInvoiceId = invoiceId || (npId && !paymentId ? npId : null);
     
     if (finalInvoiceId) {
       sessionStorage.setItem('nowpayments_invoice_id', finalInvoiceId);
@@ -59,13 +60,18 @@ const PaymentSuccess = () => {
           
           const session = await supabase.auth.getSession();
           if (session.data.session?.access_token) {
-            // Essayer d'abord avec payment_id (NP_id peut être un payment_id)
-            // Si ça ne fonctionne pas, essayer avec invoice_id
+            // Essayer d'abord avec payment_id si disponible (priorité)
+            // Sinon, essayer avec invoice_id
+            // Ne pas envoyer les deux en même temps si c'est le même identifiant
+            const requestBody: any = {};
+            if (finalPaymentId) {
+              requestBody.payment_id = finalPaymentId;
+            } else if (finalInvoiceId) {
+              requestBody.invoice_id = finalInvoiceId;
+            }
+            
             const { data: paymentData, error: paymentError } = await supabase.functions.invoke('check-nowpayments-payment', {
-              body: {
-                ...(finalPaymentId && { payment_id: finalPaymentId }),
-                ...(finalInvoiceId && { invoice_id: finalInvoiceId })
-              },
+              body: requestBody,
               headers: {
                 Authorization: `Bearer ${session.data.session.access_token}`,
               },

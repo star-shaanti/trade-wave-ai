@@ -380,15 +380,140 @@ serve(async (req) => {
     logStep("Checking payment status", { payment_id: actualPaymentId });
 
     // Check payment status via NOWPayments API
-    const response = await fetch(`https://api.nowpayments.io/v1/payment/${actualPaymentId}`, {
+    let response = await fetch(`https://api.nowpayments.io/v1/payment/${actualPaymentId}`, {
       method: "GET",
       headers: {
         "x-api-key": apiKey,
       },
     });
 
+    // Si le payment_id n'existe pas (404) et qu'on a un invoice_id, essayer avec l'invoice
+    if (!response.ok && response.status === 404 && normalizedInvoiceId && normalizedInvoiceId !== actualPaymentId) {
+      logStep("Payment ID not found, trying with invoice_id as fallback", { 
+        payment_id: actualPaymentId, 
+        invoice_id: normalizedInvoiceId 
+      });
+      
+      // Réessayer avec l'invoice_id
+      try {
+        const invoiceResponse = await fetch(`https://api.nowpayments.io/v1/invoice/${normalizedInvoiceId}`, {
+          method: "GET",
+          headers: {
+            "x-api-key": apiKey,
+          },
+        });
+        
+        if (invoiceResponse.ok) {
+          invoiceData = await invoiceResponse.json();
+          logStep("Invoice found as fallback", { 
+            invoice_id: normalizedInvoiceId,
+            invoice_status: invoiceData.status,
+            payment_id_from_invoice: invoiceData.payment_id
+          });
+          
+          if (invoiceData.payment_id) {
+            actualPaymentId = invoiceData.payment_id;
+            logStep("Using payment_id from invoice", { payment_id: actualPaymentId });
+            
+            // Réessayer avec le payment_id de l'invoice
+            response = await fetch(`https://api.nowpayments.io/v1/payment/${actualPaymentId}`, {
+              method: "GET",
+              headers: {
+                "x-api-key": apiKey,
+              },
+            });
+          } else {
+            // Pas de payment_id dans l'invoice, vérifier si l'invoice est payée directement
+            const invoiceStatus = (invoiceData.status || invoiceData.invoice_status || "").toLowerCase();
+            const paymentStatus = (invoiceData.payment_status || "").toLowerCase();
+            const isInvoicePaid = invoiceStatus === "paid" || 
+                                 invoiceStatus === "finished" || 
+                                 invoiceStatus === "confirmed" ||
+                                 invoiceStatus === "completed" ||
+                                 paymentStatus === "finished" ||
+                                 paymentStatus === "confirmed" ||
+                                 paymentStatus === "paid";
+            
+            if (isInvoicePaid) {
+              logStep("Invoice is paid, activating subscription from invoice fallback", { invoice_id: normalizedInvoiceId });
+              
+              let userId: string | null = userData.user.id;
+              if (invoiceData.order_id) {
+                const parts = invoiceData.order_id.split("-");
+                if (parts.length > 0) {
+                  const possibleUserId = parts.slice(0, 5).join("-");
+                  if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+                    userId = possibleUserId;
+                  }
+                }
+              }
+
+              let subscriptionTier: string | null = null;
+              const amount = Number(invoiceData.price_amount) || 0;
+              
+              if (amount <= 9) {
+                subscriptionTier = "Basic";
+              } else if (amount <= 19) {
+                subscriptionTier = "Premium";
+              } else {
+                subscriptionTier = "Enterprise";
+              }
+
+              const subscriptionEnd = new Date();
+              subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
+              const subscriptionEndISO = subscriptionEnd.toISOString();
+
+              const result = await serviceRoleClient.from("subscribers").upsert({
+                email: invoiceData.customer_email || userData.user.email || "",
+                user_id: userId,
+                stripe_customer_id: null,
+                subscribed: true,
+                subscription_tier: subscriptionTier,
+                subscription_end: subscriptionEndISO,
+                updated_at: new Date().toISOString(),
+              }, { onConflict: 'email' });
+
+              if (result.error) {
+                logStep("ERROR updating database from invoice fallback", { error: result.error.message });
+                throw new Error(`Database update failed: ${result.error.message}`);
+              }
+
+              return new Response(JSON.stringify({
+                payment_status: invoiceData.payment_status || "finished",
+                processed: true,
+                subscription_activated: true,
+                from_invoice_fallback: true
+              }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+                status: 200,
+              });
+            }
+          }
+        }
+      } catch (fallbackError) {
+        logStep("Error in invoice fallback", { error: fallbackError instanceof Error ? fallbackError.message : String(fallbackError) });
+      }
+    }
+
     if (!response.ok) {
       const errorData = await response.text();
+      logStep("Payment API error", { status: response.status, error: errorData });
+      
+      // Si c'est un 404, retourner un message informatif
+      if (response.status === 404) {
+        return new Response(JSON.stringify({ 
+          error: "Payment introuvable",
+          message: "Le paiement n'a pas été trouvé dans NOWPayments. Il peut ne pas exister encore ou avoir été supprimé. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+          payment_status: "not_found",
+          payment_id: actualPaymentId,
+          processed: false,
+          subscription_activated: false
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+      
       throw new Error(`NOWPayments API error: ${errorData}`);
     }
 

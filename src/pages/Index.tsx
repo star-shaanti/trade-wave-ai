@@ -256,11 +256,18 @@ const Index = () => {
 
       console.log('Vérification du paiement avec:', { paymentId: finalPaymentId, invoiceId: finalInvoiceId });
 
+      // Essayer d'abord avec payment_id si disponible (priorité)
+      // Sinon, essayer avec invoice_id
+      // Ne pas envoyer les deux en même temps si c'est le même identifiant
+      const requestBody: any = {};
+      if (finalPaymentId) {
+        requestBody.payment_id = finalPaymentId;
+      } else if (finalInvoiceId) {
+        requestBody.invoice_id = finalInvoiceId;
+      }
+
       const { data, error } = await supabase.functions.invoke('check-nowpayments-payment', {
-        body: { 
-          ...(finalPaymentId && { payment_id: finalPaymentId }),
-          ...(finalInvoiceId && { invoice_id: finalInvoiceId })
-        },
+        body: requestBody,
         headers: {
           Authorization: `Bearer ${session.data.session.access_token}`,
         },
@@ -446,14 +453,17 @@ const Index = () => {
       const urlParams = new URLSearchParams(window.location.search);
       // NP_id est l'identifiant retourné par NOWPayments dans l'URL de redirection
       const npId = urlParams.get('NP_id');
-      const invoiceId = urlParams.get('iid') || urlParams.get('invoice_id') || 
-                       npId ||
-                       sessionStorage.getItem('nowpayments_invoice_id') ||
-                       localStorage.getItem('nowpayments_invoice_id');
-      const paymentId = urlParams.get('payment_id') || urlParams.get('paymentId') ||
-                       npId ||
+      const urlInvoiceId = urlParams.get('iid') || urlParams.get('invoice_id');
+      const urlPaymentId = urlParams.get('payment_id') || urlParams.get('paymentId');
+      
+      // Priorité : payment_id explicite > NP_id > invoice_id explicite
+      // On n'utilise pas NP_id comme les deux en même temps pour éviter les conflits
+      const paymentId = urlPaymentId || npId || 
                        sessionStorage.getItem('nowpayments_payment_id') ||
                        localStorage.getItem('nowpayments_payment_id');
+      const invoiceId = urlInvoiceId || (npId && !urlPaymentId ? npId : null) ||
+                       sessionStorage.getItem('nowpayments_invoice_id') ||
+                       localStorage.getItem('nowpayments_invoice_id');
 
       // Vérifier automatiquement le paiement si on a les identifiants
       if (invoiceId || paymentId) {
