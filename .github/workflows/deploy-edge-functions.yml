@@ -22,7 +22,9 @@ jobs:
           deno-version: v1.x
 
       - name: Install Supabase CLI
-        run: npm install -g supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
       - name: Deploy Edge Functions
         env:
