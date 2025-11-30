@@ -38,8 +38,6 @@ jobs:
           fi
           
           echo "🚀 Deploying all Edge Functions to project: $SUPABASE_PROJECT_ID"
-        run: |
-          echo "🚀 Deploying all Edge Functions to project: $SUPABASE_PROJECT_ID"
           
           set -e  # Arrêter en cas d'erreur
           
