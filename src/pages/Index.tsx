@@ -7,7 +7,7 @@ import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
-import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown } from "lucide-react";
+import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, PlayCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "../components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
@@ -1517,6 +1517,28 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Colonne de gauche - Paramètres */}
           <div className="space-y-6">
+            {/* Tutorial Video Link */}
+            <div className="mb-4">
+              <a
+                href="https://youtu.be/rg5jsh-xbYA"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 shadow-sm hover:shadow-md transition-all duration-200 group"
+              >
+                <div className="flex-shrink-0">
+                  <PlayCircle className="h-6 w-6 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    {translations.tutorialVideoTitle || "How to Use Real-time Trading Signals Platform?"}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                    {translations.tutorialVideoSubtitle || "Watch our comprehensive tutorial guide"}
+                  </p>
+                </div>
+                <ExternalLink className="h-4 w-4 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
+              </a>
+            </div>
             
             {/* Trading Bot Settings */}
             <Card>

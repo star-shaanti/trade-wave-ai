@@ -56,6 +56,8 @@ export const globalTranslations = {
     open: "Open",
     closed: "Closed",
     logInToGetSignals: "Log In to Get Signals",
+    tutorialVideoTitle: "How to Use Real-time Trading Signals Platform?",
+    tutorialVideoSubtitle: "Watch our comprehensive tutorial guide",
     
     // Active Signals
     activeSignals: "ACTIVE SIGNALS",
@@ -119,6 +121,8 @@ export const globalTranslations = {
     open: "Ouvert",
     closed: "Fermé",
     logInToGetSignals: "Se connecter pour obtenir les signaux",
+    tutorialVideoTitle: "Comment utiliser la plateforme de signaux de trading en temps réel ?",
+    tutorialVideoSubtitle: "Regardez notre guide de tutoriel complet",
     
     // Active Signals
     activeSignals: "SIGNAUX ACTIFS",
@@ -182,6 +186,8 @@ export const globalTranslations = {
     open: "Abierto",
     closed: "Cerrado",
     logInToGetSignals: "Iniciar sesión para obtener señales",
+    tutorialVideoTitle: "¿Cómo usar la plataforma de señales de trading en tiempo real?",
+    tutorialVideoSubtitle: "Mira nuestra guía de tutorial completa",
     
     // Active Signals
     activeSignals: "SEÑALES ACTIVAS",
@@ -245,6 +251,8 @@ export const globalTranslations = {
     open: "Aperto",
     closed: "Chiuso",
     logInToGetSignals: "Accedi per ottenere i segnali",
+    tutorialVideoTitle: "Come utilizzare la piattaforma di segnali di trading in tempo reale?",
+    tutorialVideoSubtitle: "Guarda la nostra guida tutorial completa",
     
     // Active Signals
     activeSignals: "SEGNALI ATTIVI",
@@ -308,6 +316,8 @@ export const globalTranslations = {
     open: "Aberto",
     closed: "Fechado",
     logInToGetSignals: "Entrar para obter sinais",
+    tutorialVideoTitle: "Como usar a plataforma de sinais de trading em tempo real?",
+    tutorialVideoSubtitle: "Assista ao nosso guia de tutorial completo",
     
     // Active Signals
     activeSignals: "SINAIS ATIVOS",
@@ -353,6 +363,8 @@ export const globalTranslations = {
     open: "Открыто",
     closed: "Закрыто",
     logInToGetSignals: "Войти для получения сигналов",
+    tutorialVideoTitle: "Как использовать платформу сигналов трейдинга в реальном времени?",
+    tutorialVideoSubtitle: "Посмотрите наш полный обучающий гид",
     
     // Active Signals
     activeSignals: "АКТИВНЫЕ СИГНАЛЫ",
@@ -398,6 +410,8 @@ export const globalTranslations = {
     open: "مفتوح",
     closed: "مغلق",
     logInToGetSignals: "تسجيل الدخول للحصول على الإشارات",
+    tutorialVideoTitle: "كيفية استخدام منصة إشارات التداول في الوقت الفعلي؟",
+    tutorialVideoSubtitle: "شاهد دليلنا التعليمي الشامل",
     
     // Active Signals
     activeSignals: "الإشارات النشطة",
@@ -443,6 +457,8 @@ export const globalTranslations = {
     open: "खुला",
     closed: "बंद",
     logInToGetSignals: "सिग्नल प्राप्त करने के लिए लॉग इन करें",
+    tutorialVideoTitle: "रियल-टाइम ट्रेडिंग सिग्नल प्लेटफॉर्म का उपयोग कैसे करें?",
+    tutorialVideoSubtitle: "हमारा व्यापक ट्यूटोरियल गाइड देखें",
     
     // Active Signals
     activeSignals: "सक्रिय सिग्नल",
