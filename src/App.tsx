@@ -28,7 +28,8 @@ const App = () => {
     if (affiliateRef) {
       // Stocker dans localStorage pour le préserver lors de la navigation
       localStorage.setItem('affiliate_ref', affiliateRef);
-      console.log('[AFFILIATION] ✅ Paramètre ref détecté et stocké:', affiliateRef);
+      console.log('[AFFILIATION] ✅ Paramètre ref détecté dans l\'URL et stocké:', affiliateRef);
+      console.log('[AFFILIATION] 💾 Ref sauvegardé dans localStorage pour la session');
       
       // Nettoyer l'URL en retirant le paramètre ref pour une navigation propre
       // (optionnel, mais garde l'URL propre)
@@ -40,6 +41,9 @@ const App = () => {
       const storedRef = localStorage.getItem('affiliate_ref');
       if (storedRef) {
         console.log('[AFFILIATION] 📌 Ref existant trouvé dans localStorage:', storedRef);
+        console.log('[AFFILIATION] ✅ Ce ref sera utilisé pour le suivi d\'affiliation');
+      } else {
+        console.log('[AFFILIATION] ℹ️ Aucun ref d\'affiliation trouvé (ni dans l\'URL ni dans localStorage)');
       }
     }
   }, []);

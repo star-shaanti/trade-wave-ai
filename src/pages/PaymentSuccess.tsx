@@ -22,12 +22,20 @@ const PaymentSuccess = () => {
     const affiliateIdFromStorage = localStorage.getItem('affiliate_ref');
     const affiliateId = affiliateIdFromUrl || affiliateIdFromStorage;
 
+    console.log('[AFFILIATION] 🔍 Recherche du ref:', {
+      fromURL: affiliateIdFromUrl,
+      fromStorage: affiliateIdFromStorage,
+      final: affiliateId
+    });
+
     if (!affiliateId) {
       console.log('[AFFILIATION] ⚠️ Aucun paramètre ref trouvé (ni dans l\'URL ni dans localStorage)');
+      console.log('[AFFILIATION] 💡 Pour tester, ajoutez ?ref=VOTRE_ID à l\'URL');
       return;
     }
 
     console.log('[AFFILIATION] 📌 Utilisation du ref:', affiliateId, affiliateIdFromUrl ? '(depuis URL)' : '(depuis localStorage)');
+    console.log('[AFFILIATION] 📤 Envoi de la requête d\'affiliation...');
 
     fetch('https://affiliate-trading-signals.com/api/signup', {
       method: 'POST',
@@ -40,20 +48,34 @@ const PaymentSuccess = () => {
         subscription_price: subscriptionPrice
       })
     })
-      .then(r => r.json())
+      .then(r => {
+        console.log('[AFFILIATION] 📥 Réponse reçue, statut:', r.status);
+        return r.json();
+      })
       .then(d => {
+        console.log('[AFFILIATION] 📋 Données reçues:', d);
         if (d.success) {
           console.log('[AFFILIATION] ✅ Commission:', d.commission + '€');
+        } else {
+          console.log('[AFFILIATION] ⚠️ Réponse non réussie:', d);
         }
       })
       .catch(error => {
-        console.error('[AFFILIATION] Erreur:', error);
+        console.error('[AFFILIATION] ❌ Erreur lors de l\'envoi:', error);
       });
   }, []);
 
   useEffect(() => {
     // Marquer que l'utilisateur vient de payer
     sessionStorage.setItem('fromPaymentSuccess', 'true');
+    
+    // Vérifier et logger le ref d'affiliation au chargement de la page
+    const storedRef = localStorage.getItem('affiliate_ref');
+    console.log('[AFFILIATION] 🔍 Vérification du ref au chargement de PaymentSuccess:', {
+      refFromStorage: storedRef,
+      refFromURL: new URLSearchParams(window.location.search).get('ref'),
+      userEmail: user?.email
+    });
     
     // Extraire l'invoice_id et payment_id depuis l'URL si disponibles
     const urlParams = new URLSearchParams(window.location.search);
@@ -152,8 +174,22 @@ const PaymentSuccess = () => {
               // Récupérer le prix réel depuis sessionStorage, ou utiliser 99.99 par défaut
               const storedAmount = sessionStorage.getItem('subscriptionAmount');
               const subscriptionPrice = storedAmount ? parseFloat(storedAmount) : 99.99;
+              
+              console.log('[AFFILIATION] 🚀 Tentative de suivi d\'affiliation:', {
+                userEmail: user.email,
+                userName: userName,
+                price: subscriptionPrice,
+                refInStorage: localStorage.getItem('affiliate_ref')
+              });
+              
               trackAffiliateSignup(user.email, userName, subscriptionPrice);
               setAffiliateTracked(true);
+            } else {
+              console.log('[AFFILIATION] ⚠️ Suivi d\'affiliation non effectué:', {
+                hasUser: !!user,
+                hasEmail: !!user?.email,
+                alreadyTracked: affiliateTracked
+              });
             }
 
             toast({
