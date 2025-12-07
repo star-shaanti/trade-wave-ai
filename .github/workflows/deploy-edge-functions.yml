@@ -77,9 +77,5 @@ jobs:
           supabase functions deploy customer-portal --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt
           echo "✅ customer-portal deployed"
           
-          echo "📦 Deploying activate-subscription..."
-          supabase functions deploy activate-subscription --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt
-          echo "✅ activate-subscription deployed"
-          
           echo "🎉 All Edge Functions deployed successfully!"
 
