@@ -464,9 +464,11 @@ const Index = () => {
     if (!user || isPremium || checkingPayment) return;
 
     const autoCheckPayment = async () => {
-      // 🔒 SÉCURITÉ: Vérifier que les IDs de paiement stockés appartiennent à cet utilisateur
+      // 🔒 SÉCURITÉ RENFORCÉE: Vérifier que les IDs de paiement stockés appartiennent à cet utilisateur
       const storedUserEmail = sessionStorage.getItem('payment_user_email') || 
-                              localStorage.getItem('payment_user_email');
+                              localStorage.getItem('payment_user_email') ||
+                              sessionStorage.getItem('nowpayments_user_email') || 
+                              localStorage.getItem('nowpayments_user_email');
       
       // Vérifier s'il y a des payment_id stockés
       const hasStoredPaymentId = sessionStorage.getItem('nowpayments_payment_id') || 
@@ -474,21 +476,24 @@ const Index = () => {
       const hasStoredInvoiceId = sessionStorage.getItem('nowpayments_invoice_id') || 
                                  localStorage.getItem('nowpayments_invoice_id');
       
-      // 🚫 BLOQUER: Si des payment_id existent SANS email ou avec un email différent
-      if ((hasStoredPaymentId || hasStoredInvoiceId) && storedUserEmail !== user.email) {
-        console.log('[SÉCURITÉ] 🚫 Payment IDs orphelins ou appartenant à un autre utilisateur - NETTOYAGE', {
-          storedEmail: storedUserEmail,
+      // 🚫 BLOQUER: Si des payment_id existent SANS email OU avec un email différent
+      // IMPORTANT: Si pas d'email stocké = paiement orphelin = BLOQUER
+      if ((hasStoredPaymentId || hasStoredInvoiceId) && (!storedUserEmail || storedUserEmail !== user.email)) {
+        console.log('[SÉCURITÉ] 🚫 Payment IDs orphelins ou appartenant à un autre utilisateur - NETTOYAGE COMPLET', {
+          storedEmail: storedUserEmail || 'AUCUN',
           currentEmail: user.email,
           hasPaymentId: !!hasStoredPaymentId,
           hasInvoiceId: !!hasStoredInvoiceId
         });
-        // Nettoyer TOUS les IDs de paiement
+        // Nettoyer TOUTES les variantes de clés
         sessionStorage.removeItem('nowpayments_payment_id');
         sessionStorage.removeItem('nowpayments_invoice_id');
         sessionStorage.removeItem('payment_user_email');
+        sessionStorage.removeItem('nowpayments_user_email');
         localStorage.removeItem('nowpayments_payment_id');
         localStorage.removeItem('nowpayments_invoice_id');
         localStorage.removeItem('payment_user_email');
+        localStorage.removeItem('nowpayments_user_email');
         return; // Ne pas continuer - pas de vérification automatique
       }
       

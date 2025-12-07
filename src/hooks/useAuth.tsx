@@ -105,20 +105,24 @@ export const useAuth = () => {
         
         // 🔒 SÉCURITÉ: Nettoyer les payment IDs si l'utilisateur change
         if (event === 'SIGNED_IN' && session?.user?.email) {
-          const storedEmail = sessionStorage.getItem('nowpayments_user_email') || 
-                              localStorage.getItem('nowpayments_user_email');
+          const storedEmail = sessionStorage.getItem('payment_user_email') || 
+                              localStorage.getItem('payment_user_email');
           
-          if (storedEmail && storedEmail !== session.user.email) {
-            console.log('[SÉCURITÉ] Nettoyage des IDs de paiement - email différent', {
-              storedEmail,
+          // TOUJOURS nettoyer si pas d'email stocké OU si email différent
+          if (!storedEmail || storedEmail !== session.user.email) {
+            console.log('[SÉCURITÉ] 🚫 Nettoyage COMPLET des IDs de paiement à la connexion', {
+              storedEmail: storedEmail || 'AUCUN',
               currentEmail: session.user.email
             });
+            // Nettoyer TOUTES les variantes de clés
             sessionStorage.removeItem('nowpayments_payment_id');
             sessionStorage.removeItem('nowpayments_invoice_id');
             sessionStorage.removeItem('nowpayments_user_email');
+            sessionStorage.removeItem('payment_user_email');
             localStorage.removeItem('nowpayments_payment_id');
             localStorage.removeItem('nowpayments_invoice_id');
             localStorage.removeItem('nowpayments_user_email');
+            localStorage.removeItem('payment_user_email');
           }
         }
         
