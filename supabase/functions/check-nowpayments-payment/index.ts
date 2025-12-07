@@ -192,20 +192,60 @@ serve(async (req) => {
             if (isInvoicePaid) {
               logStep("Invoice is paid but no payment_id - activating subscription directly", { invoice_id: normalizedInvoiceId, invoice_status: invoiceStatus });
               
-              // Activer l'abonnement directement basé sur l'invoice
-              // serviceRoleClient déjà créé plus haut
-
-              // Extract user_id from order_id if available
-              let userId: string | null = userData.user.id;
+              // 🔒 SÉCURITÉ: Vérifier que l'utilisateur qui appelle est bien celui qui a payé
+              const invoiceEmail = (invoiceData.customer_email || "").toLowerCase().trim();
+              const currentUserEmail = (userData.user.email || "").toLowerCase().trim();
+              
+              // Extraire et vérifier le user_id de l'order_id
+              let orderUserId: string | null = null;
               if (invoiceData.order_id) {
                 const parts = invoiceData.order_id.split("-");
-                if (parts.length > 0) {
+                if (parts.length >= 5) {
                   const possibleUserId = parts.slice(0, 5).join("-");
                   if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-                    userId = possibleUserId;
+                    orderUserId = possibleUserId;
                   }
                 }
               }
+              
+              // Vérifier que l'utilisateur correspond
+              const emailMatches = invoiceEmail && currentUserEmail && invoiceEmail === currentUserEmail;
+              const userIdMatches = orderUserId && orderUserId === userData.user.id;
+              
+              logStep("Security check", {
+                invoiceEmail,
+                currentUserEmail,
+                emailMatches,
+                orderUserId,
+                currentUserId: userData.user.id,
+                userIdMatches
+              });
+              
+              // 🚫 BLOQUER si ni l'email ni le user_id ne correspondent
+              if (!emailMatches && !userIdMatches) {
+                logStep("🚨 SECURITY BLOCK: User mismatch - invoice belongs to different user", {
+                  invoice_id: normalizedInvoiceId,
+                  invoiceEmail,
+                  currentUserEmail,
+                  orderUserId,
+                  currentUserId: userData.user.id
+                });
+                
+                return new Response(JSON.stringify({
+                  error: "Accès non autorisé",
+                  message: "Ce paiement n'appartient pas à votre compte. Veuillez utiliser le compte avec lequel vous avez effectué le paiement.",
+                  payment_status: "unauthorized",
+                  processed: false,
+                  subscription_activated: false
+                }), {
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  status: 403,
+                });
+              }
+              
+              // Utiliser l'email vérifié
+              const emailToUse = invoiceEmail || currentUserEmail;
+              const userId = orderUserId || userData.user.id;
 
               // Determine subscription tier
               let subscriptionTier: string | null = null;
@@ -226,7 +266,7 @@ serve(async (req) => {
 
               // Update subscribers table
               const result = await serviceRoleClient.from("subscribers").upsert({
-                email: invoiceData.customer_email || userData.user.email || "",
+                email: emailToUse,
                 user_id: userId,
                 stripe_customer_id: null,
                 subscribed: true,
@@ -240,8 +280,8 @@ serve(async (req) => {
                 throw new Error(`Database update failed: ${result.error.message}`);
               }
 
-              logStep("Successfully updated subscription from invoice", {
-                email: invoiceData.customer_email || userData.user.email,
+              logStep("✅ Successfully updated subscription from invoice", {
+                email: emailToUse,
                 subscribed: true,
                 subscriptionTier,
               });
@@ -466,16 +506,43 @@ serve(async (req) => {
             if (isInvoicePaid) {
               logStep("Invoice is paid, activating subscription from invoice fallback", { invoice_id: normalizedInvoiceId });
               
-              let userId: string | null = userData.user.id;
+              // 🔒 SÉCURITÉ: Vérifier que l'utilisateur est bien celui qui a payé
+              const invoiceEmailFb = (invoiceData.customer_email || "").toLowerCase().trim();
+              const currentUserEmailFb = (userData.user.email || "").toLowerCase().trim();
+              
+              let orderUserIdFb: string | null = null;
               if (invoiceData.order_id) {
                 const parts = invoiceData.order_id.split("-");
-                if (parts.length > 0) {
+                if (parts.length >= 5) {
                   const possibleUserId = parts.slice(0, 5).join("-");
                   if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-                    userId = possibleUserId;
+                    orderUserIdFb = possibleUserId;
                   }
                 }
               }
+              
+              const emailMatchesFb = invoiceEmailFb && currentUserEmailFb && invoiceEmailFb === currentUserEmailFb;
+              const userIdMatchesFb = orderUserIdFb && orderUserIdFb === userData.user.id;
+              
+              logStep("Security check (fallback)", { invoiceEmailFb, currentUserEmailFb, emailMatchesFb, orderUserIdFb, userIdMatchesFb });
+              
+              // 🚫 BLOQUER si ni l'email ni le user_id ne correspondent
+              if (!emailMatchesFb && !userIdMatchesFb) {
+                logStep("🚨 SECURITY BLOCK (fallback): User mismatch", { invoice_id: normalizedInvoiceId });
+                return new Response(JSON.stringify({
+                  error: "Accès non autorisé",
+                  message: "Ce paiement n'appartient pas à votre compte.",
+                  payment_status: "unauthorized",
+                  processed: false,
+                  subscription_activated: false
+                }), {
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  status: 403,
+                });
+              }
+              
+              const emailToUseFb = invoiceEmailFb || currentUserEmailFb;
+              const userId = orderUserIdFb || userData.user.id;
 
               let subscriptionTier: string | null = null;
               const amount = Number(invoiceData.price_amount) || 0;
@@ -493,7 +560,7 @@ serve(async (req) => {
               const subscriptionEndISO = subscriptionEnd.toISOString();
 
               const result = await serviceRoleClient.from("subscribers").upsert({
-                email: invoiceData.customer_email || userData.user.email || "",
+                email: emailToUseFb,
                 user_id: userId,
                 stripe_customer_id: null,
                 subscribed: true,
@@ -567,22 +634,54 @@ serve(async (req) => {
     if (shouldProcess) {
       // serviceRoleClient déjà créé plus haut
 
+      // 🔒 SÉCURITÉ: Vérifier que l'utilisateur est bien celui qui a payé
+      const paymentEmail = (payment.customer_email || "").toLowerCase().trim();
+      const currentUserEmailPmt = (userData.user.email || "").toLowerCase().trim();
+      
       // Extract user_id from order_id
-      let userId: string | null = userData.user.id;
+      let orderUserIdPmt: string | null = null;
       if (payment.order_id) {
         const parts = payment.order_id.split("-");
-        if (parts.length > 0) {
+        if (parts.length >= 5) {
           const possibleUserId = parts.slice(0, 5).join("-");
           if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-            userId = possibleUserId;
+            orderUserIdPmt = possibleUserId;
           }
         }
       }
+      
+      const emailMatchesPmt = paymentEmail && currentUserEmailPmt && paymentEmail === currentUserEmailPmt;
+      const userIdMatchesPmt = orderUserIdPmt && orderUserIdPmt === userData.user.id;
+      
+      logStep("Security check (payment)", { paymentEmail, currentUserEmailPmt, emailMatchesPmt, orderUserIdPmt, userIdMatchesPmt });
+      
+      // 🚫 BLOQUER si ni l'email ni le user_id ne correspondent
+      if (!emailMatchesPmt && !userIdMatchesPmt) {
+        logStep("🚨 SECURITY BLOCK (payment): User mismatch - payment belongs to different user", {
+          payment_id: actualPaymentId,
+          paymentEmail,
+          currentUserEmail: currentUserEmailPmt
+        });
+        
+        return new Response(JSON.stringify({
+          error: "Accès non autorisé",
+          message: "Ce paiement n'appartient pas à votre compte. Veuillez utiliser le compte avec lequel vous avez effectué le paiement.",
+          payment_status: "unauthorized",
+          processed: false,
+          subscription_activated: false
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403,
+        });
+      }
+      
+      const emailToUsePmt = paymentEmail || currentUserEmailPmt;
+      let userId = orderUserIdPmt || userData.user.id;
 
-      // Find user by email if needed
-      if (!userId && payment.customer_email) {
+      // Find user by email if needed (seulement si l'email correspond)
+      if (!userId && paymentEmail && emailMatchesPmt) {
         const { data: users } = await serviceRoleClient.auth.admin.listUsers();
-        const user = users?.users?.find(u => u.email === payment.customer_email);
+        const user = users?.users?.find(u => u.email === paymentEmail);
         if (user) {
           userId = user.id;
         }
@@ -607,7 +706,7 @@ serve(async (req) => {
 
       // Update subscribers table
       const result = await serviceRoleClient.from("subscribers").upsert({
-        email: payment.customer_email || userData.user.email || "",
+        email: emailToUsePmt,
         user_id: userId,
         stripe_customer_id: null,
         subscribed: true,
@@ -621,8 +720,8 @@ serve(async (req) => {
         throw new Error(`Database update failed: ${result.error.message}`);
       }
 
-      logStep("Successfully updated subscription", {
-        email: payment.customer_email || userData.user.email,
+      logStep("✅ Successfully updated subscription", {
+        email: emailToUsePmt,
         subscribed: true,
         subscriptionTier,
       });
