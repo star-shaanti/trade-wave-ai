@@ -90,6 +90,13 @@ const PaymentSuccess = () => {
     const finalPaymentId = paymentId || npId || null;
     const finalInvoiceId = invoiceId || (npId && !paymentId ? npId : null);
     
+    // 🔒 SÉCURITÉ: Stocker l'email de l'utilisateur avec les IDs de paiement
+    if (user?.email && (finalInvoiceId || finalPaymentId)) {
+      sessionStorage.setItem('nowpayments_user_email', user.email);
+      localStorage.setItem('nowpayments_user_email', user.email);
+      console.log('Email utilisateur stocké pour sécurité:', user.email);
+    }
+    
     if (finalInvoiceId) {
       sessionStorage.setItem('nowpayments_invoice_id', finalInvoiceId);
       localStorage.setItem('nowpayments_invoice_id', finalInvoiceId);

@@ -256,6 +256,10 @@ const PricingPlans = () => {
       }
 
       if (data?.invoice_url) {
+        // 🔒 SÉCURITÉ: Stocker l'email de l'utilisateur avec l'invoice_id
+        sessionStorage.setItem('nowpayments_user_email', user.email);
+        localStorage.setItem('nowpayments_user_email', user.email);
+        
         // Stocker l'invoice_id pour vérification ultérieure si nécessaire (dans sessionStorage et localStorage)
         if (data.invoice_id) {
           sessionStorage.setItem('nowpayments_invoice_id', data.invoice_id);

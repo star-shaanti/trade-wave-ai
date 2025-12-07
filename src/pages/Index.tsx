@@ -464,6 +464,25 @@ const Index = () => {
     if (!user || isPremium || checkingPayment) return;
 
     const autoCheckPayment = async () => {
+      // 🔒 SÉCURITÉ: Vérifier que les IDs de paiement stockés appartiennent à cet utilisateur
+      const storedUserEmail = sessionStorage.getItem('nowpayments_user_email') || 
+                              localStorage.getItem('nowpayments_user_email');
+      
+      // Si l'email stocké ne correspond pas à l'utilisateur actuel, nettoyer les IDs
+      if (storedUserEmail && storedUserEmail !== user.email) {
+        console.log('[SÉCURITÉ] Email différent détecté - nettoyage des IDs de paiement', {
+          storedEmail: storedUserEmail,
+          currentEmail: user.email
+        });
+        sessionStorage.removeItem('nowpayments_payment_id');
+        sessionStorage.removeItem('nowpayments_invoice_id');
+        sessionStorage.removeItem('nowpayments_user_email');
+        localStorage.removeItem('nowpayments_payment_id');
+        localStorage.removeItem('nowpayments_invoice_id');
+        localStorage.removeItem('nowpayments_user_email');
+        return; // Ne pas continuer avec d'anciens IDs
+      }
+      
       // Vérifier si l'utilisateur vient de payer
       const fromPaymentSuccess = sessionStorage.getItem('fromPaymentSuccess');
       const urlParams = new URLSearchParams(window.location.search);
@@ -472,18 +491,24 @@ const Index = () => {
       const urlInvoiceId = urlParams.get('iid') || urlParams.get('invoice_id');
       const urlPaymentId = urlParams.get('payment_id') || urlParams.get('paymentId');
       
-      // Priorité : payment_id explicite > NP_id > invoice_id explicite
-      // On n'utilise pas NP_id comme les deux en même temps pour éviter les conflits
-      const paymentId = urlPaymentId || npId || 
-                       sessionStorage.getItem('nowpayments_payment_id') ||
-                       localStorage.getItem('nowpayments_payment_id');
-      const invoiceId = urlInvoiceId || (npId && !urlPaymentId ? npId : null) ||
-                       sessionStorage.getItem('nowpayments_invoice_id') ||
-                       localStorage.getItem('nowpayments_invoice_id');
+      // 🔒 SÉCURITÉ: Ne récupérer les IDs stockés QUE si l'email correspond
+      let storedPaymentId = null;
+      let storedInvoiceId = null;
+      
+      if (storedUserEmail === user.email) {
+        storedPaymentId = sessionStorage.getItem('nowpayments_payment_id') ||
+                          localStorage.getItem('nowpayments_payment_id');
+        storedInvoiceId = sessionStorage.getItem('nowpayments_invoice_id') ||
+                          localStorage.getItem('nowpayments_invoice_id');
+      }
+      
+      // Priorité : URL params > stockés (si même email)
+      const paymentId = urlPaymentId || npId || storedPaymentId;
+      const invoiceId = urlInvoiceId || (npId && !urlPaymentId ? npId : null) || storedInvoiceId;
 
       // Vérifier automatiquement le paiement si on a les identifiants
       if (invoiceId || paymentId) {
-        console.log('Vérification automatique du paiement détecté...', { invoiceId, paymentId });
+        console.log('Vérification automatique du paiement détecté...', { invoiceId, paymentId, userEmail: user.email });
         
         // Attendre un peu pour éviter les vérifications multiples
         await new Promise(resolve => setTimeout(resolve, 2000));
