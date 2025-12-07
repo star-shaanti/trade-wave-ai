@@ -272,6 +272,11 @@ const PricingPlans = () => {
         } catch (e) {
           // Ignorer les erreurs d'URL
         }
+        // Stocker aussi le prix et les infos du plan pour le tracking d'affiliation
+        sessionStorage.setItem('subscriptionPlan', plan.name);
+        sessionStorage.setItem('subscriptionAmount', fiatAmountForCrypto.toString());
+        sessionStorage.setItem('userEmail', user.email);
+        sessionStorage.setItem('userName', user.user_metadata?.full_name || user.email);
         window.location.href = data.invoice_url;
       } else {
         throw new Error("No invoice URL received");

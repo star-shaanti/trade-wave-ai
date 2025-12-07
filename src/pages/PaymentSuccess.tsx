@@ -8,10 +8,40 @@ import { supabase } from "@/integrations/supabase/client";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const { checkSubscription, isPremium, subscriptionLoading } = useAuth();
+  const { checkSubscription, isPremium, subscriptionLoading, user } = useAuth();
   const { toast } = useToast();
   const [verifying, setVerifying] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
+  const [affiliateTracked, setAffiliateTracked] = useState(false);
+
+  // Fonction de suivi d'affiliation
+  const trackAffiliateSignup = React.useCallback((userEmail: string, userName: string, subscriptionPrice = 99.99) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const affiliateId = urlParams.get('ref');
+
+    if (!affiliateId) return;
+
+    fetch('https://affiliate-trading-signals.com/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        affiliate_id: affiliateId,
+        email: userEmail,
+        name: userName,
+        platform: 'realtime',
+        subscription_price: subscriptionPrice
+      })
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          console.log('[AFFILIATION] ✅ Commission:', d.commission + '€');
+        }
+      })
+      .catch(error => {
+        console.error('[AFFILIATION] Erreur:', error);
+      });
+  }, []);
 
   useEffect(() => {
     // Marquer que l'utilisateur vient de payer
@@ -108,6 +138,16 @@ const PaymentSuccess = () => {
           
           // Check if subscription is now active
           if (isPremium) {
+            // Suivi d'affiliation après paiement réussi (une seule fois)
+            if (user?.email && !affiliateTracked) {
+              const userName = user.user_metadata?.display_name || user.user_metadata?.name || user.email.split('@')[0];
+              // Récupérer le prix réel depuis sessionStorage, ou utiliser 99.99 par défaut
+              const storedAmount = sessionStorage.getItem('subscriptionAmount');
+              const subscriptionPrice = storedAmount ? parseFloat(storedAmount) : 99.99;
+              trackAffiliateSignup(user.email, userName, subscriptionPrice);
+              setAffiliateTracked(true);
+            }
+
             toast({
               title: "Bienvenue dans Premium !",
               description: "Votre abonnement est maintenant actif. Redirection vers les signaux...",
@@ -162,7 +202,7 @@ const PaymentSuccess = () => {
     };
 
     verifyPayment();
-  }, [checkSubscription, isPremium, toast, navigate]);
+  }, [checkSubscription, isPremium, toast, navigate, user, trackAffiliateSignup, affiliateTracked]);
 
   // Redirection automatique après 30 secondes maximum
   useEffect(() => {
