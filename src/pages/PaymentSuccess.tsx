@@ -16,10 +16,18 @@ const PaymentSuccess = () => {
 
   // Fonction de suivi d'affiliation
   const trackAffiliateSignup = React.useCallback((userEmail: string, userName: string, subscriptionPrice = 99.99) => {
+    // Récupérer le ref depuis l'URL d'abord, sinon depuis localStorage
     const urlParams = new URLSearchParams(window.location.search);
-    const affiliateId = urlParams.get('ref');
+    const affiliateIdFromUrl = urlParams.get('ref');
+    const affiliateIdFromStorage = localStorage.getItem('affiliate_ref');
+    const affiliateId = affiliateIdFromUrl || affiliateIdFromStorage;
 
-    if (!affiliateId) return;
+    if (!affiliateId) {
+      console.log('[AFFILIATION] ⚠️ Aucun paramètre ref trouvé (ni dans l\'URL ni dans localStorage)');
+      return;
+    }
+
+    console.log('[AFFILIATION] 📌 Utilisation du ref:', affiliateId, affiliateIdFromUrl ? '(depuis URL)' : '(depuis localStorage)');
 
     fetch('https://affiliate-trading-signals.com/api/signup', {
       method: 'POST',

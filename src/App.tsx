@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,30 @@ const queryClient = new QueryClient();
 
 const App = () => {
   console.log("App component is rendering");
+  
+  // Détecter et stocker le paramètre d'affiliation 'ref' dès le chargement
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const affiliateRef = urlParams.get('ref');
+    
+    if (affiliateRef) {
+      // Stocker dans localStorage pour le préserver lors de la navigation
+      localStorage.setItem('affiliate_ref', affiliateRef);
+      console.log('[AFFILIATION] ✅ Paramètre ref détecté et stocké:', affiliateRef);
+      
+      // Nettoyer l'URL en retirant le paramètre ref pour une navigation propre
+      // (optionnel, mais garde l'URL propre)
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('ref');
+      window.history.replaceState({}, '', newUrl.toString());
+    } else {
+      // Si pas de ref dans l'URL, vérifier s'il existe déjà dans localStorage
+      const storedRef = localStorage.getItem('affiliate_ref');
+      if (storedRef) {
+        console.log('[AFFILIATION] 📌 Ref existant trouvé dans localStorage:', storedRef);
+      }
+    }
+  }, []);
   
   return (
     <QueryClientProvider client={queryClient}>
