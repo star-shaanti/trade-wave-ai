@@ -175,6 +175,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, supa
     subscribed: false,
     subscription_tier: null,
     subscription_end: null,
+    payment_source: 'stripe',
     updated_at: new Date().toISOString(),
   }, { onConflict: 'email' });
 }
@@ -244,6 +245,7 @@ async function updateSubscriptionInDatabase(subscription: Stripe.Subscription, s
     subscribed: isActive,
     subscription_tier: subscriptionTier,
     subscription_end: subscriptionEnd,
+    payment_source: 'stripe',
     updated_at: new Date().toISOString(),
   }, { onConflict: 'email' });
   

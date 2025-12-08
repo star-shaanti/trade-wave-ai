@@ -198,6 +198,7 @@ serve(async (req) => {
       subscribed: true,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEndISO,
+      payment_source: 'nowpayments', // SÉCURITÉ: Marquer comme paiement NOWPayments vérifié
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 

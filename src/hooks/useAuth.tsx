@@ -103,29 +103,6 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // 🔒 SÉCURITÉ: Nettoyer les payment IDs si l'utilisateur change
-        if (event === 'SIGNED_IN' && session?.user?.email) {
-          const storedEmail = sessionStorage.getItem('payment_user_email') || 
-                              localStorage.getItem('payment_user_email');
-          
-          // TOUJOURS nettoyer si pas d'email stocké OU si email différent
-          if (!storedEmail || storedEmail !== session.user.email) {
-            console.log('[SÉCURITÉ] 🚫 Nettoyage COMPLET des IDs de paiement à la connexion', {
-              storedEmail: storedEmail || 'AUCUN',
-              currentEmail: session.user.email
-            });
-            // Nettoyer TOUTES les variantes de clés
-            sessionStorage.removeItem('nowpayments_payment_id');
-            sessionStorage.removeItem('nowpayments_invoice_id');
-            sessionStorage.removeItem('nowpayments_user_email');
-            sessionStorage.removeItem('payment_user_email');
-            localStorage.removeItem('nowpayments_payment_id');
-            localStorage.removeItem('nowpayments_invoice_id');
-            localStorage.removeItem('nowpayments_user_email');
-            localStorage.removeItem('payment_user_email');
-          }
-        }
-        
         // Check subscription when user signs in
         if (event === 'SIGNED_IN' && session) {
           setTimeout(() => {

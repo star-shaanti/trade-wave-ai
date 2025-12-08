@@ -7,7 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Helper logging function for enhanced debugging
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
@@ -18,7 +17,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Use the service role key to perform writes (upsert) in Supabase
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -30,59 +28,26 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
-    logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
-    logStep("Authenticating user with token");
-    
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // First, check existing subscription in database (includes NOWPayments payments)
-    const { data: existingSub } = await supabaseClient
-      .from("subscribers")
-      .select("*")
-      .eq("email", user.email)
-      .single();
-
-    logStep("Existing subscription check", { 
-      exists: !!existingSub, 
-      subscribed: existingSub?.subscribed,
-      subscription_end: existingSub?.subscription_end 
-    });
-
-    // Check if existing subscription is still valid (not expired)
-    let hasActiveSubFromDB = false;
-    let subscriptionTier = existingSub?.subscription_tier || null;
-    let subscriptionEnd = existingSub?.subscription_end || null;
-
-    if (existingSub?.subscribed && existingSub?.subscription_end) {
-      const endDate = new Date(existingSub.subscription_end);
-      const now = new Date();
-      if (endDate > now) {
-        hasActiveSubFromDB = true;
-        logStep("Active subscription found in database", { 
-          tier: subscriptionTier, 
-          endDate: subscriptionEnd 
-        });
-      } else {
-        logStep("Subscription expired", { endDate: subscriptionEnd });
-      }
-    }
-
-    // Check Stripe subscriptions
+    // === ÉTAPE 1: Vérifier Stripe (source de vérité #1) ===
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     let hasActiveStripeSub = false;
     let stripeCustomerId = null;
+    let subscriptionTier = null;
+    let subscriptionEnd = null;
+    let paymentSource = null;
 
     if (customers.data.length > 0) {
       stripeCustomerId = customers.data[0].id;
@@ -98,10 +63,6 @@ serve(async (req) => {
       if (hasActiveStripeSub) {
         const subscription = subscriptions.data[0];
         subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-        logStep("Active Stripe subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-        
-        // Determine subscription tier from price
-        const priceId = subscription.items.data[0].price.id;
         const amount = subscription.items.data[0].price.unit_amount || 0;
         
         if (amount <= 999) {
@@ -111,56 +72,115 @@ serve(async (req) => {
         } else {
           subscriptionTier = "Enterprise";
         }
-        logStep("Determined subscription tier from Stripe", { priceId, amount, subscriptionTier });
-      } else {
-        logStep("No active Stripe subscription found");
+        paymentSource = "stripe";
+        logStep("Active Stripe subscription found", { subscriptionTier, subscriptionEnd });
       }
-    } else {
-      logStep("No Stripe customer found");
     }
 
-    // Use the most recent/active subscription (Stripe takes precedence if both exist)
-    const hasActiveSub = hasActiveStripeSub || hasActiveSubFromDB;
+    // === ÉTAPE 2: Vérifier la base de données (pour NOWPayments) ===
+    let hasActiveSubFromDB = false;
     
-    // If Stripe subscription exists, use its data; otherwise keep database data
-    if (!hasActiveStripeSub && hasActiveSubFromDB) {
-      // Keep existing database subscription data
-      logStep("Using database subscription data", { tier: subscriptionTier, endDate: subscriptionEnd });
+    if (!hasActiveStripeSub) {
+      const { data: existingSub } = await supabaseClient
+        .from("subscribers")
+        .select("*")
+        .eq("email", user.email)
+        .single();
+
+      if (existingSub) {
+        logStep("Found DB entry", { 
+          subscribed: existingSub.subscribed,
+          payment_source: existingSub.payment_source,
+          stripe_customer_id: existingSub.stripe_customer_id,
+          subscription_end: existingSub.subscription_end
+        });
+
+        // SÉCURITÉ: Accepter UNIQUEMENT si:
+        // 1. A un stripe_customer_id valide, OU
+        // 2. A payment_source = 'nowpayments' (créé par webhook vérifié)
+        const hasValidPaymentProof = 
+          existingSub.stripe_customer_id || 
+          existingSub.payment_source === 'nowpayments';
+
+        if (existingSub.subscribed && 
+            existingSub.subscription_end && 
+            hasValidPaymentProof) {
+          const endDate = new Date(existingSub.subscription_end);
+          if (endDate > new Date()) {
+            hasActiveSubFromDB = true;
+            subscriptionTier = existingSub.subscription_tier;
+            subscriptionEnd = existingSub.subscription_end;
+            stripeCustomerId = existingSub.stripe_customer_id;
+            paymentSource = existingSub.payment_source || (existingSub.stripe_customer_id ? 'stripe' : null);
+            logStep("Valid subscription from DB", { 
+              subscriptionTier, 
+              paymentSource,
+              subscriptionEnd 
+            });
+          } else {
+            logStep("Subscription expired", { endDate: existingSub.subscription_end });
+          }
+        } else if (existingSub.subscribed && !hasValidPaymentProof) {
+          // SÉCURITÉ: Entrée suspecte sans preuve de paiement
+          logStep("⚠️ SECURITY: Rejecting entry without payment proof", {
+            email: user.email,
+            subscribed: existingSub.subscribed,
+            payment_source: existingSub.payment_source,
+            stripe_customer_id: existingSub.stripe_customer_id
+          });
+        }
+      }
     }
 
-    const upsertResult = await supabaseClient.from("subscribers").upsert({
-      email: user.email,
-      user_id: user.id,
-      stripe_customer_id: stripeCustomerId,
-      subscribed: hasActiveSub,
-      subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'email' });
+    const hasActiveSub = hasActiveStripeSub || hasActiveSubFromDB;
 
-    if (upsertResult.error) {
-      logStep("ERROR updating database", { error: upsertResult.error.message });
-      throw new Error(`Database update failed: ${upsertResult.error.message}`);
+    // === ÉTAPE 3: Mettre à jour la base de données ===
+    if (hasActiveSub) {
+      // Mettre à jour avec les infos d'abonnement actif
+      await supabaseClient.from("subscribers").upsert({
+        email: user.email,
+        user_id: user.id,
+        stripe_customer_id: stripeCustomerId,
+        subscribed: true,
+        subscription_tier: subscriptionTier,
+        subscription_end: subscriptionEnd,
+        payment_source: paymentSource,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'email' });
+    } else {
+      // Créer/mettre à jour l'entrée comme non abonné
+      // NE PAS écraser payment_source s'il existe déjà
+      const { data: existingEntry } = await supabaseClient
+        .from("subscribers")
+        .select("payment_source")
+        .eq("email", user.email)
+        .single();
+
+      await supabaseClient.from("subscribers").upsert({
+        email: user.email,
+        user_id: user.id,
+        stripe_customer_id: stripeCustomerId,
+        subscribed: false,
+        subscription_tier: null,
+        subscription_end: null,
+        payment_source: existingEntry?.payment_source || null,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'email' });
     }
 
-    logStep("Successfully updated database with subscription info", { 
-      subscribed: hasActiveSub, 
-      subscriptionTier,
-      email: user.email,
-      userId: user.id 
-    });
+    logStep("Result", { subscribed: hasActiveSub, subscriptionTier, paymentSource });
     
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
-      subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
+      subscription_tier: hasActiveSub ? subscriptionTier : null,
+      subscription_end: hasActiveSub ? subscriptionEnd : null
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in check-subscription", { message: errorMessage });
+    logStep("ERROR", { message: errorMessage });
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
