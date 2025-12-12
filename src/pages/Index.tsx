@@ -320,16 +320,40 @@ const Index = () => {
           // Invoice introuvable n'est pas une erreur fatale - le webhook activera l'abonnement plus tard
           // Vérifier quand même l'abonnement car le webhook pourrait avoir déjà traité le paiement
           console.log('Invoice introuvable mais vérification de l\'abonnement en cours...');
-          setTimeout(async () => {
+          
+          // Vérification immédiate puis périodique jusqu'à ce que l'abonnement soit détecté
+          // Le système vérifiera automatiquement toutes les 5 secondes pendant 50 secondes (10 tentatives)
+          const checkSubscriptionPeriodically = async (attempt = 0, maxAttempts = 10) => {
+            if (attempt >= maxAttempts) {
+              console.log('Nombre maximum de tentatives atteint pour la vérification de l\'abonnement');
+              toast({
+                title: "Vérification terminée",
+                description: "Si votre paiement a été confirmé, votre abonnement sera activé automatiquement. Veuillez rafraîchir la page dans quelques instants.",
+                variant: "default",
+              });
+              return;
+            }
+            
+            console.log(`Vérification de l'abonnement - tentative ${attempt + 1}/${maxAttempts}`);
+            
             if (checkSubscriptionWithRetry) {
-              await checkSubscriptionWithRetry(5);
+              await checkSubscriptionWithRetry(3);
             } else {
               await checkSubscription();
             }
-          }, 2000);
+            
+            // Continuer à vérifier toutes les 5 secondes
+            if (attempt < maxAttempts - 1) {
+              setTimeout(() => checkSubscriptionPeriodically(attempt + 1, maxAttempts), 5000);
+            }
+          };
+          
+          // Démarrer la vérification périodique après 2 secondes
+          setTimeout(() => checkSubscriptionPeriodically(), 2000);
+          
           toast({
             title: "Vérification en cours",
-            description: data.message || "L'invoice n'a pas encore été créée. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+            description: "L'invoice n'a pas été trouvée dans NOWPayments, mais le webhook activera automatiquement votre abonnement une fois le paiement confirmé. Vérification automatique en cours...",
             variant: "default",
           });
           setShowPaymentCheckModal(false);
@@ -343,16 +367,40 @@ const Index = () => {
       if (data?.payment_status === "not_found") {
         // Vérifier quand même l'abonnement car le webhook pourrait avoir déjà traité le paiement
         console.log('Invoice not_found mais vérification de l\'abonnement en cours...');
-        setTimeout(async () => {
+        
+        // Vérification immédiate puis périodique jusqu'à ce que l'abonnement soit détecté
+        // Le système vérifiera automatiquement toutes les 5 secondes pendant 50 secondes (10 tentatives)
+        const checkSubscriptionPeriodically = async (attempt = 0, maxAttempts = 10) => {
+          if (attempt >= maxAttempts) {
+            console.log('Nombre maximum de tentatives atteint pour la vérification de l\'abonnement');
+            toast({
+              title: "Vérification terminée",
+              description: "Si votre paiement a été confirmé, votre abonnement sera activé automatiquement. Veuillez rafraîchir la page dans quelques instants.",
+              variant: "default",
+            });
+            return;
+          }
+          
+          console.log(`Vérification de l'abonnement - tentative ${attempt + 1}/${maxAttempts}`);
+          
           if (checkSubscriptionWithRetry) {
-            await checkSubscriptionWithRetry(5);
+            await checkSubscriptionWithRetry(3);
           } else {
             await checkSubscription();
           }
-        }, 2000);
+          
+          // Continuer à vérifier toutes les 5 secondes
+          if (attempt < maxAttempts - 1) {
+            setTimeout(() => checkSubscriptionPeriodically(attempt + 1, maxAttempts), 5000);
+          }
+        };
+        
+        // Démarrer la vérification périodique après 2 secondes
+        setTimeout(() => checkSubscriptionPeriodically(), 2000);
+        
         toast({
           title: "Vérification en cours",
-          description: data.message || "L'invoice n'a pas encore été créée dans NOWPayments. Le webhook activera automatiquement l'abonnement une fois le paiement confirmé.",
+          description: "L'invoice n'a pas été trouvée dans NOWPayments, mais le webhook activera automatiquement votre abonnement une fois le paiement confirmé. Vérification automatique en cours...",
           variant: "default",
         });
         setShowPaymentCheckModal(false);
