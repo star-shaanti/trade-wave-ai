@@ -133,8 +133,8 @@ function getForexOTCPriceFallback(symbol: string): ForexOTCPrice {
   // Variation réaliste basée sur la volatilité du marché
   // IMPORTANT: Pour simuler une tendance réelle, on utilise une marche aléatoire avec mémoire
   // Cela permet de créer une tendance cohérente plutôt que des variations aléatoires
-  const cacheKey = `otc-trend-${symbol}`;
-  const cachedTrend = otcCache.get(cacheKey);
+  const trendCacheKey = `otc-trend-${symbol}`;
+  const cachedTrend = otcCache.get(trendCacheKey);
   
   let trendDirection = 0; // -1 à 1, direction de la tendance
   if (cachedTrend) {

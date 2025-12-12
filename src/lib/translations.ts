@@ -430,10 +430,6 @@ export const globalTranslations = {
     signalExpired: "Сигнал истек",
     signalExpiredDescription: "Активный сигнал истек. Теперь вы можете сгенерировать новый сигнал.",
     signalExpiredTitle: "Сигнал Истек",
-    signalExpiredDismiss: "Нажмите, чтобы закрыть",
-    signalExpired: "Сигнал истек",
-    signalExpiredDescription: "Активный сигнал истек. Теперь вы можете сгенерировать новый сигнал.",
-    signalExpiredTitle: "Сигнал Истек",
     signalExpiredDismiss: "Нажмите, чтобы закрыть"
   },
   ar: {
