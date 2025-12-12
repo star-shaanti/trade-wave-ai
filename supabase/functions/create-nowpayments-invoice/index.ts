@@ -83,6 +83,14 @@ serve(async (req) => {
     const ipnUrl = Deno.env.get("NOWPAYMENTS_IPN_URL");
     if (ipnUrl) {
       payload.ipn_callback_url = ipnUrl;
+      logStep("IPN callback URL configured", { 
+        ipn_url: ipnUrl,
+        note: "Webhook will be called to this URL when payment is confirmed"
+      });
+    } else {
+      logStep("WARNING: NOWPAYMENTS_IPN_URL not configured", {
+        note: "NOWPayments will use the global webhook URL from their dashboard. Make sure it's configured correctly."
+      });
     }
 
     if (customerEmail) {
