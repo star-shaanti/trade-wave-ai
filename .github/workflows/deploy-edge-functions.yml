@@ -8,6 +8,7 @@ on:
       - 'supabase/functions/**'
       - '.github/workflows/deploy-edge-functions.yml'
       - 'supabase/config.toml'
+  workflow_dispatch:  # Permet de déclencher manuellement le workflow depuis GitHub
 
 jobs:
   deploy:
