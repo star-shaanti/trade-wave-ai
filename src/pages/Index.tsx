@@ -710,7 +710,7 @@ const Index = () => {
       
       // Attendre le délai avant de générer le signal
       await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-      
+
       // PRIORITÉ 2: Générer un signal basé sur les données réelles
       try {
         console.log(`🔍 Génération du signal basé sur l'analyse technique...`);
@@ -803,16 +803,16 @@ const Index = () => {
         });
 
         if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          const responseText = data.candidates[0].content.parts[0].text;
           
-          if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            const responseText = data.candidates[0].content.parts[0].text;
+          // Extraire le JSON de la réponse
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const signalsData = JSON.parse(jsonMatch[0]);
             
-            // Extraire le JSON de la réponse
-            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              const signalsData = JSON.parse(jsonMatch[0]);
-              
               if (signalsData.signals && Array.isArray(signalsData.signals) && signalsData.signals.length > 0) {
                 const signal = signalsData.signals[0];
                 const signalType = signal.type || "BUY";
@@ -836,28 +836,28 @@ const Index = () => {
                 
                 const newSignal: TradingSignal = {
                   id: `gemini-${Date.now()}`,
-                  symbol: signal.symbol || asset,
+                symbol: signal.symbol || asset,
                   type: signalType as "BUY" | "SELL",
-                  entry_price: parseFloat(signal.entry_price) || 1.0850,
-                  target_price: parseFloat(signal.target_price) || 1.0920,
-                  stop_loss: parseFloat(signal.stop_loss) || 1.0800,
-                  risk_reward: Math.abs((parseFloat(signal.target_price) - parseFloat(signal.entry_price)) / (parseFloat(signal.entry_price) - parseFloat(signal.stop_loss))) || 2.0,
-                  confidence: parseInt(signal.confidence) || 75,
-                  created_at: new Date().toISOString(),
-                  status: "ACTIVE" as const,
-                  description: signal.description || "Signal généré par IA",
-                  analysis: signal.analysis || "Analyse technique basée sur les indicateurs de marché",
-                  expiration_time: expirationTime,
-                  volatility: signal.volatility || "Medium",
-                  trend_strength: parseInt(signal.trend_strength) || 75,
-                  volume_flow: signal.volume_flow || "Increasing",
+                entry_price: parseFloat(signal.entry_price) || 1.0850,
+                target_price: parseFloat(signal.target_price) || 1.0920,
+                stop_loss: parseFloat(signal.stop_loss) || 1.0800,
+                risk_reward: Math.abs((parseFloat(signal.target_price) - parseFloat(signal.entry_price)) / (parseFloat(signal.entry_price) - parseFloat(signal.stop_loss))) || 2.0,
+                confidence: parseInt(signal.confidence) || 75,
+                created_at: new Date().toISOString(),
+                status: "ACTIVE" as const,
+                description: signal.description || "Signal généré par IA",
+                analysis: signal.analysis || "Analyse technique basée sur les indicateurs de marché",
+                expiration_time: expirationTime,
+                volatility: signal.volatility || "Medium",
+                trend_strength: parseInt(signal.trend_strength) || 75,
+                volume_flow: signal.volume_flow || "Increasing",
                   sentiment: signal.sentiment || (signalType === "BUY" ? "Bullish" : "Bearish"),
                   moving_average: signal.moving_average || (signalType === "BUY" ? "Above" : "Below"),
-                  rsi: signal.rsi || "Neutral",
+                rsi: signal.rsi || "Neutral",
                   stochastic: signal.stochastic || (signalType === "BUY" ? "Crossing Up" : "Crossing Down"),
                   parabolic_sar: signal.parabolic_sar || (signalType === "BUY" ? "Bullish Flip" : "Bearish Flip"),
                   envelope_trend: signal.envelope_trend || (signalType === "BUY" ? "Upper Band" : "Lower Band"),
-                  signal_strength: parseInt(signal.signal_strength) || 82,
+                signal_strength: parseInt(signal.signal_strength) || 82,
                   market_conditions: signal.market_conditions || (signalType === "BUY" ? "Favorable" : "Unfavorable")
                 };
 
@@ -866,12 +866,12 @@ const Index = () => {
                   .replace('{type}', signalType)
                   .replace('{asset}', asset);
                 setActivatedSignalInfo(signalInfo);
-                setShowSignalActivated(true);
-                setTimeout(() => {
-                  setShowSignalActivated(false);
-                }, 5000);
-                
-                toast({
+              setShowSignalActivated(true);
+              setTimeout(() => {
+                setShowSignalActivated(false);
+    }, 5000);
+              
+              toast({
                   title: translations.signalGenerated || "Signal généré",
                   description: (translations.signalGeneratedDescription || "Nouveau signal {type} généré pour {asset} basé sur l'analyse technique en temps réel")
                     .replace('{type}', signalType)
@@ -999,9 +999,9 @@ const Index = () => {
         .replace('{asset}', asset);
       setActivatedSignalInfo(signalInfo);
       setShowSignalActivated(true);
-      setTimeout(() => {
+        setTimeout(() => {
         setShowSignalActivated(false);
-      }, 5000);
+        }, 5000);
       
       toast({
         title: translations.signalGenerated || "Signal généré",
@@ -1061,7 +1061,7 @@ const Index = () => {
 
     // Appeler directement la fonction de génération
     // Le délai de 5-15 secondes est géré dans generateSignalsWithGemini
-    generateSignalsWithGemini();
+      generateSignalsWithGemini();
   };
 
   const formatTime = (seconds: number) => {
@@ -1737,6 +1737,11 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Section Hero avec traductions */}
         <div className="text-center mb-8 md:mb-12">
+          <div className="mb-4">
+            <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1.5 text-xs sm:text-sm font-semibold">
+              {translations.versionName || "Version 2.0 - Real-Time Precision Edition"}
+            </Badge>
+          </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 px-2">
             {translations.heroTitle}
           </h1>
@@ -1966,21 +1971,21 @@ const Index = () => {
                           {/* Header du signal */}
                           <div className="flex items-center justify-between mb-4">
                             <div>
-                              <h3 className="text-lg font-semibold">Active Trading Signal</h3>
+                            <h3 className="text-lg font-semibold">Active Trading Signal</h3>
                               <div className="text-xs text-muted-foreground mt-1">
                                 Generated: {new Date(signal.created_at).toLocaleString()}
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-sm text-muted-foreground">
-                                Expires In: {formatTime(Math.floor(timeRemaining))}
+                            <div className="text-sm text-muted-foreground">
+                              Expires In: {formatTime(Math.floor(timeRemaining))}
                               </div>
                               <div className="text-xs text-green-500 mt-1 flex items-center">
                                 <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
                                 Live Data
                               </div>
-                            </div>
                           </div>
+                        </div>
 
                           {/* Type de signal */}
                           <div className="text-center mb-6">
@@ -2330,8 +2335,13 @@ const Index = () => {
               </ul>
           </div>
         </div>
-          <div className="border-t border-purple-700 mt-8 pt-8 text-center text-sm text-purple-300">
-            {translations.copyright || "© 2025 Real-time Trading Signals. All rights reserved."}
+          <div className="border-t border-purple-700 mt-8 pt-8 text-center space-y-2">
+            <div className="text-sm text-purple-300">
+              {translations.copyright || "© 2025 Real-time Trading Signals. All rights reserved."}
+            </div>
+            <div className="text-xs text-purple-400 font-semibold">
+              {translations.versionName || "Version 2.0 - Real-Time Precision Edition"}
+            </div>
           </div>
         </div>
       </footer>
