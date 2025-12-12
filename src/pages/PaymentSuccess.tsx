@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const { checkSubscription, isPremium, subscriptionLoading, user } = useAuth();
+  const { checkSubscription, checkSubscriptionWithRetry, isPremium, subscriptionLoading, user } = useAuth();
   const { toast } = useToast();
   const [verifying, setVerifying] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
@@ -147,10 +147,16 @@ const PaymentSuccess = () => {
             if (paymentError) {
               console.error('Erreur lors de la vérification du paiement:', paymentError);
               // Continuer quand même avec la vérification d'abonnement
-            } else if (paymentData?.subscription_activated) {
+            } else             if (paymentData?.subscription_activated) {
               console.log('Paiement vérifié et abonnement activé via check-nowpayments-payment');
               // Attendre un peu pour que la base de données se mette à jour
               await new Promise(resolve => setTimeout(resolve, 2000));
+              // Vérifier immédiatement l'abonnement avec retry pour s'assurer qu'il est détecté
+              if (checkSubscriptionWithRetry) {
+                await checkSubscriptionWithRetry(5);
+              } else {
+                await checkSubscription();
+              }
             } else {
               console.log('Statut du paiement:', paymentData?.payment_status);
               // Si le paiement est en attente, on continue quand même avec la vérification d'abonnement
@@ -168,7 +174,12 @@ const PaymentSuccess = () => {
       
       const attemptVerification = async () => {
         try {
-          await checkSubscription();
+          // Utiliser checkSubscriptionWithRetry pour s'assurer que l'abonnement est détecté
+          if (checkSubscriptionWithRetry) {
+            await checkSubscriptionWithRetry(5);
+          } else {
+            await checkSubscription();
+          }
           
           // Wait a bit for the state to update
           await new Promise(resolve => setTimeout(resolve, 1500));

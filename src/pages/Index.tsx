@@ -199,7 +199,7 @@ const tradingHours = {
 };
 
 const Index = () => {
-  const { user, isPremium, signOut, checkSubscription } = useAuth();
+  const { user, isPremium, signOut, checkSubscription, checkSubscriptionWithRetry } = useAuth();
   const { toast } = useToast();
 
   const handleSignOut = () => {
@@ -282,9 +282,13 @@ const Index = () => {
       if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
         console.warn('Réponse vide de la fonction Edge - vérification de l\'abonnement directement');
         // Si on a une invoiceId, le webhook pourrait avoir déjà traité le paiement
-        // Vérifier directement l'abonnement après un court délai
-        setTimeout(() => {
-          checkSubscription();
+        // Vérifier directement l'abonnement après un court délai avec retry
+        setTimeout(async () => {
+          if (checkSubscriptionWithRetry) {
+            await checkSubscriptionWithRetry(5);
+          } else {
+            await checkSubscription();
+          }
         }, 3000);
         toast({
           title: "Vérification en cours",
@@ -316,8 +320,12 @@ const Index = () => {
           // Invoice introuvable n'est pas une erreur fatale - le webhook activera l'abonnement plus tard
           // Vérifier quand même l'abonnement car le webhook pourrait avoir déjà traité le paiement
           console.log('Invoice introuvable mais vérification de l\'abonnement en cours...');
-          setTimeout(() => {
-            checkSubscription();
+          setTimeout(async () => {
+            if (checkSubscriptionWithRetry) {
+              await checkSubscriptionWithRetry(5);
+            } else {
+              await checkSubscription();
+            }
           }, 2000);
           toast({
             title: "Vérification en cours",
@@ -335,8 +343,12 @@ const Index = () => {
       if (data?.payment_status === "not_found") {
         // Vérifier quand même l'abonnement car le webhook pourrait avoir déjà traité le paiement
         console.log('Invoice not_found mais vérification de l\'abonnement en cours...');
-        setTimeout(() => {
-          checkSubscription();
+        setTimeout(async () => {
+          if (checkSubscriptionWithRetry) {
+            await checkSubscriptionWithRetry(5);
+          } else {
+            await checkSubscription();
+          }
         }, 2000);
         toast({
           title: "Vérification en cours",
@@ -361,10 +373,18 @@ const Index = () => {
         sessionStorage.removeItem('nowpayments_invoice_id');
         localStorage.removeItem('nowpayments_payment_id');
         localStorage.removeItem('nowpayments_invoice_id');
-        // Recharger la page après un court délai pour mettre à jour l'état
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // Vérifier l'abonnement avec retry pour s'assurer que l'état est mis à jour
+        setTimeout(async () => {
+          if (checkSubscriptionWithRetry) {
+            await checkSubscriptionWithRetry(5);
+          } else {
+            await checkSubscription();
+          }
+          // Recharger la page après vérification pour mettre à jour l'état
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }, 1000);
       } else {
                                   // Afficher un message détaillé selon le statut
                                   const message = data?.message || 
@@ -381,10 +401,14 @@ const Index = () => {
                                   });
                                   setShowPaymentCheckModal(false);
         
-        // Si le paiement est en attente, vérifier à nouveau l'abonnement après quelques secondes
+        // Si le paiement est en attente, vérifier à nouveau l'abonnement après quelques secondes avec retry
         if (data?.payment_status === "waiting") {
-          setTimeout(() => {
-            checkSubscription();
+          setTimeout(async () => {
+            if (checkSubscriptionWithRetry) {
+              await checkSubscriptionWithRetry(5);
+            } else {
+              await checkSubscription();
+            }
           }, 5000);
         }
                                 }
@@ -513,20 +537,36 @@ const Index = () => {
         try {
           await checkPaymentStatus(paymentId || undefined, invoiceId || undefined);
           
-          // Après vérification, vérifier aussi l'abonnement
-          setTimeout(() => {
-            checkSubscription();
+          // Après vérification, vérifier aussi l'abonnement avec retry pour s'assurer qu'il est détecté
+          setTimeout(async () => {
+            if (checkSubscriptionWithRetry) {
+              await checkSubscriptionWithRetry(5);
+            } else {
+              await checkSubscription();
+            }
           }, 2000);
         } catch (error) {
           console.error('Erreur lors de la vérification automatique du paiement:', error);
+          // Même en cas d'erreur, vérifier l'abonnement car le webhook pourrait l'avoir activé
+          setTimeout(async () => {
+            if (checkSubscriptionWithRetry) {
+              await checkSubscriptionWithRetry(5);
+            } else {
+              await checkSubscription();
+            }
+          }, 3000);
         }
       }
 
       if (fromPaymentSuccess) {
         console.log("Welcome modal check: ► {user: true, isPremium: false, userEmail: undefined}");
-        // Vérifier l'abonnement immédiatement après un paiement
-        setTimeout(() => {
-          checkSubscription();
+        // Vérifier l'abonnement immédiatement après un paiement avec retry
+        setTimeout(async () => {
+          if (checkSubscriptionWithRetry) {
+            await checkSubscriptionWithRetry(5);
+          } else {
+            await checkSubscription();
+          }
         }, 1000);
         sessionStorage.removeItem('fromPaymentSuccess');
       }
@@ -543,14 +583,18 @@ const Index = () => {
   useEffect(() => {
     if (!user) return;
 
-    const checkSubscriptionPeriodically = () => {
+      const checkSubscriptionPeriodically = () => {
       // Vérifier si l'utilisateur vient de payer
       const fromPaymentSuccess = sessionStorage.getItem('fromPaymentSuccess');
       if (fromPaymentSuccess) {
         console.log("Welcome modal check: ► {user: true, isPremium: false, userEmail: undefined}");
-        // Vérifier l'abonnement immédiatement après un paiement
-        setTimeout(() => {
-          checkSubscription();
+        // Vérifier l'abonnement immédiatement après un paiement avec retry
+        setTimeout(async () => {
+          if (checkSubscriptionWithRetry) {
+            await checkSubscriptionWithRetry(5);
+          } else {
+            await checkSubscription();
+          }
         }, 1000);
         sessionStorage.removeItem('fromPaymentSuccess');
       }
