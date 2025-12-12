@@ -81,7 +81,13 @@ serve(async (req) => {
     );
 
     const body = await req.json();
-    logStep("Webhook body received", { paymentId: body.payment_id, status: body.payment_status });
+    logStep("Webhook body received", { 
+      paymentId: body.payment_id, 
+      status: body.payment_status,
+      customer_email: body.customer_email ? `${String(body.customer_email).substring(0, 3)}***` : "NOT PROVIDED",
+      has_customer_email: !!body.customer_email,
+      order_id: body.order_id
+    });
 
     // Verify signature if secret key is configured
     if (ipnSecretKey) {
@@ -158,12 +164,29 @@ serve(async (req) => {
 
     // If we have customer_email, try to find user by email
     if (!userId && customer_email) {
+      logStep("Searching for user by email", { 
+        email: `${customer_email.substring(0, 3)}***`,
+        email_length: customer_email.length 
+      });
       const { data: users } = await supabaseClient.auth.admin.listUsers();
       const user = users?.users?.find(u => u.email === customer_email);
       if (user) {
         userId = user.id;
-        logStep("Found user by email", { email: customer_email, userId });
+        logStep("✅ User found by email", { 
+          email: `${customer_email.substring(0, 3)}***`,
+          userId: userId.substring(0, 8) + "***"
+        });
+      } else {
+        logStep("⚠️ User NOT found by email", { 
+          email: `${customer_email.substring(0, 3)}***`,
+          total_users_searched: users?.users?.length || 0
+        });
       }
+    } else if (!customer_email) {
+      logStep("⚠️ No customer_email in webhook body - cannot find user by email", {
+        payment_id: payment_id,
+        order_id: order_id
+      });
     }
 
     // Determine subscription tier from price
@@ -184,8 +207,9 @@ serve(async (req) => {
     const subscriptionEndISO = subscriptionEnd.toISOString();
 
     logStep("Updating subscription", {
-      email: customer_email,
-      userId,
+      email: customer_email ? `${customer_email.substring(0, 3)}***` : "NOT PROVIDED",
+      has_email: !!customer_email,
+      userId: userId ? userId.substring(0, 8) + "***" : "NOT FOUND",
       subscriptionTier,
       subscriptionEnd: subscriptionEndISO,
     });

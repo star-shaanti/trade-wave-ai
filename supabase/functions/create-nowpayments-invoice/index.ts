@@ -43,12 +43,23 @@ serve(async (req) => {
 
     const { planName, fiatAmount, origin, customerEmail, payCurrency } = await req.json();
 
+    logStep("Request received", {
+      planName,
+      fiatAmount,
+      customerEmail: customerEmail ? `${customerEmail.substring(0, 3)}***` : "NOT PROVIDED",
+      hasEmail: !!customerEmail
+    });
+
     if (!planName || typeof planName !== "string") {
       throw new Error("Missing or invalid plan name");
     }
 
     if (fiatAmount === undefined || isNaN(Number(fiatAmount))) {
       throw new Error("Missing or invalid fiat amount");
+    }
+
+    if (!customerEmail) {
+      logStep("WARNING: No customer email provided in request", { user_id: user.id, user_email: user.email });
     }
 
     const apiKey = Deno.env.get("NOWPAYMENTS_API_KEY");
@@ -76,12 +87,24 @@ serve(async (req) => {
 
     if (customerEmail) {
       payload.customer_email = customerEmail;
+      logStep("Email added to payload", { 
+        email: `${customerEmail.substring(0, 3)}***`,
+        email_length: customerEmail.length 
+      });
+    } else {
+      logStep("WARNING: No customer email to add to payload", { user_id: user.id });
     }
 
     const allowedCurrencies = new Set(["btc", "eth"]);
     if (payCurrency && allowedCurrencies.has(payCurrency)) {
       payload.pay_currency = payCurrency;
     }
+
+    logStep("Sending request to NOWPayments API", {
+      payload_keys: Object.keys(payload),
+      has_customer_email: !!payload.customer_email,
+      customer_email_in_payload: payload.customer_email ? `${String(payload.customer_email).substring(0, 3)}***` : "NOT INCLUDED"
+    });
 
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
@@ -143,10 +166,19 @@ serve(async (req) => {
         const url = new URL(invoiceUrl);
         url.searchParams.set("email", customerEmail);
         invoiceUrl = url.toString();
+        logStep("Email added to invoice URL", { 
+          email: `${customerEmail.substring(0, 3)}***`,
+          url_has_email_param: true 
+        });
       } catch (e) {
         // Si l'URL n'est pas valide, utiliser l'URL originale
         logStep("Could not modify invoice URL", { error: e instanceof Error ? e.message : String(e) });
       }
+    } else {
+      logStep("Email not added to URL", { 
+        hasEmail: !!customerEmail, 
+        hasUrl: !!invoiceUrl 
+      });
     }
 
     if (!invoiceId) {
