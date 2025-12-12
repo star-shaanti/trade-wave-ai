@@ -1737,11 +1737,6 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Section Hero avec traductions */}
         <div className="text-center mb-8 md:mb-12">
-          <div className="mb-4">
-            <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1.5 text-xs sm:text-sm font-semibold">
-              {translations.versionName || "Version 2.0 - Real-Time Precision Edition"}
-            </Badge>
-          </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 px-2">
             {translations.heroTitle}
           </h1>
@@ -2232,7 +2227,7 @@ const Index = () => {
             <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
               <iframe
                 className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
-                src="https://www.youtube.com/embed/rg5jsh-xbYA"
+                src="https://www.youtube.com/embed/jE_KpqRoCOI"
                 title={translations.tutorialVideoTitle || "How to Use Real-time Trading Signals Platform?"}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
