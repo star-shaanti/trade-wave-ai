@@ -212,13 +212,24 @@ export const useAuth = () => {
       setLoading(false);
       
       // Check subscription for existing session
-      if (session) {
+      if (session?.access_token) {
         console.log('[AUTH] 🔍 Démarrage vérification abonnement pour session existante...');
+        // Attendre un peu pour s'assurer que tout est initialisé
         setTimeout(() => {
-          checkSubscriptionWithRetry();
+          if (session?.access_token) {
+            checkSubscription();
+          } else {
+            console.log('[AUTH] ⏳ Access token perdu, nouvelle tentative...');
+            setTimeout(() => {
+              if (session?.access_token) {
+                checkSubscription();
+              }
+            }, 500);
+          }
         }, 100);
       } else {
         // Pas de session = pas d'abonnement
+        console.log('[AUTH] ⏳ Pas de session/access_token pour vérification immédiate');
         setSubscriptionData({ subscribed: false });
       }
     });
