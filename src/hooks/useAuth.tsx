@@ -170,11 +170,25 @@ export const useAuth = () => {
           }
           
           // Vérifier l'abonnement
-          if (session) {
+          if (session?.access_token) {
             console.log('[AUTH] 🔍 Démarrage vérification abonnement après connexion...');
+            // Attendre un peu pour s'assurer que la session est complètement chargée
             setTimeout(() => {
-              checkSubscriptionWithRetry();
-            }, 100);
+              if (session?.access_token) {
+                checkSubscriptionWithRetry();
+              } else {
+                console.log('[AUTH] ⏳ Session pas encore prête, nouvelle tentative dans 500ms...');
+                setTimeout(() => {
+                  if (session?.access_token) {
+                    checkSubscriptionWithRetry();
+                  } else {
+                    console.log('[AUTH] ❌ Session toujours pas prête après 600ms');
+                  }
+                }, 500);
+              }
+            }, 200);
+          } else {
+            console.log('[AUTH] ⏳ Pas de session/access_token disponible, vérification différée');
           }
         }
         
