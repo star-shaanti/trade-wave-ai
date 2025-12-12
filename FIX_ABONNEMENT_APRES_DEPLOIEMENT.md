@@ -1,5 +1,13 @@
 # 🔧 Fix : Abonnement non activé après déploiement
 
+## ⚠️ Important : Webhooks indépendants
+
+Votre plateforme utilise **deux webhooks indépendants** :
+- **`stripe-webhook`** : Pour les paiements Stripe (carte bancaire)
+- **`nowpayments-webhook`** : Pour les paiements crypto (NOWPayments)
+
+**Le webhook Stripe n'a AUCUN impact sur les paiements crypto.** Si le webhook Stripe est désactivé, cela n'affecte que les paiements par carte bancaire.
+
 ## 🎯 Problème
 
 Après un déploiement, les utilisateurs qui paient avec crypto ne voient pas leur abonnement activé, même si le paiement est confirmé.
@@ -102,4 +110,5 @@ Après chaque déploiement, vérifiez :
    - Table `subscribers`
 3. **Testez avec un nouveau paiement** pour voir si le problème persiste
 4. **Contactez le support NOWPayments** si le webhook n'est jamais appelé
+
 
