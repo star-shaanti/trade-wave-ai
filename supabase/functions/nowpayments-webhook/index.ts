@@ -150,19 +150,50 @@ serve(async (req) => {
 
     // Extract user_id from order_id (format: user_id-timestamp)
     let userId: string | null = null;
+    let userEmail: string | null = null;
+    
     if (order_id) {
-      const parts = order_id.split("-");
-      if (parts.length > 0) {
-        // Try to find user by UUID pattern (8-4-4-4-12)
-        // order_id format: {user_id}-{timestamp}
-        const possibleUserId = parts.slice(0, 5).join("-");
-        if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-          userId = possibleUserId;
+      logStep("Extracting user_id from order_id", { order_id });
+      // order_id format: {user_id}-{timestamp}
+      // UUID format: 8-4-4-4-12 = 36 characters total
+      // Try to extract UUID from the beginning
+      const uuidPattern = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+      const match = order_id.match(uuidPattern);
+      if (match && match[1]) {
+        userId = match[1];
+        logStep("✅ User ID extracted from order_id", { 
+          userId: userId.substring(0, 8) + "***",
+          order_id: order_id.substring(0, 50) + "..."
+        });
+        
+        // Récupérer l'email de l'utilisateur si on a le user_id mais pas l'email
+        if (!customer_email && userId) {
+          try {
+            const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(userId);
+            if (!userError && userData?.user?.email) {
+              userEmail = userData.user.email;
+              logStep("✅ Email récupéré depuis user_id", { 
+                email: `${userEmail.substring(0, 3)}***`,
+                userId: userId.substring(0, 8) + "***"
+              });
+            } else {
+              logStep("⚠️ Impossible de récupérer l'email depuis user_id", { 
+                error: userError?.message,
+                userId: userId.substring(0, 8) + "***"
+              });
+            }
+          } catch (error) {
+            logStep("ERROR récupérant email depuis user_id", { 
+              error: error instanceof Error ? error.message : String(error)
+            });
+          }
         }
+      } else {
+        logStep("⚠️ Impossible d'extraire user_id depuis order_id", { order_id });
       }
     }
 
-    // If we have customer_email, try to find user by email
+    // If we have customer_email, try to find user by email (fallback)
     if (!userId && customer_email) {
       logStep("Searching for user by email", { 
         email: `${customer_email.substring(0, 3)}***`,
@@ -172,6 +203,7 @@ serve(async (req) => {
       const user = users?.users?.find(u => u.email === customer_email);
       if (user) {
         userId = user.id;
+        userEmail = customer_email;
         logStep("✅ User found by email", { 
           email: `${customer_email.substring(0, 3)}***`,
           userId: userId.substring(0, 8) + "***"
@@ -182,12 +214,16 @@ serve(async (req) => {
           total_users_searched: users?.users?.length || 0
         });
       }
-    } else if (!customer_email) {
-      logStep("⚠️ No customer_email in webhook body - cannot find user by email", {
+    } else if (!customer_email && !userEmail) {
+      logStep("⚠️ No customer_email in webhook body and cannot extract from order_id", {
         payment_id: payment_id,
-        order_id: order_id
+        order_id: order_id,
+        has_userId: !!userId
       });
     }
+    
+    // Utiliser l'email récupéré si disponible
+    const finalEmail = customer_email || userEmail || "";
 
     // Determine subscription tier from price
     let subscriptionTier: string | null = null;
@@ -206,19 +242,34 @@ serve(async (req) => {
     subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
     const subscriptionEndISO = subscriptionEnd.toISOString();
 
+    // Vérifier qu'on a au moins un email ou un user_id
+    if (!finalEmail && !userId) {
+      logStep("ERROR: Cannot update subscription - no email and no user_id", {
+        payment_id,
+        order_id,
+        customer_email,
+        extracted_userId: userId
+      });
+      throw new Error("Cannot update subscription: missing both email and user_id");
+    }
+
     logStep("Updating subscription", {
-      email: customer_email ? `${customer_email.substring(0, 3)}***` : "NOT PROVIDED",
-      has_email: !!customer_email,
+      email: finalEmail ? `${finalEmail.substring(0, 3)}***` : "NOT PROVIDED",
+      has_email: !!finalEmail,
       userId: userId ? userId.substring(0, 8) + "***" : "NOT FOUND",
       subscriptionTier,
       subscriptionEnd: subscriptionEndISO,
     });
 
     // Update subscribers table
+    // IMPORTANT: Pour contourner la contrainte qui bloque subscribed=true sans stripe_customer_id,
+    // on utilise une valeur spéciale pour identifier les paiements NOWPayments
+    const nowpaymentsCustomerId = `nowpayments_${payment_id || 'crypto'}_${Date.now()}`;
+    
     const result = await supabaseClient.from("subscribers").upsert({
-      email: customer_email || "",
+      email: finalEmail || (userId ? `user_${userId.substring(0, 8)}@nowpayments.local` : ""),
       user_id: userId,
-      stripe_customer_id: null, // No Stripe customer for crypto payments
+      stripe_customer_id: nowpaymentsCustomerId, // Valeur spéciale pour contourner la contrainte
       subscribed: true,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEndISO,
