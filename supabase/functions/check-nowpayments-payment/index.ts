@@ -192,15 +192,16 @@ serve(async (req) => {
             if (isInvoicePaid) {
               logStep("Invoice is paid but no payment_id - activating subscription directly", { invoice_id: normalizedInvoiceId, invoice_status: invoiceStatus });
               
-              // 🔒 SÉCURITÉ: Vérifier que l'utilisateur qui appelle est bien celui qui a payé
-              const invoiceEmail = (invoiceData.customer_email || "").toLowerCase().trim();
-              const currentUserEmail = (userData.user.email || "").toLowerCase().trim();
+              // SÉCURITÉ: Vérifier que l'utilisateur qui appelle est bien celui qui a payé
+              // 1. Vérifier l'email de l'invoice
+              const invoiceEmail = invoiceData.customer_email || "";
+              const currentUserEmail = userData.user.email || "";
               
-              // Extraire et vérifier le user_id de l'order_id
+              // 2. Extraire et vérifier le user_id de l'order_id
               let orderUserId: string | null = null;
               if (invoiceData.order_id) {
                 const parts = invoiceData.order_id.split("-");
-                if (parts.length >= 5) {
+                if (parts.length > 0) {
                   const possibleUserId = parts.slice(0, 5).join("-");
                   if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
                     orderUserId = possibleUserId;
@@ -208,8 +209,8 @@ serve(async (req) => {
                 }
               }
               
-              // Vérifier que l'utilisateur correspond
-              const emailMatches = invoiceEmail && currentUserEmail && invoiceEmail === currentUserEmail;
+              // SÉCURITÉ: Vérifier que l'utilisateur correspond
+              const emailMatches = invoiceEmail && currentUserEmail && invoiceEmail.toLowerCase() === currentUserEmail.toLowerCase();
               const userIdMatches = orderUserId && orderUserId === userData.user.id;
               
               logStep("Security check", {
@@ -221,9 +222,9 @@ serve(async (req) => {
                 userIdMatches
               });
               
-              // 🚫 BLOQUER si ni l'email ni le user_id ne correspondent
+              // BLOQUER si ni l'email ni le user_id ne correspondent
               if (!emailMatches && !userIdMatches) {
-                logStep("🚨 SECURITY BLOCK: User mismatch - invoice belongs to different user", {
+                logStep("SECURITY BLOCK: User mismatch - invoice belongs to different user", {
                   invoice_id: normalizedInvoiceId,
                   invoiceEmail,
                   currentUserEmail,
@@ -243,7 +244,7 @@ serve(async (req) => {
                 });
               }
               
-              // Utiliser l'email vérifié
+              // Utiliser l'email de l'invoice si disponible, sinon l'email de l'utilisateur (vérifié)
               const emailToUse = invoiceEmail || currentUserEmail;
               const userId = orderUserId || userData.user.id;
 
@@ -272,6 +273,7 @@ serve(async (req) => {
                 subscribed: true,
                 subscription_tier: subscriptionTier,
                 subscription_end: subscriptionEndISO,
+                payment_source: 'nowpayments',
                 updated_at: new Date().toISOString(),
               }, { onConflict: 'email' });
 
@@ -280,7 +282,7 @@ serve(async (req) => {
                 throw new Error(`Database update failed: ${result.error.message}`);
               }
 
-              logStep("✅ Successfully updated subscription from invoice", {
+              logStep("Successfully updated subscription from invoice", {
                 email: emailToUse,
                 subscribed: true,
                 subscriptionTier,
@@ -506,29 +508,42 @@ serve(async (req) => {
             if (isInvoicePaid) {
               logStep("Invoice is paid, activating subscription from invoice fallback", { invoice_id: normalizedInvoiceId });
               
-              // 🔒 SÉCURITÉ: Vérifier que l'utilisateur est bien celui qui a payé
-              const invoiceEmailFb = (invoiceData.customer_email || "").toLowerCase().trim();
-              const currentUserEmailFb = (userData.user.email || "").toLowerCase().trim();
+              // SÉCURITÉ: Vérifier que l'utilisateur qui appelle est bien celui qui a payé
+              const invoiceEmailFallback = invoiceData.customer_email || "";
+              const currentUserEmailFallback = userData.user.email || "";
               
-              let orderUserIdFb: string | null = null;
+              let orderUserIdFallback: string | null = null;
               if (invoiceData.order_id) {
                 const parts = invoiceData.order_id.split("-");
-                if (parts.length >= 5) {
+                if (parts.length > 0) {
                   const possibleUserId = parts.slice(0, 5).join("-");
                   if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-                    orderUserIdFb = possibleUserId;
+                    orderUserIdFallback = possibleUserId;
                   }
                 }
               }
               
-              const emailMatchesFb = invoiceEmailFb && currentUserEmailFb && invoiceEmailFb === currentUserEmailFb;
-              const userIdMatchesFb = orderUserIdFb && orderUserIdFb === userData.user.id;
+              const emailMatchesFallback = invoiceEmailFallback && currentUserEmailFallback && 
+                invoiceEmailFallback.toLowerCase() === currentUserEmailFallback.toLowerCase();
+              const userIdMatchesFallback = orderUserIdFallback && orderUserIdFallback === userData.user.id;
               
-              logStep("Security check (fallback)", { invoiceEmailFb, currentUserEmailFb, emailMatchesFb, orderUserIdFb, userIdMatchesFb });
+              logStep("Security check (fallback)", {
+                invoiceEmail: invoiceEmailFallback,
+                currentUserEmail: currentUserEmailFallback,
+                emailMatches: emailMatchesFallback,
+                orderUserId: orderUserIdFallback,
+                currentUserId: userData.user.id,
+                userIdMatches: userIdMatchesFallback
+              });
               
-              // 🚫 BLOQUER si ni l'email ni le user_id ne correspondent
-              if (!emailMatchesFb && !userIdMatchesFb) {
-                logStep("🚨 SECURITY BLOCK (fallback): User mismatch", { invoice_id: normalizedInvoiceId });
+              // BLOQUER si ni l'email ni le user_id ne correspondent
+              if (!emailMatchesFallback && !userIdMatchesFallback) {
+                logStep("SECURITY BLOCK (fallback): User mismatch - invoice belongs to different user", {
+                  invoice_id: normalizedInvoiceId,
+                  invoiceEmail: invoiceEmailFallback,
+                  currentUserEmail: currentUserEmailFallback
+                });
+                
                 return new Response(JSON.stringify({
                   error: "Accès non autorisé",
                   message: "Ce paiement n'appartient pas à votre compte.",
@@ -541,8 +556,8 @@ serve(async (req) => {
                 });
               }
               
-              const emailToUseFb = invoiceEmailFb || currentUserEmailFb;
-              const userId = orderUserIdFb || userData.user.id;
+              const emailToUseFallback = invoiceEmailFallback || currentUserEmailFallback;
+              const userId = orderUserIdFallback || userData.user.id;
 
               let subscriptionTier: string | null = null;
               const amount = Number(invoiceData.price_amount) || 0;
@@ -560,12 +575,13 @@ serve(async (req) => {
               const subscriptionEndISO = subscriptionEnd.toISOString();
 
               const result = await serviceRoleClient.from("subscribers").upsert({
-                email: emailToUseFb,
+                email: emailToUseFallback,
                 user_id: userId,
                 stripe_customer_id: null,
                 subscribed: true,
                 subscription_tier: subscriptionTier,
                 subscription_end: subscriptionEndISO,
+                payment_source: 'nowpayments',
                 updated_at: new Date().toISOString(),
               }, { onConflict: 'email' });
 
@@ -634,33 +650,43 @@ serve(async (req) => {
     if (shouldProcess) {
       // serviceRoleClient déjà créé plus haut
 
-      // 🔒 SÉCURITÉ: Vérifier que l'utilisateur est bien celui qui a payé
-      const paymentEmail = (payment.customer_email || "").toLowerCase().trim();
-      const currentUserEmailPmt = (userData.user.email || "").toLowerCase().trim();
+      // SÉCURITÉ: Vérifier que l'utilisateur qui appelle est bien celui qui a payé
+      const paymentEmail = payment.customer_email || "";
+      const currentUserEmailPayment = userData.user.email || "";
       
       // Extract user_id from order_id
-      let orderUserIdPmt: string | null = null;
+      let orderUserIdPayment: string | null = null;
       if (payment.order_id) {
         const parts = payment.order_id.split("-");
-        if (parts.length >= 5) {
+        if (parts.length > 0) {
           const possibleUserId = parts.slice(0, 5).join("-");
           if (possibleUserId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-            orderUserIdPmt = possibleUserId;
+            orderUserIdPayment = possibleUserId;
           }
         }
       }
       
-      const emailMatchesPmt = paymentEmail && currentUserEmailPmt && paymentEmail === currentUserEmailPmt;
-      const userIdMatchesPmt = orderUserIdPmt && orderUserIdPmt === userData.user.id;
+      const emailMatchesPayment = paymentEmail && currentUserEmailPayment && 
+        paymentEmail.toLowerCase() === currentUserEmailPayment.toLowerCase();
+      const userIdMatchesPayment = orderUserIdPayment && orderUserIdPayment === userData.user.id;
       
-      logStep("Security check (payment)", { paymentEmail, currentUserEmailPmt, emailMatchesPmt, orderUserIdPmt, userIdMatchesPmt });
+      logStep("Security check (payment)", {
+        paymentEmail,
+        currentUserEmail: currentUserEmailPayment,
+        emailMatches: emailMatchesPayment,
+        orderUserId: orderUserIdPayment,
+        currentUserId: userData.user.id,
+        userIdMatches: userIdMatchesPayment
+      });
       
-      // 🚫 BLOQUER si ni l'email ni le user_id ne correspondent
-      if (!emailMatchesPmt && !userIdMatchesPmt) {
-        logStep("🚨 SECURITY BLOCK (payment): User mismatch - payment belongs to different user", {
+      // BLOQUER si ni l'email ni le user_id ne correspondent
+      if (!emailMatchesPayment && !userIdMatchesPayment) {
+        logStep("SECURITY BLOCK (payment): User mismatch - payment belongs to different user", {
           payment_id: actualPaymentId,
           paymentEmail,
-          currentUserEmail: currentUserEmailPmt
+          currentUserEmail: currentUserEmailPayment,
+          orderUserId: orderUserIdPayment,
+          currentUserId: userData.user.id
         });
         
         return new Response(JSON.stringify({
@@ -675,11 +701,11 @@ serve(async (req) => {
         });
       }
       
-      const emailToUsePmt = paymentEmail || currentUserEmailPmt;
-      let userId = orderUserIdPmt || userData.user.id;
+      const emailToUsePayment = paymentEmail || currentUserEmailPayment;
+      let userId = orderUserIdPayment || userData.user.id;
 
-      // Find user by email if needed (seulement si l'email correspond)
-      if (!userId && paymentEmail && emailMatchesPmt) {
+      // Find user by email if needed (but only if email matches)
+      if (!userId && paymentEmail && emailMatchesPayment) {
         const { data: users } = await serviceRoleClient.auth.admin.listUsers();
         const user = users?.users?.find(u => u.email === paymentEmail);
         if (user) {
@@ -706,12 +732,13 @@ serve(async (req) => {
 
       // Update subscribers table
       const result = await serviceRoleClient.from("subscribers").upsert({
-        email: emailToUsePmt,
+        email: emailToUsePayment,
         user_id: userId,
         stripe_customer_id: null,
         subscribed: true,
         subscription_tier: subscriptionTier,
         subscription_end: subscriptionEndISO,
+        payment_source: 'nowpayments',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
 
@@ -720,8 +747,8 @@ serve(async (req) => {
         throw new Error(`Database update failed: ${result.error.message}`);
       }
 
-      logStep("✅ Successfully updated subscription", {
-        email: emailToUsePmt,
+      logStep("Successfully updated subscription", {
+        email: emailToUsePayment,
         subscribed: true,
         subscriptionTier,
       });

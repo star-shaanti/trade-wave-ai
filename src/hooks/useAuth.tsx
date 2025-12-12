@@ -17,11 +17,12 @@ export const useAuth = () => {
 
   const checkSubscription = useCallback(async () => {
     if (!session?.access_token) {
-      console.log("Pas d'utilisateur, pas de vérification d'abonnement");
+      console.log("[AUTH] ❌ Pas de session/token, pas de vérification d'abonnement");
+      setSubscriptionData({ subscribed: false });
       return;
     }
     
-    console.log(`Vérification de l'abonnement pour: ${session.user?.email}`);
+    console.log(`[AUTH] 🔍 Vérification de l'abonnement pour: ${session.user?.email}`);
     setSubscriptionLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -31,16 +32,29 @@ export const useAuth = () => {
       });
 
       if (error) {
-        console.error("Error checking subscription:", error);
+        console.error("[AUTH] ❌ Erreur check-subscription:", error);
         setSubscriptionData({ subscribed: false });
         return;
       }
 
-      const subscriptionData = data || { subscribed: false };
-      console.log(`Abonnement trouvé dans subscribers: ${subscriptionData.subscribed}`);
-      setSubscriptionData(subscriptionData);
+      // SÉCURITÉ: Toujours s'assurer que subscribed est un booléen
+      const isSubscribed = data?.subscribed === true;
+      const newSubscriptionData = {
+        subscribed: isSubscribed,
+        subscription_tier: isSubscribed ? data?.subscription_tier : undefined,
+        subscription_end: isSubscribed ? data?.subscription_end : undefined
+      };
+      
+      console.log(`[AUTH] 📊 Résultat check-subscription:`, {
+        subscribed: isSubscribed,
+        tier: newSubscriptionData.subscription_tier,
+        end: newSubscriptionData.subscription_end,
+        rawData: data
+      });
+      
+      setSubscriptionData(newSubscriptionData);
     } catch (error) {
-      console.error("Subscription check failed:", error);
+      console.error("[AUTH] ❌ Subscription check failed:", error);
       setSubscriptionData({ subscribed: false });
     } finally {
       setSubscriptionLoading(false);
@@ -49,13 +63,17 @@ export const useAuth = () => {
 
   // Vérification plus fréquente après paiement
   const checkSubscriptionWithRetry = useCallback(async (maxRetries = 5) => {
-    if (!session?.access_token) return;
+    if (!session?.access_token) {
+      console.log("[AUTH] ❌ Pas de session pour checkSubscriptionWithRetry");
+      setSubscriptionData({ subscribed: false });
+      return;
+    }
     
-    console.log(`Tentative de vérification de l'abonnement pour: ${session.user?.email}`);
+    console.log(`[AUTH] 🔄 Début vérification avec retry pour: ${session.user?.email}`);
     
     for (let i = 0; i < maxRetries; i++) {
       try {
-        console.log(`Tentative ${i + 1} de vérification de l'abonnement...`);
+        console.log(`[AUTH] 🔄 Tentative ${i + 1}/${maxRetries}...`);
         
         setSubscriptionLoading(true);
         const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -65,16 +83,28 @@ export const useAuth = () => {
         });
 
         if (error) {
-          console.error("Error checking subscription:", error);
+          console.error("[AUTH] ❌ Erreur lors de la vérification:", error);
           setSubscriptionData({ subscribed: false });
         } else {
-          const newSubscriptionData = data || { subscribed: false };
-          console.log(`Abonnement trouvé dans subscribers: ${newSubscriptionData.subscribed}`);
+          // SÉCURITÉ: Toujours s'assurer que subscribed est un booléen strict
+          const isSubscribed = data?.subscribed === true;
+          const newSubscriptionData = {
+            subscribed: isSubscribed,
+            subscription_tier: isSubscribed ? data?.subscription_tier : undefined,
+            subscription_end: isSubscribed ? data?.subscription_end : undefined
+          };
+          
+          console.log(`[AUTH] 📊 Résultat tentative ${i + 1}:`, {
+            subscribed: isSubscribed,
+            tier: newSubscriptionData.subscription_tier,
+            rawResponse: data
+          });
+          
           setSubscriptionData(newSubscriptionData);
           
           // Si l'abonnement est actif, on arrête les tentatives
-          if (newSubscriptionData.subscribed) {
-            console.log("Abonnement confirmé, arrêt des tentatives");
+          if (isSubscribed) {
+            console.log("[AUTH] ✅ Abonnement confirmé, arrêt des tentatives");
             break;
           }
         }
@@ -86,32 +116,71 @@ export const useAuth = () => {
           await new Promise(resolve => setTimeout(resolve, 3000));
         }
       } catch (error) {
-        console.error(`Subscription check attempt ${i + 1} failed:`, error);
+        console.error(`[AUTH] ❌ Tentative ${i + 1} échouée:`, error);
         setSubscriptionLoading(false);
+        setSubscriptionData({ subscribed: false });
         if (i < maxRetries - 1) {
           await new Promise(resolve => setTimeout(resolve, 3000));
         }
       }
     }
+    
+    console.log("[AUTH] 🏁 Fin de checkSubscriptionWithRetry");
   }, [session?.access_token, session?.user?.email]);
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log(`[AUTH] 🔔 Auth state change: ${event}`, { 
+          hasSession: !!session, 
+          email: session?.user?.email 
+        });
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Check subscription when user signs in
-        if (event === 'SIGNED_IN' && session) {
-          setTimeout(() => {
-            checkSubscriptionWithRetry();
-          }, 100);
+        // 🔒 SÉCURITÉ: TOUJOURS réinitialiser l'état d'abonnement au changement d'utilisateur
+        if (event === 'SIGNED_IN') {
+          // Réinitialiser l'abonnement à false jusqu'à vérification
+          setSubscriptionData({ subscribed: false });
+          console.log('[AUTH] 🔄 Abonnement réinitialisé à false en attendant vérification');
+          
+          // Nettoyer les IDs de paiement orphelins
+          if (session?.user?.email) {
+            const storedEmail = sessionStorage.getItem('payment_user_email') || 
+                                localStorage.getItem('payment_user_email');
+            
+            // TOUJOURS nettoyer si pas d'email stocké OU si email différent
+            if (!storedEmail || storedEmail !== session.user.email) {
+              console.log('[AUTH] 🚫 Nettoyage des IDs de paiement (email différent ou absent)', {
+                storedEmail: storedEmail || 'AUCUN',
+                currentEmail: session.user.email
+              });
+              sessionStorage.removeItem('nowpayments_payment_id');
+              sessionStorage.removeItem('nowpayments_invoice_id');
+              sessionStorage.removeItem('nowpayments_user_email');
+              sessionStorage.removeItem('payment_user_email');
+              localStorage.removeItem('nowpayments_payment_id');
+              localStorage.removeItem('nowpayments_invoice_id');
+              localStorage.removeItem('nowpayments_user_email');
+              localStorage.removeItem('payment_user_email');
+            }
+          }
+          
+          // Vérifier l'abonnement
+          if (session) {
+            console.log('[AUTH] 🔍 Démarrage vérification abonnement après connexion...');
+            setTimeout(() => {
+              checkSubscriptionWithRetry();
+            }, 100);
+          }
         }
         
         // Clear subscription data when user signs out
         if (event === 'SIGNED_OUT') {
+          console.log('[AUTH] 👋 Déconnexion - réinitialisation abonnement');
           setSubscriptionData({ subscribed: false });
         }
       }
@@ -119,15 +188,24 @@ export const useAuth = () => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[AUTH] 🔄 Session existante vérifiée:', { 
+        hasSession: !!session, 
+        email: session?.user?.email 
+      });
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
       
       // Check subscription for existing session
       if (session) {
+        console.log('[AUTH] 🔍 Démarrage vérification abonnement pour session existante...');
         setTimeout(() => {
           checkSubscriptionWithRetry();
         }, 100);
+      } else {
+        // Pas de session = pas d'abonnement
+        setSubscriptionData({ subscribed: false });
       }
     });
 

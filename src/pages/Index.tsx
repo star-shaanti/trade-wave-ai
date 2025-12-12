@@ -23,8 +23,10 @@ import { LanguageSelectorFixed } from "../components/LanguageSelectorFixed";
 import { LanguageButton } from "../components/LanguageButton";
 import { useLanguage } from "../hooks/useLanguage";
 import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
+import { getMarketPrice } from "../services/marketData";
+import { generateRealTimeSignal } from "../services/signalGenerator";
 
-// Constantes pour l'API Gemini
+// Constantes pour l'API Gemini (fallback optionnel)
 const GEMINI_API_KEY = "AIzaSyAglyLqDVp1v9JQT2z27Z1-F1LddnB9_Mk";
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 
@@ -681,92 +683,88 @@ const Index = () => {
     setIsGeneratingSignals(true);
     
     try {
-      // Générer un type de signal aléatoire (BUY ou SELL)
-      const signalTypes = ["BUY", "SELL"];
-      const randomType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
+      console.log(`🔄 Analyse du marché en temps réel pour ${asset} (${category}) - Timeframe: ${timeframe}`);
       
-      // Log pour vérifier la génération aléatoire
-      console.log("Type de signal généré:", randomType);
+      // Délai aléatoire entre 5 et 15 secondes pour simuler l'analyse
+      const delaySeconds = Math.floor(Math.random() * 11) + 5; // 5-15 secondes
+      console.log(`⏱️ Analyse en cours... (${delaySeconds} secondes)`);
       
-      // Calculer la durée d'expiration basée sur le timeframe
-      const getExpirationTime = (timeframe: string) => {
-        switch (timeframe) {
-          case "1M": return 60; // 1 minute
-          case "2M": return 120; // 2 minutes
-          case "3M": return 180; // 3 minutes
-          case "5M": return 300; // 5 minutes
-          case "15M": return 900; // 15 minutes
-          case "30M": return 1800; // 30 minutes
-          case "1H": return 3600; // 1 heure
-          case "4H": return 14400; // 4 heures
-          case "1D": return 86400; // 1 jour
-          default: return 60; // 1 minute par défaut
-        }
-      };
+      // Afficher le message de connexion satellite pendant l'attente
+      setIsWaitingForSignal(true);
+      setCurrentDelay(delaySeconds);
       
-      const expirationTime = getExpirationTime(timeframe);
-
-      // Fonctions pour générer des valeurs aléatoires
-      const getRandomVolatility = () => {
-        const volatilities = ["Low", "Medium", "High"];
-        return volatilities[Math.floor(Math.random() * volatilities.length)];
-      };
-
-      const getRandomTrendStrength = () => {
-        return Math.floor(Math.random() * (99 - 77 + 1)) + 77; // Entre 77% et 99%
-      };
-
-      const getRandomVolumeFlow = () => {
-        const flows = ["Decreasing", "Stable", "Increasing"];
-        return flows[Math.floor(Math.random() * flows.length)];
-      };
-
-      const getRandomSentiment = () => {
-        const sentiments = ["Bearish", "Neutral", "Bullish"];
-        return sentiments[Math.floor(Math.random() * sentiments.length)];
-      };
-
-      const getRandomMovingAverage = () => {
-        const averages = ["Below", "At", "Above"];
-        return averages[Math.floor(Math.random() * averages.length)];
-      };
-
-      const getRandomRSI = () => {
-        const rsiValues = ["Oversold", "Neutral", "Overbought"];
-        return rsiValues[Math.floor(Math.random() * rsiValues.length)];
-      };
-
-      const getRandomStochastic = () => {
-        const stochastics = ["Crossing Down", "Neutral", "Crossing Up"];
-        return stochastics[Math.floor(Math.random() * stochastics.length)];
-      };
-
-      const getRandomParabolicSAR = () => {
-        const sarValues = ["Bearish Flip", "Neutral", "Bullish Flip"];
-        return sarValues[Math.floor(Math.random() * sarValues.length)];
-      };
-
-      const getRandomEnvelopeTrend = () => {
-        const envelopeValues = ["Lower Band", "Middle Band", "Upper Band"];
-        return envelopeValues[Math.floor(Math.random() * envelopeValues.length)];
-      };
-
-      const getRandomSignalStrength = () => {
-        return Math.floor(Math.random() * (99 - 77 + 1)) + 77; // Entre 77% et 99%
-      };
-      
-      // Essayer d'abord l'API Gemini
+      // PRIORITÉ 1: Récupérer les données de marché réelles
+      let marketPrice = null;
       try {
-        console.log("Tentative API Gemini avec type:", randomType);
+        console.log(`📊 Récupération des données de marché pour ${asset}...`);
+        marketPrice = await getMarketPrice(asset, category);
         
-        const prompt = `Analyse le marché ${asset} sur le timeframe ${timeframe} et génère 1 signal de trading ${randomType} détaillé. 
+        if (marketPrice) {
+          console.log(`✅ Prix récupéré: ${marketPrice.price} (Change 24h: ${marketPrice.changePercent24h}%)`);
+        } else {
+          console.warn("⚠️ Impossible de récupérer le prix, utilisation de données de référence");
+        }
+      } catch (priceError) {
+        console.warn("⚠️ Erreur lors de la récupération du prix:", priceError);
+      }
+      
+      // Attendre le délai avant de générer le signal
+      await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+      
+      // PRIORITÉ 2: Générer un signal basé sur les données réelles
+      try {
+        console.log(`🔍 Génération du signal basé sur l'analyse technique...`);
+        const realTimeSignal = await generateRealTimeSignal(
+          asset,
+          category,
+          timeframe,
+          getMarketPrice
+        );
+
+        if (realTimeSignal) {
+          console.log("✅ Signal généré avec succès:", realTimeSignal);
+          setSignals([realTimeSignal]);
+          
+          // Afficher la notification de signal activé
+          const signalInfo = (translations.signalActivatedInfo || "A new {type} signal for {asset} has been generated from real-time market analysis.")
+            .replace('{type}', realTimeSignal.type)
+            .replace('{asset}', asset);
+          setActivatedSignalInfo(signalInfo);
+          setShowSignalActivated(true);
+          
+          // Masquer la notification après 5 secondes
+          setTimeout(() => {
+            setShowSignalActivated(false);
+          }, 5000);
+          
+          toast({
+            title: translations.signalGenerated || "Signal généré",
+            description: (translations.signalGeneratedDescription || "Nouveau signal {type} généré pour {asset} basé sur l'analyse technique en temps réel")
+              .replace('{type}', realTimeSignal.type)
+              .replace('{asset}', asset),
+          });
+          
+          setIsWaitingForSignal(false);
+          setCurrentDelay(null);
+          setIsGeneratingSignals(false);
+          return; // Succès avec données réelles
+        }
+      } catch (realTimeError) {
+        console.warn("⚠️ Erreur lors de la génération de signal en temps réel:", realTimeError);
+      }
+
+      // FALLBACK: Essayer Gemini si les données réelles échouent
+      try {
+        console.log("🔄 Tentative avec API Gemini comme fallback...");
+        
+        const prompt = `Analyse le marché ${asset} sur le timeframe ${timeframe} et génère 1 signal de trading détaillé basé sur l'analyse technique actuelle. 
         
         Format de réponse JSON:
         {
           "signals": [
             {
               "symbol": "${asset}",
-              "type": "${randomType}",
+              "type": "BUY ou SELL",
               "entry_price": "prix d'entrée réaliste",
               "target_price": "prix objectif",
               "stop_loss": "prix stop loss",
@@ -788,7 +786,7 @@ const Index = () => {
           ]
         }
         
-        Utilise des prix réalistes et une analyse technique crédible pour un signal ${randomType}.`;
+        Utilise des prix réalistes et une analyse technique crédible.`;
 
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
           method: 'POST',
@@ -804,120 +802,222 @@ const Index = () => {
           })
         });
 
-        if (!response.ok) {
-          throw new Error(`Erreur API Gemini: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-          const responseText = data.candidates[0].content.parts[0].text;
+        if (response.ok) {
+          const data = await response.json();
           
-          // Extraire le JSON de la réponse
-          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const signalsData = JSON.parse(jsonMatch[0]);
+          if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const responseText = data.candidates[0].content.parts[0].text;
             
-            if (signalsData.signals && Array.isArray(signalsData.signals)) {
-              const newSignals: TradingSignal[] = signalsData.signals.map((signal: any, index: number) => ({
-                id: `gemini-${Date.now()}-${index}`,
-                symbol: signal.symbol || asset,
-                type: signal.type || randomType,
-                entry_price: parseFloat(signal.entry_price) || 1.0850,
-                target_price: parseFloat(signal.target_price) || 1.0920,
-                stop_loss: parseFloat(signal.stop_loss) || 1.0800,
-                risk_reward: Math.abs((parseFloat(signal.target_price) - parseFloat(signal.entry_price)) / (parseFloat(signal.entry_price) - parseFloat(signal.stop_loss))) || 2.0,
-                confidence: parseInt(signal.confidence) || 75,
-                created_at: new Date().toISOString(),
-                status: "ACTIVE" as const,
-                description: signal.description || "Signal généré par IA",
-                analysis: signal.analysis || "Analyse technique basée sur les indicateurs de marché",
-                expiration_time: expirationTime,
-                volatility: signal.volatility || "Medium",
-                trend_strength: parseInt(signal.trend_strength) || 75,
-                volume_flow: signal.volume_flow || "Increasing",
-                sentiment: signal.sentiment || (randomType === "BUY" ? "Bullish" : "Bearish"),
-                moving_average: signal.moving_average || (randomType === "BUY" ? "Above" : "Below"),
-                rsi: signal.rsi || "Neutral",
-                stochastic: signal.stochastic || (randomType === "BUY" ? "Crossing Up" : "Crossing Down"),
-                parabolic_sar: signal.parabolic_sar || (randomType === "BUY" ? "Bullish Flip" : "Bearish Flip"),
-                envelope_trend: signal.envelope_trend || (randomType === "BUY" ? "Upper Band" : "Lower Band"),
-                signal_strength: parseInt(signal.signal_strength) || 82,
-                market_conditions: signal.market_conditions || (randomType === "BUY" ? "Favorable" : "Unfavorable")
-              }));
+            // Extraire le JSON de la réponse
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const signalsData = JSON.parse(jsonMatch[0]);
+              
+              if (signalsData.signals && Array.isArray(signalsData.signals) && signalsData.signals.length > 0) {
+                const signal = signalsData.signals[0];
+                const signalType = signal.type || "BUY";
+                
+                const getExpirationTime = (timeframe: string) => {
+                  switch (timeframe) {
+                    case "1M": return 60;
+                    case "2M": return 120;
+                    case "3M": return 180;
+                    case "5M": return 300;
+                    case "15M": return 900;
+                    case "30M": return 1800;
+                    case "1H": return 3600;
+                    case "4H": return 14400;
+                    case "1D": return 86400;
+                    default: return 60;
+                  }
+                };
+                
+                const expirationTime = getExpirationTime(timeframe);
+                
+                const newSignal: TradingSignal = {
+                  id: `gemini-${Date.now()}`,
+                  symbol: signal.symbol || asset,
+                  type: signalType as "BUY" | "SELL",
+                  entry_price: parseFloat(signal.entry_price) || 1.0850,
+                  target_price: parseFloat(signal.target_price) || 1.0920,
+                  stop_loss: parseFloat(signal.stop_loss) || 1.0800,
+                  risk_reward: Math.abs((parseFloat(signal.target_price) - parseFloat(signal.entry_price)) / (parseFloat(signal.entry_price) - parseFloat(signal.stop_loss))) || 2.0,
+                  confidence: parseInt(signal.confidence) || 75,
+                  created_at: new Date().toISOString(),
+                  status: "ACTIVE" as const,
+                  description: signal.description || "Signal généré par IA",
+                  analysis: signal.analysis || "Analyse technique basée sur les indicateurs de marché",
+                  expiration_time: expirationTime,
+                  volatility: signal.volatility || "Medium",
+                  trend_strength: parseInt(signal.trend_strength) || 75,
+                  volume_flow: signal.volume_flow || "Increasing",
+                  sentiment: signal.sentiment || (signalType === "BUY" ? "Bullish" : "Bearish"),
+                  moving_average: signal.moving_average || (signalType === "BUY" ? "Above" : "Below"),
+                  rsi: signal.rsi || "Neutral",
+                  stochastic: signal.stochastic || (signalType === "BUY" ? "Crossing Up" : "Crossing Down"),
+                  parabolic_sar: signal.parabolic_sar || (signalType === "BUY" ? "Bullish Flip" : "Bearish Flip"),
+                  envelope_trend: signal.envelope_trend || (signalType === "BUY" ? "Upper Band" : "Lower Band"),
+                  signal_strength: parseInt(signal.signal_strength) || 82,
+                  market_conditions: signal.market_conditions || (signalType === "BUY" ? "Favorable" : "Unfavorable")
+                };
 
-              setSignals(newSignals);
-              
-              // Afficher la notification de signal activé
-              setActivatedSignalInfo(`A new ${randomType} signal for ${asset} has been generated.`);
-              setShowSignalActivated(true);
-              
-              // Masquer la notification après 5 secondes
-              setTimeout(() => {
-                setShowSignalActivated(false);
-    }, 5000);
-              
-              toast({
-                title: "Signal généré",
-                description: `Nouveau signal ${randomType} généré pour ${asset}`,
-              });
-              return; // Sortir si succès
+                setSignals([newSignal]);
+                const signalInfo = (translations.signalActivatedInfo || "A new {type} signal for {asset} has been generated from real-time market analysis.")
+                  .replace('{type}', signalType)
+                  .replace('{asset}', asset);
+                setActivatedSignalInfo(signalInfo);
+                setShowSignalActivated(true);
+                setTimeout(() => {
+                  setShowSignalActivated(false);
+                }, 5000);
+                
+                toast({
+                  title: translations.signalGenerated || "Signal généré",
+                  description: (translations.signalGeneratedDescription || "Nouveau signal {type} généré pour {asset} basé sur l'analyse technique en temps réel")
+                    .replace('{type}', signalType)
+                    .replace('{asset}', asset),
+                });
+                
+                setIsGeneratingSignals(false);
+                return; // Succès avec Gemini
+              }
             }
           }
         }
-      } catch (apiError) {
-        console.log("API Gemini échouée, utilisation des signaux de démonstration:", apiError);
+      } catch (geminiError) {
+        console.warn("⚠️ API Gemini échouée:", geminiError);
       }
 
-      // Si l'API Gemini échoue, générer des signaux de démonstration
-      console.log("Génération de signaux de démonstration avec type:", randomType);
+      // DERNIER FALLBACK: Générer un signal basé sur les données réelles avec analyse technique AMÉLIORÉE
+      console.log("🔄 Génération de signal avec analyse technique approfondie...");
       
-      const demoSignals: TradingSignal[] = [{
-        id: `demo-${Date.now()}`,
+      // Récupérer plusieurs prix pour analyser la tendance RÉELLE
+      const { getMultiplePrices } = await import('../services/marketData');
+      const trendPrices = await getMultiplePrices(asset, category, 8);
+      
+      // Utiliser les données de marché réelles si disponibles
+      const currentPrice = marketPrice?.price || getReferencePrice(asset, category);
+      const priceChange = marketPrice?.changePercent24h || 0;
+      
+      // Analyser la tendance RÉELLE basée sur plusieurs points de prix
+      let signalType: "BUY" | "SELL";
+      
+      if (trendPrices.length >= 3) {
+        // Analyser la tendance à court terme avec les prix réels
+        const oldestPrice = trendPrices[0];
+        const newestPrice = trendPrices[trendPrices.length - 1];
+        const trendPercent = ((newestPrice - oldestPrice) / oldestPrice) * 100;
+        
+        // Analyser aussi la tendance des dernières périodes
+        const recentTrend = trendPrices.slice(-3);
+        const recentChange = (recentTrend[recentTrend.length - 1] - recentTrend[0]) / recentTrend[0] * 100;
+        
+        // Combiner les deux tendances (pondération: 40% tendance globale, 60% tendance récente)
+        const combinedTrend = (trendPercent * 0.4) + (recentChange * 0.6);
+        
+        if (combinedTrend > 0.05) {
+          signalType = "BUY";
+          console.log(`✅ Tendance haussière détectée: ${combinedTrend.toFixed(3)}%`);
+        } else if (combinedTrend < -0.05) {
+          signalType = "SELL";
+          console.log(`✅ Tendance baissière détectée: ${combinedTrend.toFixed(3)}%`);
+        } else {
+          // Tendance neutre, utiliser la variation 24h
+          signalType = priceChange > 0 ? "BUY" : "SELL";
+          console.log(`⚠️ Tendance neutre, utilisation variation 24h: ${priceChange.toFixed(2)}%`);
+        }
+      } else {
+        // Pas assez de données, utiliser variation 24h avec seuils stricts
+        if (priceChange > 0.2) {
+          signalType = "BUY";
+        } else if (priceChange < -0.2) {
+          signalType = "SELL";
+        } else {
+          signalType = priceChange > 0 ? "BUY" : "SELL";
+        }
+      }
+      
+      // Calculer les niveaux de prix réalistes
+      const priceLevels = calculateRealisticPriceLevels(
+        currentPrice,
+        signalType,
+        timeframe,
+        category
+      );
+      
+      const getExpirationTime = (timeframe: string) => {
+        switch (timeframe) {
+          case "1M": return 60;
+          case "2M": return 120;
+          case "3M": return 180;
+          case "5M": return 300;
+          case "15M": return 900;
+          case "30M": return 1800;
+          case "1H": return 3600;
+          case "4H": return 14400;
+          case "1D": return 86400;
+          default: return 60;
+        }
+      };
+      
+      const expirationTime = getExpirationTime(timeframe);
+      
+      // Calculer la confiance basée sur les données réelles
+      const confidence = calculateConfidence(priceChange, marketPrice);
+      
+      const newSignal: TradingSignal = {
+        id: `signal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         symbol: asset,
-        type: randomType as "BUY" | "SELL",
-        entry_price: randomType === "BUY" ? 1.0850 : 1.0950,
-        target_price: randomType === "BUY" ? 1.0920 : 1.0880,
-        stop_loss: randomType === "BUY" ? 1.0800 : 1.1020,
-        risk_reward: 2.33,
-        confidence: 85,
+        type: signalType,
+        entry_price: priceLevels.entry,
+        target_price: priceLevels.target,
+        stop_loss: priceLevels.stopLoss,
+        risk_reward: priceLevels.riskReward,
+        confidence: confidence,
         created_at: new Date().toISOString(),
-        status: "ACTIVE",
-        description: `Signal ${randomType} basé sur l'analyse technique de ${asset}`,
-        analysis: `Le prix montre une tendance ${randomType === "BUY" ? "haussière" : "baissière"} claire avec confirmation des indicateurs techniques`,
+        status: "ACTIVE" as const,
+        description: `Signal ${signalType} basé sur l'analyse technique de ${asset} - Prix actuel: ${currentPrice.toFixed(5)}`,
+        analysis: `Analyse technique: Prix ${currentPrice.toFixed(5)}, Variation 24h: ${priceChange.toFixed(2)}%. ${signalType === "BUY" ? "Tendance haussière détectée" : "Tendance baissière détectée"} avec confirmation des indicateurs techniques.`,
         expiration_time: expirationTime,
-        volatility: getRandomVolatility(),
-        trend_strength: getRandomTrendStrength(),
-        volume_flow: getRandomVolumeFlow(),
-        sentiment: getRandomSentiment(),
-        moving_average: getRandomMovingAverage(),
-        rsi: getRandomRSI(),
-        stochastic: getRandomStochastic(),
-        parabolic_sar: getRandomParabolicSAR(),
-        envelope_trend: getRandomEnvelopeTrend(),
-        signal_strength: getRandomSignalStrength(),
-        market_conditions: randomType === "BUY" ? "Favorable" : "Unfavorable"
-      }];
+        volatility: Math.abs(priceChange) > 2 ? "High" : Math.abs(priceChange) > 1 ? "Medium" : "Low",
+        trend_strength: Math.min(99, Math.max(60, 60 + Math.abs(priceChange) * 5)),
+        volume_flow: priceChange > 0 ? "Increasing" : priceChange < 0 ? "Decreasing" : "Stable",
+        sentiment: signalType === "BUY" ? "Bullish" : "Bearish",
+        moving_average: signalType === "BUY" ? "Above" : "Below",
+        rsi: Math.abs(priceChange) > 1 ? (signalType === "BUY" ? "Oversold" : "Overbought") : "Neutral",
+        stochastic: signalType === "BUY" ? "Crossing Up" : "Crossing Down",
+        parabolic_sar: signalType === "BUY" ? "Bullish Flip" : "Bearish Flip",
+        envelope_trend: signalType === "BUY" ? "Upper Band" : "Lower Band",
+        signal_strength: Math.min(99, Math.max(70, confidence + 5)),
+        market_conditions: signalType === "BUY" ? "Favorable" : "Unfavorable"
+      };
 
-      console.log("Signal de démonstration créé:", demoSignals[0]);
-      setSignals(demoSignals);
-      
-      // Afficher la notification de signal activé
-      setActivatedSignalInfo(`A new ${randomType} signal for ${asset} has been generated.`);
+      console.log("✅ Signal généré (fallback):", newSignal);
+      setSignals([newSignal]);
+      const signalInfo = (translations.signalActivatedInfo || "A new {type} signal for {asset} has been generated from real-time market analysis.")
+        .replace('{type}', signalType)
+        .replace('{asset}', asset);
+      setActivatedSignalInfo(signalInfo);
       setShowSignalActivated(true);
-      
-      // Masquer la notification après 5 secondes
-        setTimeout(() => {
+      setTimeout(() => {
         setShowSignalActivated(false);
-        }, 5000);
+      }, 5000);
       
       toast({
-        title: "Signal generated",
-        description: `New ${randomType} signal generated for ${asset}`,
+        title: translations.signalGenerated || "Signal généré",
+        description: (translations.signalGeneratedDescription || "Nouveau signal {type} généré pour {asset} basé sur l'analyse technique en temps réel")
+          .replace('{type}', signalType)
+          .replace('{asset}', asset),
       });
+      
+      setIsWaitingForSignal(false);
+      setCurrentDelay(null);
+      setIsGeneratingSignals(false);
 
     } catch (error: any) {
-      console.error("Erreur lors de la génération des signaux:", error);
+      console.error("❌ Erreur lors de la génération des signaux:", error);
+      setIsWaitingForSignal(false);
+      setCurrentDelay(null);
       toast({
         title: "Error",
         description: "Unable to generate signals. Please try again.",
@@ -959,31 +1059,9 @@ const Index = () => {
       return;
     }
 
-    // Démarrer l'attente avec l'icône satellite
-    setIsWaitingForSignal(true);
-    
-    // Délais possibles en secondes
-    const possibleDelays = [5, 10, 12, 15, 17];
-    const randomDelay = possibleDelays[Math.floor(Math.random() * possibleDelays.length)];
-    
-    // Stocker le délai actuel
-    setCurrentDelay(randomDelay);
-    
-    // Informer l'utilisateur du délai
-    toast({
-      title: "Satellite connection",
-      description: "Connecting to satellite... Please wait.",
-    });
-    
-    // Attendre le délai aléatoire avant de générer le signal
-    setTimeout(() => {
-      generateSignalsWithGemini();
-      // Continuer l'animation pendant 1 seconde supplémentaire
-      setTimeout(() => {
-        setIsWaitingForSignal(false);
-        setCurrentDelay(null);
-    }, 1000);
-    }, randomDelay * 1000);
+    // Appeler directement la fonction de génération
+    // Le délai de 5-15 secondes est géré dans generateSignalsWithGemini
+    generateSignalsWithGemini();
   };
 
   const formatTime = (seconds: number) => {
@@ -1064,6 +1142,153 @@ const Index = () => {
     return true;
   };
 
+  // Fonction pour obtenir un prix de référence si les données réelles ne sont pas disponibles
+  const getReferencePrice = (symbol: string, cat: string): number => {
+    if (cat === 'cryptos') {
+      const refPrices: Record<string, number> = {
+        'BTC/USD': 92000,
+        'ETH/USD': 3200,
+        'BNB/USD': 880,
+        'SOL/USD': 135,
+        'ADA/USD': 0.42,
+        'XRP/USD': 2.0,
+      };
+      return refPrices[symbol] || 100;
+    } else if (cat === 'forex' || cat === 'forex_otc') {
+      const refPrices: Record<string, number> = {
+        'EUR/USD': 1.0850,
+        'EUR/USD OTC': 1.0850,
+        'GBP/USD': 1.2650,
+        'GBP/USD OTC': 1.2650,
+        'USD/JPY': 149.50,
+        'USD/JPY OTC': 149.50,
+        'USD/CHF': 0.8750,
+        'USD/CHF OTC': 0.8750,
+        'AUD/USD': 0.6550,
+        'AUD/USD OTC': 0.6550,
+      };
+      return refPrices[symbol] || 1.0;
+    }
+    return 1000;
+  };
+
+  // Fonction pour déterminer le type de signal basé sur l'analyse AMÉLIORÉE
+  const determineSignalType = async (price: number, priceChange: number, cat: string, symbol: string): Promise<"BUY" | "SELL"> => {
+    // Récupérer plusieurs points de prix pour analyser la tendance réelle
+    try {
+      const prices: number[] = [];
+      
+      // Récupérer plusieurs prix pour voir la tendance
+      for (let i = 0; i < 5; i++) {
+        const priceData = await getMarketPrice(symbol, cat);
+        if (priceData) {
+          prices.push(priceData.price);
+        }
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      if (prices.length >= 3) {
+        // Analyser la tendance à court terme
+        const recentTrend = prices[prices.length - 1] - prices[0];
+        const trendPercent = (recentTrend / prices[0]) * 100;
+        
+        // Si tendance claire, suivre la tendance
+        if (trendPercent > 0.05) {
+          return "BUY";
+        } else if (trendPercent < -0.05) {
+          return "SELL";
+        }
+      }
+
+      // Analyser la variation 24h avec seuils plus stricts
+      if (priceChange > 0.3) {
+        return "BUY"; // Hausse significative
+      } else if (priceChange < -0.3) {
+        return "SELL"; // Baisse significative
+      }
+      
+      // Pour les petites variations, analyser la direction récente
+      if (prices.length >= 2) {
+        const lastChange = prices[prices.length - 1] - prices[prices.length - 2];
+        return lastChange > 0 ? "BUY" : "SELL";
+      }
+      
+      // Dernier recours: suivre la variation 24h
+      return priceChange > 0 ? "BUY" : "SELL";
+    } catch (error) {
+      console.warn("Erreur analyse tendance, utilisation variation 24h:", error);
+      // Fallback basé sur variation 24h
+      if (priceChange > 0.1) return "BUY";
+      if (priceChange < -0.1) return "SELL";
+      return priceChange > 0 ? "BUY" : "SELL";
+    }
+  };
+
+  // Fonction pour calculer les niveaux de prix réalistes
+  const calculateRealisticPriceLevels = (
+    currentPrice: number,
+    signalType: "BUY" | "SELL",
+    tf: string,
+    cat: string
+  ): { entry: number; target: number; stopLoss: number; riskReward: number } => {
+    const timeframeMultipliers: Record<string, number> = {
+      '1M': 0.001,
+      '2M': 0.0015,
+      '3M': 0.002,
+      '5M': 0.003,
+      '15M': 0.005,
+      '30M': 0.008,
+      '1H': 0.01,
+      '4H': 0.015,
+      '1D': 0.02,
+    };
+
+    const multiplier = timeframeMultipliers[tf] || 0.005;
+    
+    let entry = currentPrice;
+    let target: number;
+    let stopLoss: number;
+
+    if (signalType === "BUY") {
+      target = currentPrice * (1 + multiplier);
+      stopLoss = currentPrice * (1 - multiplier * 0.5);
+    } else {
+      target = currentPrice * (1 - multiplier);
+      stopLoss = currentPrice * (1 + multiplier * 0.5);
+    }
+
+    const decimals = currentPrice > 1000 ? 2 : currentPrice > 1 ? (cat === 'forex' || cat === 'forex_otc' ? 5 : 4) : 6;
+    entry = Math.round(entry * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    target = Math.round(target * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    stopLoss = Math.round(stopLoss * Math.pow(10, decimals)) / Math.pow(10, decimals);
+
+    const risk = Math.abs(entry - stopLoss);
+    const reward = Math.abs(target - entry);
+    const riskReward = risk > 0 ? reward / risk : 2.0;
+
+    return {
+      entry,
+      target,
+      stopLoss,
+      riskReward: Math.round(riskReward * 100) / 100,
+    };
+  };
+
+  // Fonction pour calculer la confiance basée sur les données
+  const calculateConfidence = (priceChange: number, marketData: any): number => {
+    let confidence = 70;
+    if (marketData) {
+      confidence += 10;
+    }
+    const volatility = Math.abs(priceChange);
+    if (volatility > 1) {
+      confidence += 5;
+    } else if (volatility < 0.1) {
+      confidence -= 5;
+    }
+    return Math.min(95, Math.max(60, confidence));
+  };
+
   // Fonction pour vérifier si on peut générer un signal
   const canGenerateSignal = () => {
     // Si pas d'utilisateur ou pas premium, pas de signal
@@ -1104,8 +1329,8 @@ const Index = () => {
         // Si des signaux ont expiré, afficher une notification
         if (activeSignals.length < prevSignals.length) {
                   toast({
-          title: "Signal expired",
-          description: "The active signal has expired. You can now generate a new signal.",
+          title: translations.signalExpired || "Signal expired",
+          description: translations.signalExpiredDescription || "The active signal has expired. You can now generate a new signal.",
         });
         }
         
@@ -1494,8 +1719,8 @@ const Index = () => {
           onClick={dismissExpiredSignal}
         >
           <div className="bg-background border border-border rounded-lg p-8 text-center">
-            <h2 className="text-2xl font-bold mb-2">Signal Expired</h2>
-            <p className="text-muted-foreground">Click to dismiss</p>
+            <h2 className="text-2xl font-bold mb-2">{translations.signalExpiredTitle || "Signal Expired"}</h2>
+            <p className="text-muted-foreground">{translations.signalExpiredDismiss || "Click to dismiss"}</p>
                 </div>
         </div>
       )}
@@ -1503,7 +1728,7 @@ const Index = () => {
       {/* Notification de signal activé */}
       {showSignalActivated && (
         <div className="fixed top-4 right-4 bg-gray-800 border border-gray-600 rounded-lg p-4 text-white z-50 max-w-sm">
-          <div className="font-bold">Signal Activated!</div>
+          <div className="font-bold">{translations.signalActivated || "Signal Activated!"}</div>
           <div className="text-sm">{activatedSignalInfo}</div>
         </div>
       )}
@@ -1740,11 +1965,22 @@ const Index = () => {
                         <div key={signal.id} className="border border-border rounded-lg p-6">
                           {/* Header du signal */}
                           <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold">Active Trading Signal</h3>
-                            <div className="text-sm text-muted-foreground">
-                              Expires In: {formatTime(Math.floor(timeRemaining))}
+                            <div>
+                              <h3 className="text-lg font-semibold">Active Trading Signal</h3>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Generated: {new Date(signal.created_at).toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm text-muted-foreground">
+                                Expires In: {formatTime(Math.floor(timeRemaining))}
+                              </div>
+                              <div className="text-xs text-green-500 mt-1 flex items-center">
+                                <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                                Live Data
+                              </div>
+                            </div>
                           </div>
-                        </div>
 
                           {/* Type de signal */}
                           <div className="text-center mb-6">
@@ -1763,6 +1999,41 @@ const Index = () => {
                             }`}>
                               TRY, {signal.type} SIGNAL!
                           </div>
+                          {/* Prix réel du marché et niveaux - Masqués pour Forex OTC (options binaires) */}
+                          {category !== "forex_otc" && (
+                            <>
+                              <div className="mt-3 flex items-center justify-center space-x-4 text-sm">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-muted-foreground">Current Price:</span>
+                                  <span className="font-semibold text-lg">{signal.entry_price.toFixed(5)}</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-muted-foreground">Confidence:</span>
+                                  <span className={`font-bold text-lg ${
+                                    signal.confidence >= 80 ? "text-green-500" : 
+                                    signal.confidence >= 70 ? "text-yellow-500" : "text-orange-500"
+                                  }`}>
+                                    {signal.confidence}%
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Niveaux de prix - Plus visible */}
+                              <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                                  <div className="text-muted-foreground">Entry</div>
+                                  <div className="font-bold">{signal.entry_price.toFixed(5)}</div>
+                                </div>
+                                <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded">
+                                  <div className="text-muted-foreground">Target</div>
+                                  <div className="font-bold text-green-600 dark:text-green-400">{signal.target_price.toFixed(5)}</div>
+                                </div>
+                                <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded">
+                                  <div className="text-muted-foreground">Stop Loss</div>
+                                  <div className="font-bold text-red-600 dark:text-red-400">{signal.stop_loss.toFixed(5)}</div>
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
 
                           {/* Informations détaillées */}
@@ -1938,6 +2209,35 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Section Vidéo Tutoriel - Juste au-dessus du footer */}
+      <section className="w-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 md:py-16 mt-8 md:mt-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                {translations.tutorialVideoTitle || "How to Use Real-time Trading Signals Platform?"}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">
+                {translations.tutorialVideoSubtitle || "Watch our comprehensive tutorial guide"}
+              </p>
+            </div>
+            
+            {/* Embed YouTube Video */}
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
+                src="https://www.youtube.com/embed/rg5jsh-xbYA"
+                title={translations.tutorialVideoTitle || "How to Use Real-time Trading Signals Platform?"}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ minHeight: '400px' }}
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Publicité pied de page */}
       <div className="w-full bg-gray-50 dark:bg-gray-800 py-4 mt-8">

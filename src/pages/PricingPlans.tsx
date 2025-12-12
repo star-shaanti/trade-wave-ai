@@ -187,6 +187,10 @@ const PricingPlans = () => {
       }
 
       if (data?.url) {
+        // SÉCURITÉ: Stocker l'email de l'utilisateur qui paie pour éviter les abus
+        sessionStorage.setItem('payment_user_email', user.email);
+        localStorage.setItem('payment_user_email', user.email);
+        
         // Sauvegarder les infos dans sessionStorage pour le tracking
         sessionStorage.setItem('subscriptionPlan', plan.name);
         sessionStorage.setItem('subscriptionAmount', (plan.amount / 100).toString());
