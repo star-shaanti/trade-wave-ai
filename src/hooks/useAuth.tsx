@@ -61,6 +61,9 @@ export const useAuth = () => {
     }
   }, [session?.access_token, session?.user?.email]);
 
+  // ⚠️ CODE CRITIQUE - Ne pas modifier sans vérification complète
+  // Cette fonction gère la vérification de l'abonnement avec retry après paiement crypto
+  // Modifié le: 2025-12-13 - Fix paiements crypto (gestion session + retry)
   // Vérification plus fréquente après paiement
   const checkSubscriptionWithRetry = useCallback(async (maxRetries = 5) => {
     if (!session?.access_token) {

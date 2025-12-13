@@ -148,6 +148,9 @@ serve(async (req) => {
 
     logStep("Processing finished payment", { payment_id, order_id, customer_email });
 
+    // ⚠️ CODE CRITIQUE - Ne pas modifier sans vérification complète
+    // Cette section gère l'extraction du user_id depuis order_id
+    // Modifié le: 2025-12-13 - Fix paiements crypto (extraction user_id + récupération email)
     // Extract user_id from order_id (format: user_id-timestamp)
     let userId: string | null = null;
     let userEmail: string | null = null;
@@ -261,6 +264,9 @@ serve(async (req) => {
       subscriptionEnd: subscriptionEndISO,
     });
 
+    // ⚠️ CODE CRITIQUE - Ne pas modifier sans vérification complète
+    // Cette section contourne la contrainte qui bloque subscribed=true sans stripe_customer_id
+    // Modifié le: 2025-12-13 - Fix paiements crypto (contournement contrainte stripe_customer_id)
     // Update subscribers table
     // IMPORTANT: Pour contourner la contrainte qui bloque subscribed=true sans stripe_customer_id,
     // on utilise une valeur spéciale pour identifier les paiements NOWPayments
