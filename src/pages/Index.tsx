@@ -229,7 +229,7 @@ const Index = () => {
     // Afficher l'email dans une notification toast
     toast({
       title: "Customer Service Email",
-      description: "realtimetradingsignal@gmail.com",
+      description: "support@realtimetradesignals.com",
     });
   };
 
@@ -429,9 +429,9 @@ const Index = () => {
             await checkSubscription();
           }
           // Recharger la page après vérification pour mettre à jour l'état
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
         }, 1000);
       } else {
                                   // Afficher un message détaillé selon le statut
@@ -631,7 +631,7 @@ const Index = () => {
   useEffect(() => {
     if (!user) return;
 
-      const checkSubscriptionPeriodically = () => {
+    const checkSubscriptionPeriodically = () => {
       // Vérifier si l'utilisateur vient de payer
       const fromPaymentSuccess = sessionStorage.getItem('fromPaymentSuccess');
       if (fromPaymentSuccess) {
@@ -2360,7 +2360,7 @@ const Index = () => {
               <ul className="space-y-2 text-sm text-purple-200">
                 <li>
                   <a 
-                    href={`mailto:realtimetradingsignal@gmail.com?subject=Customer Service`}
+                    href={`mailto:support@realtimetradesignals.com?subject=Customer Service`}
                     className="hover:text-white transition-colors"
               >
                 {translations.customerService || "Customer Service"}
@@ -2424,7 +2424,7 @@ const Index = () => {
         </div>
           <div className="border-t border-purple-700 mt-8 pt-8 text-center space-y-2">
             <div className="text-sm text-purple-300">
-              {translations.copyright || "© 2025 Real-time Trading Signals. All rights reserved."}
+            {translations.copyright || "© 2025 Real-time Trading Signals. All rights reserved."}
             </div>
             <div className="text-xs text-purple-400 font-semibold">
               {translations.versionName || "Version 2.0 - Real-Time Precision Edition"}
