@@ -22,7 +22,8 @@ import { LanguageSelectorSimple } from "../components/LanguageSelectorSimple";
 import { LanguageSelectorFixed } from "../components/LanguageSelectorFixed";
 import { LanguageButton } from "../components/LanguageButton";
 import { useLanguage } from "../hooks/useLanguage";
-import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
+// AdSense components removed
+// import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
 import { getMarketPrice } from "../services/marketData";
 import { generateRealTimeSignal } from "../services/signalGenerator";
 
@@ -1484,43 +1485,43 @@ const Index = () => {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => window.location.href = "/"}>
                         <Home className="h-4 w-4 mr-2" />
-                        Home Page
+                        {translations.homePage}
                       </DropdownMenuItem>
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                           <User className="h-4 w-4 mr-2" />
-                          Profile & Settings
+                          {translations.profileSettings}
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent>
                           <DropdownMenuItem onClick={() => setShowCancelSubscriptionModal(true)}>
                             <X className="h-4 w-4 mr-2 text-red-500" />
-                            <span className="text-red-500">Cancel Subscription</span>
+                            <span className="text-red-500">{translations.cancelSubscription}</span>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => window.open("https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00", "_blank")}>
                             <Settings className="h-4 w-4 mr-2" />
-                            Manage Subscription
+                            {translations.manageSubscription}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowChangePasswordModal(true)}>
                             <Lock className="h-4 w-4 mr-2" />
-                            Change Password
+                            {translations.changePassword}
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Pause className="h-4 w-4 mr-2 text-orange-500" />
-                            <span className="text-orange-500">Suspend Account</span>
+                            <span className="text-orange-500">{translations.suspendAccount}</span>
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Trash2 className="h-4 w-4 mr-2 text-red-500" />
-                            <span className="text-red-500">Delete Account</span>
+                            <span className="text-red-500">{translations.deleteAccount}</span>
                           </DropdownMenuItem>
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
                       <DropdownMenuItem onClick={handleCustomerService}>
                         <Mail className="h-4 w-4 mr-2" />
-                        Customer Service
+                        {translations.customerService}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleSignOut}>
                         <LogOut className="h-4 w-4 mr-2" />
-                        Log out
+                        {translations.logOut}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -1576,43 +1577,43 @@ const Index = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => window.location.href = "/"}>
                           <Home className="h-4 w-4 mr-2" />
-                          Home Page
+                          {translations.homePage}
                         </DropdownMenuItem>
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger>
                             <User className="h-4 w-4 mr-2" />
-                            Profile & Settings
+                            {translations.profileSettings}
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent>
                             <DropdownMenuItem onClick={() => setShowCancelSubscriptionModal(true)}>
                               <X className="h-4 w-4 mr-2 text-red-500" />
-                              <span className="text-red-500">Cancel Subscription</span>
+                              <span className="text-red-500">{translations.cancelSubscription}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => window.open("https://billing.stripe.com/p/login/5kQ5kD5DMeKH8zC7xXdfG00", "_blank")}>
                               <Settings className="h-4 w-4 mr-2" />
-                              Manage Subscription
+                              {translations.manageSubscription}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setShowChangePasswordModal(true)}>
                               <Lock className="h-4 w-4 mr-2" />
-                              Change Password
+                              {translations.changePassword}
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                               <Pause className="h-4 w-4 mr-2 text-orange-500" />
-                              <span className="text-orange-500">Suspend Account</span>
+                              <span className="text-orange-500">{translations.suspendAccount}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                               <Trash2 className="h-4 w-4 mr-2 text-red-500" />
-                              <span className="text-red-500">Delete Account</span>
+                              <span className="text-red-500">{translations.deleteAccount}</span>
                             </DropdownMenuItem>
                           </DropdownMenuSubContent>
                         </DropdownMenuSub>
                         <DropdownMenuItem onClick={handleCustomerService}>
                           <Mail className="h-4 w-4 mr-2" />
-                          Customer Service
+                          {translations.customerService}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleSignOut}>
                           <LogOut className="h-4 w-4 mr-2" />
-                          Log out
+                          {translations.logOut}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -1688,30 +1689,30 @@ const Index = () => {
           <DialogHeader>
             <DialogTitle className="text-red-500 flex items-center space-x-2">
               <X className="h-5 w-5" />
-              <span>Cancel Subscription</span>
+              <span>{translations.cancelSubscription}</span>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Are you sure you want to cancel your subscription? This action will stop your recurring billing.
+              {translations.cancelSubscriptionConfirm}
             </p>
             
             {/* Section d'avertissement */}
             <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-orange-500" />
-                <h4 className="font-semibold text-orange-800 dark:text-orange-200">Before you cancel:</h4>
+                <h4 className="font-semibold text-orange-800 dark:text-orange-200">{translations.beforeYouCancel}</h4>
               </div>
               <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
-                <li>• You'll lose access to premium trading signals</li>
-                <li>• Your subscription will end at the current billing period</li>
-                <li>• You can resubscribe anytime</li>
-                <li>• No refunds for the current billing period</li>
+                <li>• {translations.cancelWarning1}</li>
+                <li>• {translations.cancelWarning2}</li>
+                <li>• {translations.cancelWarning3}</li>
+                <li>• {translations.cancelWarning4}</li>
               </ul>
           </div>
           
             <p className="text-xs text-muted-foreground">
-              You will be redirected to Stripe's secure portal to safely cancel your subscription.
+              {translations.cancelRedirectMessage}
             </p>
 
             <div className="flex space-x-3 pt-4">
@@ -1720,7 +1721,7 @@ const Index = () => {
                 onClick={() => setShowCancelSubscriptionModal(false)}
                 className="flex-1"
               >
-                Keep Subscription
+                {translations.keepSubscription}
               </Button>
               <Button 
                 variant="destructive" 
@@ -1731,7 +1732,7 @@ const Index = () => {
                 className="flex-1"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Cancel Subscription
+                {translations.cancelSubscription}
               </Button>
             </div>
           </div>
@@ -1744,37 +1745,37 @@ const Index = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Lock className="h-5 w-5" />
-              <span>Change Password</span>
+              <span>{translations.changePassword}</span>
             </DialogTitle>
             <DialogDescription>
-              Enter your current password and choose a new password
+              {translations.changePasswordDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="current-password">Current Password</Label>
+              <Label htmlFor="current-password">{translations.currentPassword}</Label>
               <Input
                 id="current-password"
                 type="password"
-                placeholder="Enter your current password"
+                placeholder={translations.currentPasswordPlaceholder}
                 className="mt-1"
               />
               </div>
             <div>
-              <Label htmlFor="new-password">New Password</Label>
+              <Label htmlFor="new-password">{translations.newPassword}</Label>
               <Input
                 id="new-password"
                 type="password"
-                placeholder="Enter your new password"
+                placeholder={translations.newPasswordPlaceholder}
                 className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Label htmlFor="confirm-password">{translations.confirmNewPassword}</Label>
               <Input
                 id="confirm-password"
                 type="password"
-                placeholder="Confirm your new password"
+                placeholder={translations.confirmNewPasswordPlaceholder}
                 className="mt-1"
               />
             </div>
@@ -1784,20 +1785,20 @@ const Index = () => {
                 onClick={() => setShowChangePasswordModal(false)}
                 className="flex-1"
               >
-                Cancel
+                {translations.cancel}
               </Button>
               <Button 
                 onClick={() => {
                   // Ici vous pouvez ajouter la logique de changement de mot de passe
                   toast({
-                    title: "Password Updated",
-                    description: "Your password has been successfully changed.",
+                    title: translations.passwordUpdated,
+                    description: translations.passwordUpdatedDescription,
                   });
                   setShowChangePasswordModal(false);
                 }}
                 className="flex-1"
               >
-                Update Password
+                {translations.updatePassword}
               </Button>
             </div>
           </div>
@@ -2223,15 +2224,8 @@ const Index = () => {
               </div>
       </main>
 
-      {/* Layout avec sidebars pour les publicités */}
+      {/* Layout sans sidebars publicitaires */}
       <div className="flex flex-col lg:flex-row">
-        {/* Sidebar gauche (desktop seulement) */}
-        <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
-          <div className="sticky top-4 p-4">
-            <SidebarAdLeft />
-          </div>
-        </div>
-
         {/* Contenu principal */}
         <div className="flex-1 min-w-0">
           {/* Section d'affiliation centrée */}
@@ -2293,13 +2287,6 @@ const Index = () => {
         </div>
       </section>
         </div>
-
-        {/* Sidebar droite (desktop seulement) */}
-        <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0">
-          <div className="sticky top-4 p-4">
-            <SidebarAdRight />
-          </div>
-        </div>
       </div>
 
       {/* Section Vidéo Tutoriel - Juste au-dessus du footer */}
@@ -2330,11 +2317,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Publicité pied de page */}
-      <div className="w-full bg-gray-50 dark:bg-gray-800 py-4 mt-8">
-        <FooterAd />
-      </div>
 
       {/* Footer */}
       <footer className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-t border-purple-800 mt-8 md:mt-16">

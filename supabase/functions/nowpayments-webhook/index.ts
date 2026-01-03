@@ -157,7 +157,7 @@ serve(async (req) => {
     
     if (order_id) {
       logStep("Extracting user_id from order_id", { order_id });
-      // order_id format: {user_id}-{timestamp}
+        // order_id format: {user_id}-{timestamp}
       // UUID format: 8-4-4-4-12 = 36 characters total
       // Try to extract UUID from the beginning
       const uuidPattern = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
@@ -223,7 +223,7 @@ serve(async (req) => {
         order_id: order_id,
         has_userId: !!userId
       });
-    }
+      }
     
     // Utiliser l'email récupéré si disponible
     const finalEmail = customer_email || userEmail || "";

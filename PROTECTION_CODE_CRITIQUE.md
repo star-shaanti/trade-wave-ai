@@ -134,3 +134,6 @@ Lors de chaque déploiement, vérifiez que ces fichiers n'ont pas été modifié
    - Vérifiez les logs pour identifier le problème
    - Ne déployez pas d'autres modifications avant résolution
 
+
+
+

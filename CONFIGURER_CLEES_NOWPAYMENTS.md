@@ -119,3 +119,6 @@ NOWPayments fonctionne différemment de Stripe :
 **Clé NON NÉCESSAIRE :**
 4. ❌ Clé publique - Pas utilisée par NOWPayments
 
+
+
+

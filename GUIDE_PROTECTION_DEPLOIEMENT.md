@@ -109,3 +109,6 @@ Après chaque déploiement, vérifiez :
 3. **Vérifiez les logs** pour identifier le problème
 4. **Ne déployez pas d'autres modifications** avant résolution
 
+
+
+

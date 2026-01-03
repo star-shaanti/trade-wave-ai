@@ -178,7 +178,7 @@ const PaymentSuccess = () => {
           if (checkSubscriptionWithRetry) {
             await checkSubscriptionWithRetry(5);
           } else {
-            await checkSubscription();
+          await checkSubscription();
           }
           
           // Wait a bit for the state to update

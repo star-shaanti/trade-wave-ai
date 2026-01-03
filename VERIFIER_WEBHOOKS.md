@@ -110,3 +110,6 @@ Si les paiements crypto ne fonctionnent pas, vérifiez :
 3. Vérifiez que le webhook est appelé
 4. Vérifiez que l'abonnement est activé dans la table `subscribers`
 
+
+
+

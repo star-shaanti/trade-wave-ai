@@ -130,3 +130,6 @@ NOWPAYMENTS_API_KEY=votre_api_key_de_nowpayments
 - **IPN Callback URL** : `https://taadbjuelxonszosfrsk.supabase.co/functions/v1/nowpayments-webhook`
 - **IPN Secret Key** : (doit correspondre à `NOWPAYMENTS_IPN_SECRET_KEY` dans Supabase)
 
+
+
+

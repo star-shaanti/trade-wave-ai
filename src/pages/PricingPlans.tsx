@@ -390,37 +390,42 @@ const PricingPlans = () => {
                 ))}
               </div>
 
-              <Button
-                onClick={() => handleSubscribe(plan)}
-                disabled={loadingPlan === getStripeLoadingId(plan)}
-                className={`w-full justify-start gap-3 px-3 py-2 overflow-hidden ${
-                  plan.popular 
-                    ? 'bg-primary hover:bg-primary/90' 
-                    : 'bg-primary/90 hover:bg-primary'
-                } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {loadingPlan === getStripeLoadingId(plan) ? (
-                  'Loading...'
-                ) : !isAuthenticated ? (
-                  'Sign in first'
-                ) : (
-                  <div className="flex items-center justify-between w-full min-w-0 gap-2">
-                    <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                      <div className="text-left min-w-0 flex-1 overflow-hidden">
-                        <div className="text-sm font-semibold leading-tight truncate text-primary-foreground">Stripe</div>
-                        <div className="text-xs text-primary-foreground/80 truncate">${plan.fiatAmount}</div>
+              {/* Stripe payment temporarily hidden */}
+              {false && (
+                <>
+                  <Button
+                    onClick={() => handleSubscribe(plan)}
+                    disabled={loadingPlan === getStripeLoadingId(plan)}
+                    className={`w-full justify-start gap-3 px-3 py-2 overflow-hidden ${
+                      plan.popular 
+                        ? 'bg-primary hover:bg-primary/90' 
+                        : 'bg-primary/90 hover:bg-primary'
+                    } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {loadingPlan === getStripeLoadingId(plan) ? (
+                      'Loading...'
+                    ) : !isAuthenticated ? (
+                      'Sign in first'
+                    ) : (
+                      <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                          <div className="text-left min-w-0 flex-1 overflow-hidden">
+                            <div className="text-sm font-semibold leading-tight truncate text-primary-foreground">Stripe</div>
+                            <div className="text-xs text-primary-foreground/80 truncate">${plan.fiatAmount}</div>
+                          </div>
+                        </div>
+                        <span className="text-xs font-semibold uppercase tracking-wide flex-shrink-0 whitespace-nowrap text-primary-foreground">
+                          {t.buyWithStripe}
+                        </span>
                       </div>
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-wide flex-shrink-0 whitespace-nowrap text-primary-foreground">
-                      {t.buyWithStripe}
-                    </span>
-                  </div>
-                )}
-              </Button>
+                    )}
+                  </Button>
 
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t.buyWithLabel}
-              </p>
+                  <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.buyWithLabel}
+                  </p>
+                </>
+              )}
 
               <Button
                 variant="secondary"

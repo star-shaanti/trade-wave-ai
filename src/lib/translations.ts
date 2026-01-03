@@ -89,6 +89,39 @@ export const globalTranslations = {
     customerService: "Customer Service",
     becomeAffiliate: "Become an Affiliate",
     faq: "FAQ",
+    
+    // User Menu
+    homePage: "Home Page",
+    profileSettings: "Profile & Settings",
+    cancelSubscription: "Cancel Subscription",
+    manageSubscription: "Manage Subscription",
+    changePassword: "Change Password",
+    suspendAccount: "Suspend Account",
+    deleteAccount: "Delete Account",
+    logOut: "Log out",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "Are you sure you want to cancel your subscription? This action will stop your recurring billing.",
+    beforeYouCancel: "Before you cancel:",
+    cancelWarning1: "You'll lose access to premium trading signals",
+    cancelWarning2: "Your subscription will end at the current billing period",
+    cancelWarning3: "You can resubscribe anytime",
+    cancelWarning4: "No refunds for the current billing period",
+    cancelRedirectMessage: "You will be redirected to Stripe's secure portal to safely cancel your subscription.",
+    keepSubscription: "Keep Subscription",
+    
+    // Change Password Modal
+    changePasswordDescription: "Enter your current password and choose a new password",
+    currentPassword: "Current Password",
+    currentPasswordPlaceholder: "Enter your current password",
+    newPassword: "New Password",
+    newPasswordPlaceholder: "Enter your new password",
+    confirmNewPassword: "Confirm New Password",
+    confirmNewPasswordPlaceholder: "Confirm your new password",
+    updatePassword: "Update Password",
+    cancel: "Cancel",
+    passwordUpdated: "Password Updated",
+    passwordUpdatedDescription: "Your password has been successfully changed.",
     legal: "Legal",
     termsConditions: "Terms & Conditions",
     privacyPolicy: "Privacy Policy",
@@ -167,6 +200,39 @@ export const globalTranslations = {
     customerService: "Service Client",
     becomeAffiliate: "Devenir Affilié",
     faq: "FAQ",
+    
+    // User Menu
+    homePage: "Page d'accueil",
+    profileSettings: "Profil et Paramètres",
+    cancelSubscription: "Annuler l'abonnement",
+    manageSubscription: "Gérer l'abonnement",
+    changePassword: "Changer le mot de passe",
+    suspendAccount: "Suspendre le compte",
+    deleteAccount: "Supprimer le compte",
+    logOut: "Se déconnecter",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "Êtes-vous sûr de vouloir annuler votre abonnement ? Cette action arrêtera votre facturation récurrente.",
+    beforeYouCancel: "Avant d'annuler :",
+    cancelWarning1: "Vous perdrez l'accès aux signaux de trading premium",
+    cancelWarning2: "Votre abonnement se terminera à la période de facturation actuelle",
+    cancelWarning3: "Vous pouvez vous réabonner à tout moment",
+    cancelWarning4: "Aucun remboursement pour la période de facturation actuelle",
+    cancelRedirectMessage: "Vous serez redirigé vers le portail sécurisé de Stripe pour annuler votre abonnement en toute sécurité.",
+    keepSubscription: "Conserver l'abonnement",
+    
+    // Change Password Modal
+    changePasswordDescription: "Entrez votre mot de passe actuel et choisissez un nouveau mot de passe",
+    currentPassword: "Mot de passe actuel",
+    currentPasswordPlaceholder: "Entrez votre mot de passe actuel",
+    newPassword: "Nouveau mot de passe",
+    newPasswordPlaceholder: "Entrez votre nouveau mot de passe",
+    confirmNewPassword: "Confirmer le nouveau mot de passe",
+    confirmNewPasswordPlaceholder: "Confirmez votre nouveau mot de passe",
+    updatePassword: "Mettre à jour le mot de passe",
+    cancel: "Annuler",
+    passwordUpdated: "Mot de passe mis à jour",
+    passwordUpdatedDescription: "Votre mot de passe a été modifié avec succès.",
     legal: "Légal",
     termsConditions: "Conditions Générales",
     privacyPolicy: "Politique de Confidentialité",
@@ -245,6 +311,40 @@ export const globalTranslations = {
     customerService: "Servicio al Cliente",
     becomeAffiliate: "Convertirse en Afiliado",
     faq: "FAQ",
+    
+    // User Menu
+    homePage: "Página de inicio",
+    profileSettings: "Perfil y Configuración",
+    cancelSubscription: "Cancelar Suscripción",
+    manageSubscription: "Gestionar Suscripción",
+    changePassword: "Cambiar Contraseña",
+    suspendAccount: "Suspender Cuenta",
+    deleteAccount: "Eliminar Cuenta",
+    logOut: "Cerrar sesión",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "¿Está seguro de que desea cancelar su suscripción? Esta acción detendrá su facturación recurrente.",
+    beforeYouCancel: "Antes de cancelar:",
+    cancelWarning1: "Perderá el acceso a las señales de trading premium",
+    cancelWarning2: "Su suscripción finalizará en el período de facturación actual",
+    cancelWarning3: "Puede volver a suscribirse en cualquier momento",
+    cancelWarning4: "No hay reembolsos para el período de facturación actual",
+    cancelRedirectMessage: "Será redirigido al portal seguro de Stripe para cancelar su suscripción de forma segura.",
+    keepSubscription: "Mantener suscripción",
+    
+    // Change Password Modal
+    changePasswordDescription: "Ingrese su contraseña actual y elija una nueva contraseña",
+    currentPassword: "Contraseña actual",
+    currentPasswordPlaceholder: "Ingrese su contraseña actual",
+    newPassword: "Nueva contraseña",
+    newPasswordPlaceholder: "Ingrese su nueva contraseña",
+    confirmNewPassword: "Confirmar nueva contraseña",
+    confirmNewPasswordPlaceholder: "Confirme su nueva contraseña",
+    updatePassword: "Actualizar contraseña",
+    cancel: "Cancelar",
+    passwordUpdated: "Contraseña actualizada",
+    passwordUpdatedDescription: "Su contraseña se ha actualizado correctamente.",
+    
     legal: "Legal",
     termsConditions: "Términos y Condiciones",
     privacyPolicy: "Política de Privacidad",
@@ -323,6 +423,40 @@ export const globalTranslations = {
     customerService: "Servizio Clienti",
     becomeAffiliate: "Diventa Affiliato",
     faq: "FAQ",
+    
+    // User Menu
+    homePage: "Pagina principale",
+    profileSettings: "Profilo e Impostazioni",
+    cancelSubscription: "Annulla Abbonamento",
+    manageSubscription: "Gestisci Abbonamento",
+    changePassword: "Cambia Password",
+    suspendAccount: "Sospendi Account",
+    deleteAccount: "Elimina Account",
+    logOut: "Esci",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "Sei sicuro di voler cancellare il tuo abbonamento? Questa azione interromperà la tua fatturazione ricorrente.",
+    beforeYouCancel: "Prima di cancellare:",
+    cancelWarning1: "Perderai l'accesso ai segnali di trading premium",
+    cancelWarning2: "Il tuo abbonamento terminerà al periodo di fatturazione corrente",
+    cancelWarning3: "Puoi riabbonarti in qualsiasi momento",
+    cancelWarning4: "Nessun rimborso per il periodo di fatturazione corrente",
+    cancelRedirectMessage: "Sarai reindirizzato al portale sicuro di Stripe per cancellare il tuo abbonamento in modo sicuro.",
+    keepSubscription: "Mantieni abbonamento",
+    
+    // Change Password Modal
+    changePasswordDescription: "Inserisci la tua password attuale e scegli una nuova password",
+    currentPassword: "Password attuale",
+    currentPasswordPlaceholder: "Inserisci la tua password attuale",
+    newPassword: "Nuova password",
+    newPasswordPlaceholder: "Inserisci la tua nuova password",
+    confirmNewPassword: "Conferma nuova password",
+    confirmNewPasswordPlaceholder: "Conferma la tua nuova password",
+    updatePassword: "Aggiorna password",
+    cancel: "Annulla",
+    passwordUpdated: "Password aggiornata",
+    passwordUpdatedDescription: "La tua password è stata aggiornata con successo.",
+    
     legal: "Legale",
     termsConditions: "Termini e Condizioni",
     privacyPolicy: "Informativa sulla Privacy",
@@ -388,7 +522,58 @@ export const globalTranslations = {
     signalExpiredDismiss: "Clique para fechar",
     
     // Version
-    versionName: "Versão 2.0 - Real-Time Precision Edition"
+    versionName: "Versão 2.0 - Real-Time Precision Edition",
+    
+    // Footer
+    footerDescription: "Sinais de trading em tempo real gerados por IA e nossos traders profissionais",
+    services: "Serviços",
+    forexSignals: "Sinais Forex",
+    cryptoSignals: "Sinais Crypto",
+    indicesSignals: "Sinais Índices",
+    technicalAnalysis: "Análise Técnica",
+    support: "Suporte",
+    customerService: "Atendimento ao Cliente",
+    becomeAffiliate: "Tornar-se Afiliado",
+    faq: "FAQ",
+    legal: "Legal",
+    termsConditions: "Termos e Condições",
+    privacyPolicy: "Política de Privacidade",
+    tradingRisks: "Riscos de Trading",
+    legalNotice: "Aviso Legal",
+    copyright: "© 2025 Sinais de Trading em Tempo Real. Todos os direitos reservados.",
+    
+    // User Menu
+    homePage: "Página inicial",
+    profileSettings: "Perfil e Configurações",
+    cancelSubscription: "Cancelar Assinatura",
+    manageSubscription: "Gerenciar Assinatura",
+    changePassword: "Alterar Senha",
+    suspendAccount: "Suspender Conta",
+    deleteAccount: "Excluir Conta",
+    logOut: "Sair",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "Tem certeza de que deseja cancelar sua assinatura? Esta ação interromperá sua cobrança recorrente.",
+    beforeYouCancel: "Antes de cancelar:",
+    cancelWarning1: "Você perderá o acesso aos sinais de trading premium",
+    cancelWarning2: "Sua assinatura terminará no período de faturamento atual",
+    cancelWarning3: "Você pode se reinscrever a qualquer momento",
+    cancelWarning4: "Sem reembolsos para o período de faturamento atual",
+    cancelRedirectMessage: "Você será redirecionado para o portal seguro do Stripe para cancelar sua assinatura com segurança.",
+    keepSubscription: "Manter assinatura",
+    
+    // Change Password Modal
+    changePasswordDescription: "Digite sua senha atual e escolha uma nova senha",
+    currentPassword: "Senha atual",
+    currentPasswordPlaceholder: "Digite sua senha atual",
+    newPassword: "Nova senha",
+    newPasswordPlaceholder: "Digite sua nova senha",
+    confirmNewPassword: "Confirmar nova senha",
+    confirmNewPasswordPlaceholder: "Confirme sua nova senha",
+    updatePassword: "Atualizar senha",
+    cancel: "Cancelar",
+    passwordUpdated: "Senha atualizada",
+    passwordUpdatedDescription: "Sua senha foi atualizada com sucesso."
   },
   ru: {
     pricingTitle: "Выберите тариф",
@@ -448,7 +633,58 @@ export const globalTranslations = {
     signalExpiredDismiss: "Нажмите, чтобы закрыть",
     
     // Version
-    versionName: "Версия 2.0 - Real-Time Precision Edition"
+    versionName: "Версия 2.0 - Real-Time Precision Edition",
+    
+    // Footer
+    footerDescription: "Сигналы торговли в реальном времени, сгенерированные ИИ и нашими профессиональными трейдерами",
+    services: "Услуги",
+    forexSignals: "Форекс Сигналы",
+    cryptoSignals: "Крипто Сигналы",
+    indicesSignals: "Индексы Сигналы",
+    technicalAnalysis: "Технический Анализ",
+    support: "Поддержка",
+    customerService: "Служба поддержки",
+    becomeAffiliate: "Стать партнером",
+    faq: "FAQ",
+    legal: "Юридическая информация",
+    termsConditions: "Условия использования",
+    privacyPolicy: "Политика конфиденциальности",
+    tradingRisks: "Риски торговли",
+    legalNotice: "Юридическое уведомление",
+    copyright: "© 2025 Сигналы Торговли в Реальном Времени. Все права защищены.",
+    
+    // User Menu
+    homePage: "Главная страница",
+    profileSettings: "Профиль и Настройки",
+    cancelSubscription: "Отменить подписку",
+    manageSubscription: "Управление подпиской",
+    changePassword: "Изменить пароль",
+    suspendAccount: "Приостановить аккаунт",
+    deleteAccount: "Удалить аккаунт",
+    logOut: "Выйти",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "Вы уверены, что хотите отменить подписку? Это действие остановит вашу повторяющуюся оплату.",
+    beforeYouCancel: "Перед отменой:",
+    cancelWarning1: "Вы потеряете доступ к премиум торговым сигналам",
+    cancelWarning2: "Ваша подписка закончится в текущем периоде оплаты",
+    cancelWarning3: "Вы можете подписаться снова в любое время",
+    cancelWarning4: "Нет возмещений за текущий период оплаты",
+    cancelRedirectMessage: "Вы будете перенаправлены на защищенный портал Stripe для безопасной отмены подписки.",
+    keepSubscription: "Сохранить подписку",
+    
+    // Change Password Modal
+    changePasswordDescription: "Введите ваш текущий пароль и выберите новый пароль",
+    currentPassword: "Текущий пароль",
+    currentPasswordPlaceholder: "Введите ваш текущий пароль",
+    newPassword: "Новый пароль",
+    newPasswordPlaceholder: "Введите ваш новый пароль",
+    confirmNewPassword: "Подтвердить новый пароль",
+    confirmNewPasswordPlaceholder: "Подтвердите ваш новый пароль",
+    updatePassword: "Обновить пароль",
+    cancel: "Отмена",
+    passwordUpdated: "Пароль обновлен",
+    passwordUpdatedDescription: "Ваш пароль был успешно изменен."
   },
   ar: {
     pricingTitle: "اختر خطتك",
@@ -508,7 +744,58 @@ export const globalTranslations = {
     signalExpiredDismiss: "انقر للإغلاق",
     
     // Version
-    versionName: "الإصدار 2.0 - Real-Time Precision Edition"
+    versionName: "الإصدار 2.0 - Real-Time Precision Edition",
+    
+    // Footer
+    footerDescription: "إشارات التداول في الوقت الفعلي التي تم إنشاؤها بواسطة الذكاء الاصطناعي وتجارنا المحترفين",
+    services: "الخدمات",
+    forexSignals: "إشارات الفوركس",
+    cryptoSignals: "إشارات العملات المشفرة",
+    indicesSignals: "إشارات المؤشرات",
+    technicalAnalysis: "التحليل الفني",
+    support: "الدعم",
+    customerService: "خدمة العملاء",
+    becomeAffiliate: "تصبح شريك",
+    faq: "الأسئلة الشائعة",
+    legal: "قانوني",
+    termsConditions: "الشروط والأحكام",
+    privacyPolicy: "سياسة الخصوصية",
+    tradingRisks: "مخاطر التداول",
+    legalNotice: "إشعار قانوني",
+    copyright: "© 2025 إشارات التداول في الوقت الفعلي. جميع الحقوق محفوظة.",
+    
+    // User Menu
+    homePage: "الصفحة الرئيسية",
+    profileSettings: "الملف الشخصي والإعدادات",
+    cancelSubscription: "إلغاء الاشتراك",
+    manageSubscription: "إدارة الاشتراك",
+    changePassword: "تغيير كلمة المرور",
+    suspendAccount: "تعليق الحساب",
+    deleteAccount: "حذف الحساب",
+    logOut: "تسجيل الخروج",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "هل أنت متأكد أنك تريد إلغاء الاشتراك؟ سيوقف هذا الإجراء الفوترة المتكررة الخاصة بك.",
+    beforeYouCancel: "قبل الإلغاء:",
+    cancelWarning1: "ستفقد الوصول إلى إشارات التداول المميزة",
+    cancelWarning2: "سينتهي اشتراكك في فترة الفوترة الحالية",
+    cancelWarning3: "يمكنك إعادة الاشتراك في أي وقت",
+    cancelWarning4: "لا توجد استردادات لفترة الفوترة الحالية",
+    cancelRedirectMessage: "سيتم إعادة توجيهك إلى البوابة الآمنة لـ Stripe لإلغاء اشتراكك بأمان.",
+    keepSubscription: "الاحتفاظ بالاشتراك",
+    
+    // Change Password Modal
+    changePasswordDescription: "أدخل كلمة المرور الحالية واختر كلمة مرور جديدة",
+    currentPassword: "كلمة المرور الحالية",
+    currentPasswordPlaceholder: "أدخل كلمة المرور الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    newPasswordPlaceholder: "أدخل كلمة المرور الجديدة",
+    confirmNewPassword: "تأكيد كلمة المرور الجديدة",
+    confirmNewPasswordPlaceholder: "أكد كلمة المرور الجديدة",
+    updatePassword: "تحديث كلمة المرور",
+    cancel: "إلغاء",
+    passwordUpdated: "تم تحديث كلمة المرور",
+    passwordUpdatedDescription: "تم تغيير كلمة المرور الخاصة بك بنجاح."
   },
   hi: {
     pricingTitle: "अपनी योजना चुनें",
@@ -568,7 +855,58 @@ export const globalTranslations = {
     signalExpiredDismiss: "बंद करने के लिए क्लिक करें",
     
     // Version
-    versionName: "संस्करण 2.0 - Real-Time Precision Edition"
+    versionName: "संस्करण 2.0 - Real-Time Precision Edition",
+    
+    // Footer
+    footerDescription: "AI और हमारे पेशेवर ट्रेडरों द्वारा उत्पन्न रियल-टाइम ट्रेडिंग सिग्नल",
+    services: "सेवाएं",
+    forexSignals: "फॉरेक्स सिग्नल",
+    cryptoSignals: "क्रिप्टो सिग्नल",
+    indicesSignals: "इंडेक्स सिग्नल",
+    technicalAnalysis: "तकनीकी विश्लेषण",
+    support: "सहायता",
+    customerService: "ग्राहक सेवा",
+    becomeAffiliate: "सहयोगी बनें",
+    faq: "FAQ",
+    legal: "कानूनी",
+    termsConditions: "नियम और शर्तें",
+    privacyPolicy: "गोपनीयता नीति",
+    tradingRisks: "ट्रेडिंग जोखिम",
+    legalNotice: "कानूनी नोटिस",
+    copyright: "© 2025 रियल-टाइम ट्रेडिंग सिग्नल। सभी अधिकार सुरक्षित।",
+    
+    // User Menu
+    homePage: "होम पेज",
+    profileSettings: "प्रोफ़ाइल और सेटिंग्स",
+    cancelSubscription: "सदस्यता रद्द करें",
+    manageSubscription: "सदस्यता प्रबंधित करें",
+    changePassword: "पासवर्ड बदलें",
+    suspendAccount: "खाता निलंबित करें",
+    deleteAccount: "खाता हटाएं",
+    logOut: "लॉग आउट",
+    
+    // Cancel Subscription Modal
+    cancelSubscriptionConfirm: "क्या आप वाकई अपनी सदस्यता रद्द करना चाहते हैं? यह कार्रवाई आपके आवर्ती बिलिंग को रोक देगी।",
+    beforeYouCancel: "रद्द करने से पहले:",
+    cancelWarning1: "आप प्रीमियम ट्रेडिंग सिग्नल तक पहुंच खो देंगे",
+    cancelWarning2: "आपकी सदस्यता वर्तमान बिलिंग अवधि में समाप्त हो जाएगी",
+    cancelWarning3: "आप कभी भी पुनः सदस्यता ले सकते हैं",
+    cancelWarning4: "वर्तमान बिलिंग अवधि के लिए कोई धनवापसी नहीं",
+    cancelRedirectMessage: "आपको अपनी सदस्यता को सुरक्षित रूप से रद्द करने के लिए Stripe के सुरक्षित पोर्टल पर पुनर्निर्देशित किया जाएगा।",
+    keepSubscription: "सदस्यता रखें",
+    
+    // Change Password Modal
+    changePasswordDescription: "अपना वर्तमान पासवर्ड दर्ज करें और एक नया पासवर्ड चुनें",
+    currentPassword: "वर्तमान पासवर्ड",
+    currentPasswordPlaceholder: "अपना वर्तमान पासवर्ड दर्ज करें",
+    newPassword: "नया पासवर्ड",
+    newPasswordPlaceholder: "अपना नया पासवर्ड दर्ज करें",
+    confirmNewPassword: "नया पासवर्ड पुष्टि करें",
+    confirmNewPasswordPlaceholder: "अपना नया पासवर्ड पुष्टि करें",
+    updatePassword: "पासवर्ड अपडेट करें",
+    cancel: "रद्द करें",
+    passwordUpdated: "पासवर्ड अपडेट किया गया",
+    passwordUpdatedDescription: "आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।"
   }
 };
 
