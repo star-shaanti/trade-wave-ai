@@ -24,6 +24,7 @@ import { LanguageButton } from "../components/LanguageButton";
 import { useLanguage } from "../hooks/useLanguage";
 // AdSense components removed
 // import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
+import { CookieBanner } from "../components/CookieBanner";
 import { getMarketPrice } from "../services/marketData";
 import { generateRealTimeSignal } from "../services/signalGenerator";
 
@@ -2538,6 +2539,9 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Cookie Banner */}
+      <CookieBanner />
     </div>
   );
 };

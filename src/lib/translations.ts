@@ -122,6 +122,20 @@ export const globalTranslations = {
     cancel: "Cancel",
     passwordUpdated: "Password Updated",
     passwordUpdatedDescription: "Your password has been successfully changed.",
+    
+    // Cookie Banner
+    cookieBannerTitle: "We use cookies",
+    cookieBannerDescription: "We use essential cookies for site functionality and analytics cookies to improve your experience. You can customize your preferences.",
+    cookieAcceptAll: "Accept All",
+    cookieRejectAll: "Reject All",
+    cookieSettings: "Settings",
+    cookieNecessary: "Necessary Cookies",
+    cookieNecessaryDescription: "These cookies are essential for the website to function properly. They cannot be disabled.",
+    cookieAnalytics: "Analytics Cookies",
+    cookieAnalyticsDescription: "These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.",
+    cookieSettingsTitle: "Cookie Settings",
+    cookieSettingsDescription: "Customize your cookie preferences. You can enable or disable different types of cookies below.",
+    cookieSavePreferences: "Save Preferences",
     legal: "Legal",
     termsConditions: "Terms & Conditions",
     privacyPolicy: "Privacy Policy",
@@ -233,6 +247,20 @@ export const globalTranslations = {
     cancel: "Annuler",
     passwordUpdated: "Mot de passe mis à jour",
     passwordUpdatedDescription: "Votre mot de passe a été modifié avec succès.",
+    
+    // Cookie Banner
+    cookieBannerTitle: "Nous utilisons des cookies",
+    cookieBannerDescription: "Nous utilisons des cookies essentiels pour le fonctionnement du site et des cookies analytiques pour améliorer votre expérience. Vous pouvez personnaliser vos préférences.",
+    cookieAcceptAll: "Tout accepter",
+    cookieRejectAll: "Tout refuser",
+    cookieSettings: "Paramètres",
+    cookieNecessary: "Cookies nécessaires",
+    cookieNecessaryDescription: "Ces cookies sont essentiels au bon fonctionnement du site. Ils ne peuvent pas être désactivés.",
+    cookieAnalytics: "Cookies analytiques",
+    cookieAnalyticsDescription: "Ces cookies nous aident à comprendre comment les visiteurs interagissent avec notre site web en collectant et en rapportant des informations de manière anonyme.",
+    cookieSettingsTitle: "Paramètres des cookies",
+    cookieSettingsDescription: "Personnalisez vos préférences de cookies. Vous pouvez activer ou désactiver différents types de cookies ci-dessous.",
+    cookieSavePreferences: "Enregistrer les préférences",
     legal: "Légal",
     termsConditions: "Conditions Générales",
     privacyPolicy: "Politique de Confidentialité",
@@ -345,6 +373,20 @@ export const globalTranslations = {
     passwordUpdated: "Contraseña actualizada",
     passwordUpdatedDescription: "Su contraseña se ha actualizado correctamente.",
     
+    // Cookie Banner
+    cookieBannerTitle: "Utilizamos cookies",
+    cookieBannerDescription: "Utilizamos cookies esenciales para la funcionalidad del sitio y cookies analíticas para mejorar su experiencia. Puede personalizar sus preferencias.",
+    cookieAcceptAll: "Aceptar todo",
+    cookieRejectAll: "Rechazar todo",
+    cookieSettings: "Configuración",
+    cookieNecessary: "Cookies necesarias",
+    cookieNecessaryDescription: "Estas cookies son esenciales para el funcionamiento del sitio web. No se pueden desactivar.",
+    cookieAnalytics: "Cookies analíticas",
+    cookieAnalyticsDescription: "Estas cookies nos ayudan a entender cómo los visitantes interactúan con nuestro sitio web recopilando y reportando información de forma anónima.",
+    cookieSettingsTitle: "Configuración de cookies",
+    cookieSettingsDescription: "Personalice sus preferencias de cookies. Puede habilitar o deshabilitar diferentes tipos de cookies a continuación.",
+    cookieSavePreferences: "Guardar preferencias",
+    
     legal: "Legal",
     termsConditions: "Términos y Condiciones",
     privacyPolicy: "Política de Privacidad",
@@ -456,6 +498,20 @@ export const globalTranslations = {
     cancel: "Annulla",
     passwordUpdated: "Password aggiornata",
     passwordUpdatedDescription: "La tua password è stata aggiornata con successo.",
+    
+    // Cookie Banner
+    cookieBannerTitle: "Utilizziamo i cookie",
+    cookieBannerDescription: "Utilizziamo cookie essenziali per la funzionalità del sito e cookie analitici per migliorare la tua esperienza. Puoi personalizzare le tue preferenze.",
+    cookieAcceptAll: "Accetta tutto",
+    cookieRejectAll: "Rifiuta tutto",
+    cookieSettings: "Impostazioni",
+    cookieNecessary: "Cookie necessari",
+    cookieNecessaryDescription: "Questi cookie sono essenziali per il corretto funzionamento del sito web. Non possono essere disattivati.",
+    cookieAnalytics: "Cookie analitici",
+    cookieAnalyticsDescription: "Questi cookie ci aiutano a capire come i visitatori interagiscono con il nostro sito web raccogliendo e riportando informazioni in modo anonimo.",
+    cookieSettingsTitle: "Impostazioni cookie",
+    cookieSettingsDescription: "Personalizza le tue preferenze sui cookie. Puoi abilitare o disabilitare diversi tipi di cookie di seguito.",
+    cookieSavePreferences: "Salva preferenze",
     
     legal: "Legale",
     termsConditions: "Termini e Condizioni",
@@ -573,7 +629,21 @@ export const globalTranslations = {
     updatePassword: "Atualizar senha",
     cancel: "Cancelar",
     passwordUpdated: "Senha atualizada",
-    passwordUpdatedDescription: "Sua senha foi atualizada com sucesso."
+    passwordUpdatedDescription: "Sua senha foi atualizada com sucesso.",
+    
+    // Cookie Banner
+    cookieBannerTitle: "Usamos cookies",
+    cookieBannerDescription: "Usamos cookies essenciais para a funcionalidade do site e cookies analíticos para melhorar sua experiência. Você pode personalizar suas preferências.",
+    cookieAcceptAll: "Aceitar tudo",
+    cookieRejectAll: "Rejeitar tudo",
+    cookieSettings: "Configurações",
+    cookieNecessary: "Cookies necessários",
+    cookieNecessaryDescription: "Estes cookies são essenciais para o funcionamento do site. Eles não podem ser desativados.",
+    cookieAnalytics: "Cookies analíticos",
+    cookieAnalyticsDescription: "Estes cookies nos ajudam a entender como os visitantes interagem com nosso site coletando e relatando informações anonimamente.",
+    cookieSettingsTitle: "Configurações de cookies",
+    cookieSettingsDescription: "Personalize suas preferências de cookies. Você pode ativar ou desativar diferentes tipos de cookies abaixo.",
+    cookieSavePreferences: "Salvar preferências"
   },
   ru: {
     pricingTitle: "Выберите тариф",
@@ -684,7 +754,21 @@ export const globalTranslations = {
     updatePassword: "Обновить пароль",
     cancel: "Отмена",
     passwordUpdated: "Пароль обновлен",
-    passwordUpdatedDescription: "Ваш пароль был успешно изменен."
+    passwordUpdatedDescription: "Ваш пароль был успешно изменен.",
+    
+    // Cookie Banner
+    cookieBannerTitle: "Мы используем cookies",
+    cookieBannerDescription: "Мы используем необходимые cookies для функциональности сайта и аналитические cookies для улучшения вашего опыта. Вы можете настроить свои предпочтения.",
+    cookieAcceptAll: "Принять все",
+    cookieRejectAll: "Отклонить все",
+    cookieSettings: "Настройки",
+    cookieNecessary: "Необходимые cookies",
+    cookieNecessaryDescription: "Эти cookies необходимы для работы веб-сайта. Они не могут быть отключены.",
+    cookieAnalytics: "Аналитические cookies",
+    cookieAnalyticsDescription: "Эти cookies помогают нам понять, как посетители взаимодействуют с нашим веб-сайтом, собирая и сообщая информацию анонимно.",
+    cookieSettingsTitle: "Настройки cookies",
+    cookieSettingsDescription: "Настройте свои предпочтения cookies. Вы можете включить или отключить различные типы cookies ниже.",
+    cookieSavePreferences: "Сохранить предпочтения"
   },
   ar: {
     pricingTitle: "اختر خطتك",
@@ -795,7 +879,21 @@ export const globalTranslations = {
     updatePassword: "تحديث كلمة المرور",
     cancel: "إلغاء",
     passwordUpdated: "تم تحديث كلمة المرور",
-    passwordUpdatedDescription: "تم تغيير كلمة المرور الخاصة بك بنجاح."
+    passwordUpdatedDescription: "تم تغيير كلمة المرور الخاصة بك بنجاح.",
+    
+    // Cookie Banner
+    cookieBannerTitle: "نستخدم ملفات تعريف الارتباط",
+    cookieBannerDescription: "نستخدم ملفات تعريف الارتباط الأساسية لوظائف الموقع وملفات تعريف الارتباط التحليلية لتحسين تجربتك. يمكنك تخصيص تفضيلاتك.",
+    cookieAcceptAll: "قبول الكل",
+    cookieRejectAll: "رفض الكل",
+    cookieSettings: "الإعدادات",
+    cookieNecessary: "ملفات تعريف الارتباط الضرورية",
+    cookieNecessaryDescription: "هذه الملفات ضرورية لعمل الموقع بشكل صحيح. لا يمكن تعطيلها.",
+    cookieAnalytics: "ملفات تعريف الارتباط التحليلية",
+    cookieAnalyticsDescription: "تساعدنا هذه الملفات على فهم كيفية تفاعل الزوار مع موقعنا من خلال جمع المعلومات والإبلاغ عنها بشكل مجهول.",
+    cookieSettingsTitle: "إعدادات ملفات تعريف الارتباط",
+    cookieSettingsDescription: "خصص تفضيلات ملفات تعريف الارتباط الخاصة بك. يمكنك تفعيل أو إلغاء تفعيل أنواع مختلفة من ملفات تعريف الارتباط أدناه.",
+    cookieSavePreferences: "حفظ التفضيلات"
   },
   hi: {
     pricingTitle: "अपनी योजना चुनें",
@@ -906,7 +1004,21 @@ export const globalTranslations = {
     updatePassword: "पासवर्ड अपडेट करें",
     cancel: "रद्द करें",
     passwordUpdated: "पासवर्ड अपडेट किया गया",
-    passwordUpdatedDescription: "आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।"
+    passwordUpdatedDescription: "आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।",
+    
+    // Cookie Banner
+    cookieBannerTitle: "हम कुकीज़ का उपयोग करते हैं",
+    cookieBannerDescription: "हम साइट कार्यक्षमता के लिए आवश्यक कुकीज़ और आपके अनुभव में सुधार के लिए विश्लेषणात्मक कुकीज़ का उपयोग करते हैं। आप अपनी प्राथमिकताएं अनुकूलित कर सकते हैं।",
+    cookieAcceptAll: "सभी स्वीकार करें",
+    cookieRejectAll: "सभी अस्वीकार करें",
+    cookieSettings: "सेटिंग्स",
+    cookieNecessary: "आवश्यक कुकीज़",
+    cookieNecessaryDescription: "ये कुकीज़ वेबसाइट के सही कामकाज के लिए आवश्यक हैं। इन्हें अक्षम नहीं किया जा सकता है।",
+    cookieAnalytics: "विश्लेषणात्मक कुकीज़",
+    cookieAnalyticsDescription: "ये कुकीज़ हमें गुमनाम रूप से जानकारी एकत्र करके और रिपोर्टिंग करके समझने में मदद करती हैं कि आगंतुक हमारी वेबसाइट के साथ कैसे बातचीत करते हैं।",
+    cookieSettingsTitle: "कुकी सेटिंग्स",
+    cookieSettingsDescription: "अपनी कुकी प्राथमिकताएं अनुकूलित करें। आप नीचे विभिन्न प्रकार की कुकीज़ को सक्षम या अक्षम कर सकते हैं।",
+    cookieSavePreferences: "प्राथमिकताएं सहेजें"
   }
 };
 
