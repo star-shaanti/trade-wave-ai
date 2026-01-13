@@ -5,71 +5,81 @@
   <!-- Page d'accueil -->
   <url>
     <loc>https://realtimetradingsignals.com/</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://realtimetradingsignals.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://realtimetradingsignals.com/it/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://realtimetradingsignals.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://realtimetradingsignals.com/ru/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://realtimetradingsignals.com/ar/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://realtimetradingsignals.com/hi/"/>
   </url>
   
   <!-- Page de tarification -->
   <url>
     <loc>https://realtimetradingsignals.com/pricing</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/pricing"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/pricing"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://realtimetradingsignals.com/es/pricing"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://realtimetradingsignals.com/it/pricing"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://realtimetradingsignals.com/pt/pricing"/>
   </url>
   
   <!-- Page FAQ -->
   <url>
     <loc>https://realtimetradingsignals.com/faq</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/faq"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/faq"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/faq"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://realtimetradingsignals.com/es/faq"/>
   </url>
   
   <!-- Page des risques de trading -->
   <url>
     <loc>https://realtimetradingsignals.com/trading-risks</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/trading-risks"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/trading-risks"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/trading-risks"/>
   </url>
   
   <!-- Page de politique de confidentialité -->
   <url>
     <loc>https://realtimetradingsignals.com/privacy-policy</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/privacy-policy"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/privacy-policy"/>
   </url>
   
   <!-- Page des conditions d'utilisation -->
   <url>
     <loc>https://realtimetradingsignals.com/terms-conditions</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/terms-conditions"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/terms-conditions"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/terms-conditions"/>
   </url>
   
   <!-- Page de mentions légales -->
   <url>
     <loc>https://realtimetradingsignals.com/legal-notice</loc>
-    <lastmod>2025-10-31</lastmod>
+    <lastmod>2026-01-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/legal-notice"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://realtimetradingsignals.com/fr/legal-notice"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://realtimetradingsignals.com/en/legal-notice"/>
   </url>
   
   
