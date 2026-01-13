@@ -25,6 +25,7 @@ import { useLanguage } from "../hooks/useLanguage";
 // AdSense components removed
 // import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
 import { CookieBanner } from "../components/CookieBanner";
+import { TradingRobots } from "../components/TradingRobots";
 import { getMarketPrice } from "../services/marketData";
 import { generateRealTimeSignal } from "../services/signalGenerator";
 
@@ -2201,6 +2202,9 @@ const Index = () => {
                 </div>
               </div>
       </main>
+
+      {/* Section Trading Robots */}
+      <TradingRobots />
 
       {/* Layout sans sidebars publicitaires */}
       <div className="flex flex-col lg:flex-row">
