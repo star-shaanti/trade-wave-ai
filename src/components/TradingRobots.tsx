@@ -105,18 +105,81 @@ export const TradingRobots = () => {
   ];
 
   const [displayedRobots, setDisplayedRobots] = useState<RobotData[]>(baseRobots);
+  
+  // État pour gérer les "bursts" d'activité (vagues de traders)
+  const [activityLevel, setActivityLevel] = useState<'normal' | 'burst' | 'slowdown'>('normal');
+  const burstRef = useRef({ count: 0, duration: 0 });
 
-  // Générer de nouvelles valeurs aléatoires
+  // Système de bursts : parfois une vague de traders entre d'un coup
+  useEffect(() => {
+    const checkBurst = setInterval(() => {
+      // 15% de chance d'avoir un burst toutes les 10 secondes
+      if (Math.random() < 0.15 && activityLevel === 'normal') {
+        setActivityLevel('burst');
+        burstRef.current.count = 0;
+        burstRef.current.duration = Math.floor(Math.random() * 3) + 2; // 2-4 cycles de burst
+        
+        // Après le burst, ralentissement progressif
+        setTimeout(() => {
+          setActivityLevel('slowdown');
+          setTimeout(() => {
+            setActivityLevel('normal');
+          }, 10000); // Ralentissement pendant 10 secondes
+        }, burstRef.current.duration * 5000);
+      }
+    }, 10000);
+
+    return () => clearInterval(checkBurst);
+  }, [activityLevel]);
+
+  // Générer de nouvelles valeurs de manière progressive et cohérente
+  // Avec système de bursts pour simuler des vagues de traders
   const generateNewValues = (current: RobotData): RobotData => {
-    const performanceRange = { min: 15, max: 70 };
-    const winRateRange = { min: 70, max: 95 };
-    const tradesRange = { min: 15000, max: 28000 };
+    let multiplier = 1;
+    let tradesMultiplier = 1;
+    
+    // Appliquer le multiplicateur selon l'activité
+    if (activityLevel === 'burst') {
+      multiplier = 2.5; // Les valeurs s'accélèrent pendant le burst
+      tradesMultiplier = 8; // Beaucoup plus de trades (simule 1000+ traders qui entrent)
+      burstRef.current.count++;
+      
+      // Si le burst est terminé, passer au slowdown
+      if (burstRef.current.count >= burstRef.current.duration) {
+        setActivityLevel('slowdown');
+        burstRef.current.count = 0;
+      }
+    } else if (activityLevel === 'slowdown') {
+      multiplier = 0.3; // Ralentissement après le burst
+      tradesMultiplier = 0.5; // Moins de trades pendant le ralentissement
+    }
+    
+    // PERFORMANCE: Évolution progressive avec multiplicateur
+    // Pendant burst: accélération (2.5x)
+    // Pendant slowdown: ralentissement (0.3x)
+    // Normal: évolution standard
+    const performanceChange = (Math.random() - 0.4) * 4 * multiplier;
+    const newPerformance = Math.max(15, Math.min(70, current.performance + performanceChange));
+    
+    // WIN RATE: Petites variations, légèrement affecté par les bursts
+    // Pendant un burst, le win rate peut s'améliorer légèrement (plus d'activité = meilleure précision)
+    const winRateMultiplier = activityLevel === 'burst' ? 1.3 : activityLevel === 'slowdown' ? 0.7 : 1;
+    const winRateVariation = (Math.random() - 0.5) * 3 * winRateMultiplier;
+    const newWinRate = Math.max(70, Math.min(95, Math.round(current.winRate + winRateVariation)));
+    
+    // TRADES: Augmentation avec système de bursts
+    // Normal: +50 à +150 trades
+    // Burst: +400 à +1200 trades (simule 1000+ traders qui entrent)
+    // Slowdown: +25 à +75 trades (ralentissement)
+    const baseTradesIncrement = Math.floor(Math.random() * 100) + 50;
+    const tradesIncrement = Math.floor(baseTradesIncrement * tradesMultiplier);
+    const newTrades = current.trades + tradesIncrement;
     
     return {
       ...current,
-      performance: parseFloat((Math.random() * (performanceRange.max - performanceRange.min) + performanceRange.min).toFixed(1)),
-      winRate: Math.floor(Math.random() * (winRateRange.max - winRateRange.min) + winRateRange.min),
-      trades: Math.floor(Math.random() * (tradesRange.max - tradesRange.min) + tradesRange.min)
+      performance: parseFloat(newPerformance.toFixed(1)),
+      winRate: newWinRate,
+      trades: newTrades
     };
   };
 

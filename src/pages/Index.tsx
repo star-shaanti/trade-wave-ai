@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
@@ -489,6 +489,9 @@ const Index = () => {
   const [authLoading, setAuthLoading] = useState(false);
   // Compteur d'utilisateurs actifs avec variation limitée
   const [activeUsers, setActiveUsers] = useState(0);
+  const activityModeRef = useRef<'normal' | 'burst' | 'slowdown'>('normal');
+  const burstCountRef = useRef(0);
+  const burstDurationRef = useRef(0);
   const [expiredSignal, setExpiredSignal] = useState<TradingSignal | null>(null);
   const [showSignalActivated, setShowSignalActivated] = useState(false);
   const [activatedSignalInfo, setActivatedSignalInfo] = useState("");
@@ -660,24 +663,100 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [user, checkSubscription]);
 
-  // Compteur d'utilisateurs actifs avec variation limitée
+  // Compteur d'utilisateurs actifs avec évolution progressive et bursts d'activité
+  // Peut monter jusqu'à 1,360,000 tout en maintenant la cohérence
   useEffect(() => {
-    // Valeur initiale aléatoire entre 365,652 et 765,326
-    const initialValue = Math.floor(Math.random() * (765326 - 365652 + 1)) + 365652;
+    // Valeur initiale réaliste autour de 400k-450k (cohérent avec l'image)
+    const initialValue = Math.floor(Math.random() * 50000) + 400000; // 400,000 - 450,000
     setActiveUsers(initialValue);
 
     const updateActiveUsers = () => {
       setActiveUsers(prevUsers => {
-        // Variation aléatoire entre -70 et +70 (pas plus de 70 d'un coup)
-        const variation = Math.floor(Math.random() * 141) - 70; // -70 à +70
+        let variation = 0;
+        const MAX_USERS = 1360000; // Maximum : 1.36 million
+        const MIN_USERS = 380000; // Minimum : 380k
+        
+        // Si on approche du maximum, réduire les variations pour éviter de dépasser
+        const isNearMax = prevUsers > MAX_USERS * 0.9; // Plus de 90% du max (1,224,000)
+        const distanceFromMax = MAX_USERS - prevUsers;
+        
+        // Vérifier si un burst doit être déclenché (10% de chance quand en mode normal)
+        // Ne pas déclencher de burst si on est trop proche du maximum
+        if (activityModeRef.current === 'normal' && Math.random() < 0.1 && !isNearMax) {
+          activityModeRef.current = 'burst';
+          burstCountRef.current = 0;
+          burstDurationRef.current = Math.floor(Math.random() * 3) + 2; // 2-4 cycles de burst
+        }
+
+        // Calculer la variation selon le mode d'activité
+        if (activityModeRef.current === 'burst') {
+          // BURST: Grande vague de traders qui arrivent (+500 à +2000 traders)
+          // Simule une campagne marketing, annonce importante, etc.
+          let burstVariation = Math.floor(Math.random() * 1500) + 500;
+          
+          // Si on approche du maximum, limiter le burst pour ne pas dépasser
+          if (isNearMax) {
+            burstVariation = Math.min(burstVariation, Math.floor(distanceFromMax * 0.5));
+            // Si le burst ne peut pas se faire, passer au slowdown
+            if (burstVariation < 100) {
+              activityModeRef.current = 'slowdown';
+              burstCountRef.current = 0;
+            }
+          }
+          
+          variation = burstVariation;
+          burstCountRef.current++;
+          
+          // Si le burst est terminé, passer au slowdown
+          if (burstCountRef.current >= burstDurationRef.current) {
+            activityModeRef.current = 'slowdown';
+            burstCountRef.current = 0;
+            // Après 5 cycles de slowdown, retour à la normale
+            setTimeout(() => {
+              activityModeRef.current = 'normal';
+            }, 25000); // 5 cycles × 5 secondes
+          }
+        } else if (activityModeRef.current === 'slowdown') {
+          // SLOWDOWN: Ralentissement après le burst (+10 à +50 traders)
+          // Les nouveaux arrivants se stabilisent, moins d'activité
+          let slowdownVariation = Math.floor(Math.random() * 40) + 10;
+          
+          // Limiter si on approche du maximum
+          if (isNearMax) {
+            slowdownVariation = Math.min(slowdownVariation, Math.floor(distanceFromMax * 0.3));
+          }
+          
+          variation = slowdownVariation;
+        } else {
+          // NORMAL: Variation progressive (+20 à +120 traders)
+          // Légèrement positif en moyenne pour simuler la croissance naturelle
+          let normalVariation = Math.floor(Math.random() * 100) + 20; // +20 à +120
+          
+          // Si on approche du maximum, réduire la variation normale
+          if (isNearMax) {
+            normalVariation = Math.min(normalVariation, Math.floor(distanceFromMax * 0.2));
+          }
+          
+          // Parfois des petites baisses réalistes (5% de chance)
+          // Simule quelques déconnexions normales
+          // Ne pas avoir de baisse si on est très proche du minimum
+          if (Math.random() < 0.05 && prevUsers > MIN_USERS + 50000) {
+            variation = -Math.floor(Math.random() * 30); // -1 à -30 (quelques déconnexions)
+          } else {
+            variation = normalVariation;
+          }
+        }
+
         const newUsers = prevUsers + variation;
         
-        // Maintenir dans les limites 365,652 - 765,326
-        return Math.max(365652, Math.min(765326, newUsers));
+        // Maintenir dans des limites réalistes (380k - 1,360,000)
+        // Permet une croissance jusqu'à 1.36 million tout en restant cohérent
+        return Math.max(MIN_USERS, Math.min(MAX_USERS, newUsers));
       });
     };
 
-    const interval = setInterval(updateActiveUsers, 5000); // Toutes les 5 secondes
+    // Mise à jour toutes les 5 secondes (synchronisé avec les robots)
+    const interval = setInterval(updateActiveUsers, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -780,13 +859,9 @@ const Index = () => {
     try {
       console.log(`🔄 Analyse du marché en temps réel pour ${asset} (${category}) - Timeframe: ${timeframe}`);
       
-      // Délai aléatoire entre 5 et 15 secondes pour simuler l'analyse
-      const delaySeconds = Math.floor(Math.random() * 11) + 5; // 5-15 secondes
-      console.log(`⏱️ Analyse en cours... (${delaySeconds} secondes)`);
-      
-      // Afficher le message de connexion satellite pendant l'attente
+      // Afficher le message de connexion satellite pendant l'analyse
       setIsWaitingForSignal(true);
-      setCurrentDelay(delaySeconds);
+      setCurrentDelay(null); // Pas de délai fixe, on attend que l'analyse se termine
       
       // PRIORITÉ 1: Récupérer les données de marché réelles
       let marketPrice = null;
@@ -802,9 +877,6 @@ const Index = () => {
       } catch (priceError) {
         console.warn("⚠️ Erreur lors de la récupération du prix:", priceError);
       }
-      
-      // Attendre le délai avant de générer le signal
-      await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
 
       // PRIORITÉ 2: Générer un signal basé sur les données réelles
       try {
@@ -912,21 +984,8 @@ const Index = () => {
                 const signal = signalsData.signals[0];
                 const signalType = signal.type || "BUY";
                 
-                const getExpirationTime = (timeframe: string) => {
-                  switch (timeframe) {
-                    case "1M": return 60;
-                    case "2M": return 120;
-                    case "3M": return 180;
-                    case "5M": return 300;
-                    case "15M": return 900;
-                    case "30M": return 1800;
-                    case "1H": return 3600;
-                    case "4H": return 14400;
-                    case "1D": return 86400;
-                    default: return 60;
-                  }
-                };
-                
+                // Utiliser la fonction getExpirationTime du service signalGenerator
+                const { getExpirationTime } = await import('../services/signalGenerator');
                 const expirationTime = getExpirationTime(timeframe);
                 
                 const newSignal: TradingSignal = {
@@ -1010,25 +1069,38 @@ const Index = () => {
         // Combiner les deux tendances (pondération: 40% tendance globale, 60% tendance récente)
         const combinedTrend = (trendPercent * 0.4) + (recentChange * 0.6);
         
-        if (combinedTrend > 0.05) {
+        // CORRECTION: Seuils réduits pour équilibrer BUY/SELL
+        if (combinedTrend > 0.02) { // Réduit de 0.05% à 0.02%
           signalType = "BUY";
           console.log(`✅ Tendance haussière détectée: ${combinedTrend.toFixed(3)}%`);
-        } else if (combinedTrend < -0.05) {
+        } else if (combinedTrend < -0.02) { // Réduit de -0.05% à -0.02%
           signalType = "SELL";
           console.log(`✅ Tendance baissière détectée: ${combinedTrend.toFixed(3)}%`);
         } else {
-          // Tendance neutre, utiliser la variation 24h
-          signalType = priceChange > 0 ? "BUY" : "SELL";
-          console.log(`⚠️ Tendance neutre, utilisation variation 24h: ${priceChange.toFixed(2)}%`);
+          // Tendance neutre, utiliser la variation 24h avec seuil très bas
+          // CORRECTION: Équilibrer au lieu de donner SELL par défaut
+          if (priceChange > 0) {
+            signalType = "BUY";
+            console.log(`⚠️ Tendance neutre, utilisation variation 24h positive: ${priceChange.toFixed(2)}% -> BUY`);
+          } else if (priceChange < 0) {
+            signalType = "SELL";
+            console.log(`⚠️ Tendance neutre, utilisation variation 24h négative: ${priceChange.toFixed(2)}% -> SELL`);
+          } else {
+            // Variation = 0: donner BUY pour équilibrer (au lieu de SELL)
+            signalType = "BUY";
+            console.log(`⚠️ Tendance neutre et variation 24h = 0, signal équilibré: BUY`);
+          }
         }
       } else {
-        // Pas assez de données, utiliser variation 24h avec seuils stricts
-        if (priceChange > 0.2) {
+        // Pas assez de données, utiliser variation 24h avec seuils réduits
+        // CORRECTION: Seuils réduits et équilibrage
+        if (priceChange > 0.1) { // Réduit de 0.2% à 0.1%
           signalType = "BUY";
-        } else if (priceChange < -0.2) {
+        } else if (priceChange < -0.1) { // Réduit de -0.2% à -0.1%
           signalType = "SELL";
         } else {
-          signalType = priceChange > 0 ? "BUY" : "SELL";
+          // CORRECTION: Équilibrer au lieu de SELL par défaut
+          signalType = priceChange >= 0 ? "BUY" : "SELL"; // >= 0 donne BUY
         }
       }
       
@@ -1040,24 +1112,18 @@ const Index = () => {
         category
       );
       
-      const getExpirationTime = (timeframe: string) => {
-        switch (timeframe) {
-          case "1M": return 60;
-          case "2M": return 120;
-          case "3M": return 180;
-          case "5M": return 300;
-          case "15M": return 900;
-          case "30M": return 1800;
-          case "1H": return 3600;
-          case "4H": return 14400;
-          case "1D": return 86400;
-          default: return 60;
-        }
-      };
-      
+      // Utiliser la fonction getExpirationTime du service signalGenerator
+      const { getExpirationTime } = await import('../services/signalGenerator');
       const expirationTime = getExpirationTime(timeframe);
       
       // Calculer la confiance basée sur les données réelles
+      const calculateConfidence = (change: number, price: typeof marketPrice) => {
+        if (!price) return 70;
+        const absChange = Math.abs(change);
+        if (absChange > 2) return Math.min(95, 75 + absChange * 5);
+        if (absChange > 1) return Math.min(90, 70 + absChange * 8);
+        return Math.max(60, 65 + absChange * 10);
+      };
       const confidence = calculateConfidence(priceChange, marketPrice);
       
       const newSignal: TradingSignal = {
@@ -1155,7 +1221,7 @@ const Index = () => {
     }
 
     // Appeler directement la fonction de génération
-    // Le délai de 5-15 secondes est géré dans generateSignalsWithGemini
+    // Le temps d'analyse dépend de la récupération des données réelles (pas de délai fixe)
       generateSignalsWithGemini();
   };
 
@@ -1452,7 +1518,7 @@ const Index = () => {
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Logo className="h-8 w-8 text-primary" />
+              <Logo size={32} className="text-primary" />
               <div 
                 className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => window.location.reload()}
@@ -1545,7 +1611,7 @@ const Index = () => {
           <div className="md:hidden">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-3">
-                <Logo className="h-8 w-8 text-primary" />
+                <Logo size={32} className="text-primary" />
                 <div 
                   className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => window.location.reload()}

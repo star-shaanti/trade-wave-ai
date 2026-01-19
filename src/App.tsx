@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import TradingRisks from "./pages/TradingRisks";
 import LegalNotice from "./pages/LegalNotice";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <PWAInstallBanner />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

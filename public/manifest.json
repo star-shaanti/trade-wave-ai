@@ -1,0 +1,31 @@
+{
+  "name": "Real-time Trading Signals",
+  "short_name": "Trading Signals",
+  "description": "AI-powered real-time trading signals for Forex OTC, Cryptocurrency, and Indices",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#00d4aa",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business", "productivity"],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Trading Signals",
+      "short_name": "Signals",
+      "description": "View active trading signals",
+      "url": "/",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

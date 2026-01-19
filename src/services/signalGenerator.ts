@@ -46,7 +46,7 @@ export async function generateRealTimeSignal(
     }
 
     // Récupérer plusieurs points de prix pour analyser la tendance RÉELLE
-    // CRITIQUE: Augmenter le nombre de points pour Forex OTC pour meilleure précision
+    // Utiliser le système actuel : TradingView/OANDA pour Forex OTC, autres sources pour le reste
     const { getMultiplePrices } = await import('./marketData');
     const priceCount = symbol.includes('OTC') ? 12 : 10; // Plus de points pour OTC
     const prices = await getMultiplePrices(symbol, category, priceCount);
@@ -290,66 +290,104 @@ function analyzeIndicatorsImproved(
 
   // VALIDATION FINALE: Vérifier que le signal correspond à la tendance réelle
   // Cette validation est CRITIQUE pour éviter les signaux inversés
-  let finalType: "BUY" | "SELL" = buyScore > sellScore ? "BUY" : "SELL";
+  // CORRECTION URGENTE: Équilibrer BUY/SELL au lieu de donner SELL par défaut
   
-  // Vérifier la tendance réelle des prix
+  // PRIORITÉ 1: Utiliser la tendance réelle des prix si disponible
+  let finalType: "BUY" | "SELL";
+  let trendBasedDecision = false;
+  
   if (priceHistory.length >= 3) {
     const lastPrice = priceHistory[priceHistory.length - 1];
     const firstPrice = priceHistory[0];
     const realTrend = lastPrice - firstPrice;
     const realTrendPercent = (realTrend / firstPrice) * 100;
     
-    // Si le signal ne correspond pas à la tendance réelle, corriger
-    if (realTrendPercent > 0.01 && finalType === "SELL") {
-      // Tendance haussière réelle mais signal SELL -> CORRIGER en BUY
-      console.warn(`⚠️ Correction: Tendance haussière réelle (+${realTrendPercent.toFixed(3)}%) mais signal SELL -> Changé en BUY`);
+    // CORRECTION: Seuils plus bas pour détecter les tendances (+0.01% = haussier, -0.01% = baissier)
+    // Éviter les signaux neutres qui causent trop de SELL par défaut
+    if (realTrendPercent > 0.01) {
+      // Tendance haussière claire -> BUY
       finalType = "BUY";
-      buyScore = Math.max(buyScore, sellScore + 20); // Forcer BUY
-      reasons.push(`CORRECTION: Signal ajusté pour suivre la tendance haussière réelle`);
-    } else if (realTrendPercent < -0.01 && finalType === "BUY") {
-      // Tendance baissière réelle mais signal BUY -> CORRIGER en SELL
-      console.warn(`⚠️ Correction: Tendance baissière réelle (${realTrendPercent.toFixed(3)}%) mais signal BUY -> Changé en SELL`);
+      buyScore += 30; // Bonus important pour tendance réelle haussière
+      trendBasedDecision = true;
+      reasons.push(`✅ Tendance haussière RÉELLE détectée: +${realTrendPercent.toFixed(3)}% -> Signal BUY`);
+    } else if (realTrendPercent < -0.01) {
+      // Tendance baissière claire -> SELL
       finalType = "SELL";
-      sellScore = Math.max(sellScore, buyScore + 20); // Forcer SELL
-      reasons.push(`CORRECTION: Signal ajusté pour suivre la tendance baissière réelle`);
+      sellScore += 30; // Bonus important pour tendance réelle baissière
+      trendBasedDecision = true;
+      reasons.push(`✅ Tendance baissière RÉELLE détectée: ${realTrendPercent.toFixed(3)}% -> Signal SELL`);
+    } else {
+      // Tendance neutre (-0.01% à +0.01%), utiliser les scores mais avec logique équilibrée
+      // CORRECTION: Si scores égaux, alterner BUY/SELL ou utiliser variation 24h
+      if (buyScore > sellScore) {
+        finalType = "BUY";
+      } else if (sellScore > buyScore) {
+        finalType = "SELL";
+      } else {
+        // Scores égaux: utiliser variation 24h avec seuil très bas
+        if (marketPrice.changePercent24h > 0) {
+          finalType = "BUY";
+          buyScore += 10; // Légère préférence pour BUY si haussier
+        } else if (marketPrice.changePercent24h < 0) {
+          finalType = "SELL";
+          sellScore += 10; // Légère préférence pour SELL si baissier
+        } else {
+          // Variation 24h = 0: utiliser une logique aléatoire pondérée ou BUY par défaut
+          // CORRECTION: Donner BUY par défaut pour équilibrer (au lieu de SELL)
+          finalType = Math.random() > 0.5 ? "BUY" : "SELL";
+          if (finalType === "BUY") buyScore += 5;
+          else sellScore += 5;
+          reasons.push(`⚠️ Tendance neutre, signal équilibré: ${finalType}`);
+        }
+      }
+    }
+  } else {
+    // Pas assez de données d'historique, utiliser les scores
+    if (buyScore > sellScore) {
+      finalType = "BUY";
+    } else if (sellScore > buyScore) {
+      finalType = "SELL";
+    } else {
+      // CORRECTION: Équilibrer au lieu de SELL par défaut
+      finalType = marketPrice.changePercent24h > 0 ? "BUY" : (marketPrice.changePercent24h < 0 ? "SELL" : "BUY");
+      if (finalType === "BUY") buyScore += 5;
+      else sellScore += 5;
     }
   }
   
   const scoreDifference = Math.abs(buyScore - sellScore);
   const type = finalType;
   
-  // Si la différence est trop faible, suivre uniquement la tendance réelle
-  if (scoreDifference < 15) {
-    // En cas d'égalité, suivre STRICTEMENT la tendance à court terme
-    if (priceHistory.length >= 3) {
-      const trend = priceHistory[priceHistory.length - 1] - priceHistory[0];
-      const trendPercent = (trend / priceHistory[0]) * 100;
-      
-      // Seuil très bas pour détecter toute tendance
-      if (trendPercent > 0.005) {
-        return {
-          type: "BUY",
-          confidence: 70,
-          description: `Signal BUY basé sur la tendance haussière réelle détectée`,
-          analysis: `Tendance haussière réelle: +${trendPercent.toFixed(3)}%`,
-          trendStrength: 65,
-          sentiment: "Bullish",
-          signalStrength: 75,
-          marketConditions: "Trending Up",
-        };
-      } else if (trendPercent < -0.005) {
-        return {
-          type: "SELL",
-          confidence: 70,
-          description: `Signal SELL basé sur la tendance baissière réelle détectée`,
-          analysis: `Tendance baissière réelle: ${trendPercent.toFixed(3)}%`,
-          trendStrength: 65,
-          sentiment: "Bearish",
-          signalStrength: 75,
-          marketConditions: "Trending Down",
-        };
-      }
+  // Si la différence est trop faible ET que ce n'est pas basé sur la tendance réelle, suivre uniquement la tendance
+  if (scoreDifference < 15 && !trendBasedDecision && priceHistory.length >= 3) {
+    const trend = priceHistory[priceHistory.length - 1] - priceHistory[0];
+    const trendPercent = (trend / priceHistory[0]) * 100;
+    
+    // Seuil très bas pour détecter toute tendance (même faible)
+    if (trendPercent > 0.005) {
+      return {
+        type: "BUY",
+        confidence: 72,
+        description: `Signal BUY basé sur la tendance haussière réelle détectée`,
+        analysis: `Tendance haussière réelle: +${trendPercent.toFixed(3)}%`,
+        trendStrength: 68,
+        sentiment: "Bullish",
+        signalStrength: 76,
+        marketConditions: "Trending Up",
+      };
+    } else if (trendPercent < -0.005) {
+      return {
+        type: "SELL",
+        confidence: 72,
+        description: `Signal SELL basé sur la tendance baissière réelle détectée`,
+        analysis: `Tendance baissière réelle: ${trendPercent.toFixed(3)}%`,
+        trendStrength: 68,
+        sentiment: "Bearish",
+        signalStrength: 76,
+        marketConditions: "Trending Down",
+      };
     }
+    // Si tendance entre -0.005% et +0.005%, continuer avec la logique normale ci-dessous
   }
 
   const totalScore = Math.max(buyScore, sellScore);
@@ -530,8 +568,9 @@ function generateVolumeHistory(length: number): number[] {
 
 /**
  * Obtient le temps d'expiration selon le timeframe
+ * Exporté pour être utilisé dans d'autres fichiers
  */
-function getExpirationTime(timeframe: string): number {
+export function getExpirationTime(timeframe: string): number {
   const times: Record<string, number> = {
     '1M': 60,
     '2M': 120,
