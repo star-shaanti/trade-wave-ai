@@ -1,10 +1,11 @@
 // Service Worker pour PWA
-const CACHE_NAME = 'trading-signals-v1';
+const CACHE_NAME = 'trading-signals-v2-logo-fix';
 const urlsToCache = [
   '/',
   '/index.html',
   '/favicon.svg',
-  '/manifest.json'
+  '/manifest.json',
+  '/logo.png'
 ];
 
 // Installation du Service Worker

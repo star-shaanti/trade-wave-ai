@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface LogoProps {
   className?: string;
@@ -6,28 +6,66 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({ className = "", size = 48 }) => {
+  const [logoError, setLogoError] = useState(false);
+  const [pngError, setPngError] = useState(false);
+
+  // Cache-busting avec timestamp pour forcer le rechargement
+  const cacheBust = Date.now();
+
+  // Si logo.svg ou logo.png existe, utiliser l'image
+  // Sinon, afficher le texte RTS
+  const useImage = !logoError && !pngError;
+
   return (
     <div 
-      className={`flex items-center justify-center font-black ${className}`}
-      style={{ 
-        fontSize: `${size}px`,
-        letterSpacing: `${size * 0.1}px`,
-        lineHeight: 1,
-        fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
-        fontWeight: 900
-      }}
+      className={`flex items-center justify-center ${className}`}
+      style={{ width: size, height: size, minWidth: size, minHeight: size }}
     >
-      <span 
-        className="bg-gradient-to-br from-[#00d4aa] via-[#0095ff] to-[#00d4aa] bg-clip-text text-transparent"
-        style={{
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          textShadow: '0 0 30px rgba(0, 212, 170, 0.4)',
-          filter: 'drop-shadow(0 2px 8px rgba(0, 212, 170, 0.3))',
-        }}
-      >
-        RTS
-      </span>
+      {!logoError ? (
+        <img 
+          src={`/logo.svg?v=${cacheBust}`}
+          alt="RTS Logo" 
+          className="w-full h-full object-contain"
+          style={{ maxWidth: size, maxHeight: size }}
+          onError={() => {
+            setLogoError(true);
+          }}
+        />
+      ) : !pngError ? (
+        <img 
+          src={`/logo.png?v=${cacheBust}`}
+          alt="RTS Logo" 
+          className="w-full h-full object-contain"
+          style={{ maxWidth: size, maxHeight: size }}
+          onError={() => {
+            setPngError(true);
+          }}
+        />
+      ) : (
+        // Fallback : texte RTS en gras et élégant
+        <div 
+          className="flex items-center justify-center font-black"
+          style={{ 
+            fontSize: `${size}px`,
+            letterSpacing: `${size * 0.1}px`,
+            lineHeight: 1,
+            fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+            fontWeight: 900
+          }}
+        >
+          <span 
+            className="bg-gradient-to-br from-[#00d4aa] via-[#0095ff] to-[#00d4aa] bg-clip-text text-transparent"
+            style={{
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 0 30px rgba(0, 212, 170, 0.4)',
+              filter: 'drop-shadow(0 2px 8px rgba(0, 212, 170, 0.3))',
+            }}
+          >
+            RTS
+          </span>
+        </div>
+      )}
     </div>
   );
 };

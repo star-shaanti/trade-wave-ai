@@ -390,7 +390,8 @@ const PricingPlans = () => {
                 ))}
               </div>
 
-              <Button
+              {/* STRIPE PAYMENT HIDDEN - Paiement Stripe masqué */}
+              {/* <Button
                 onClick={() => handleSubscribe(plan)}
                 disabled={loadingPlan === getStripeLoadingId(plan)}
                 className={`w-full justify-start gap-3 px-3 py-2 overflow-hidden ${
@@ -420,7 +421,7 @@ const PricingPlans = () => {
 
               <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {t.buyWithLabel}
-              </p>
+              </p> */}
 
               <Button
                 variant="secondary"
@@ -438,7 +439,7 @@ const PricingPlans = () => {
                         <div className="text-left min-w-0 flex-1 overflow-hidden">
                           <div className="text-sm font-semibold leading-tight truncate">{t.payWithCrypto}</div>
                           <div className="text-xs text-white/80 truncate">
-                            ${plan.fiatAmount}
+                            {t.cryptoPaymentSubtext || `BTC, ETH, USDT & 150+ more`}
                           </div>
                         </div>
                       </div>
