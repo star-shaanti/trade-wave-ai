@@ -390,8 +390,7 @@ const PricingPlans = () => {
                 ))}
               </div>
 
-              {/* STRIPE PAYMENT HIDDEN - Paiement Stripe masqué */}
-              {/* <Button
+              <Button
                 onClick={() => handleSubscribe(plan)}
                 disabled={loadingPlan === getStripeLoadingId(plan)}
                 className={`w-full justify-start gap-3 px-3 py-2 overflow-hidden ${
@@ -421,7 +420,7 @@ const PricingPlans = () => {
 
               <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {t.buyWithLabel}
-              </p> */}
+              </p>
 
               <Button
                 variant="secondary"
