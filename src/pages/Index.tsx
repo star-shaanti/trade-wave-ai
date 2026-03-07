@@ -7,7 +7,7 @@ import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
-import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown } from "lucide-react";
+import { Lock, SignalHigh, Users, TrendingUp, Award, ArrowRight, RefreshCw, LogIn, Moon, Sun, User, ChevronDown, Clock, AlertTriangle, CheckCircle, Home, X, Settings, Pause, Trash2, LogOut, ExternalLink, Mail, Satellite, Crown, Shield } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "../components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
@@ -26,6 +26,7 @@ import { useLanguage } from "../hooks/useLanguage";
 // import { FooterAd, SidebarAd, SidebarAdLeft, SidebarAdRight } from "../components/AdSense";
 import { CookieBanner } from "../components/CookieBanner";
 import { TradingRobots } from "../components/TradingRobots";
+import { PromoPopup } from "../components/PromoPopup";
 import { getMarketPrice } from "../services/marketData";
 import { generateRealTimeSignal } from "../services/signalGenerator";
 
@@ -1702,6 +1703,28 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Sub-header Banner - Market Signals24 */}
+      <div className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 text-white py-3 px-4">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <span className="bg-white/20 backdrop-blur-sm text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+              {translations.bannerBadge || "The Most Revolutionary Platform"}
+            </span>
+            <span className="font-bold text-lg hidden sm:inline">{translations.bannerTitle || "Market Signals24"}</span>
+          </div>
+          <p className="text-xs md:text-sm text-center md:text-left text-white/90 flex-1 mx-4">
+            {translations.bannerDescription || "The first signal platform with triple validation: Artificial Intelligence + Human Experts + Market Confirmation. Zero tolerance for false signals."}
+          </p>
+          <Button
+            onClick={() => window.location.href = "/signin"}
+            size="sm"
+            className="bg-white text-purple-700 hover:bg-white/90 font-bold text-xs whitespace-nowrap shadow-lg"
+          >
+            {translations.bannerCta || "Discover Now"} <ArrowRight className="h-3 w-3 ml-1" />
+          </Button>
+        </div>
+      </div>
+
       {/* Modal d'authentification */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
         <DialogContent className="sm:max-w-md">
@@ -2366,6 +2389,69 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Promo Section - Above Footer */}
+      <section className="w-full bg-gradient-to-br from-blue-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-950/20 dark:to-gray-900 py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">
+              {translations.promoTitle || "Why Traders Choose Market Signals24?"}
+            </h2>
+            <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
+              {translations.promoSubtitle || "Join thousands of traders who already profit from our triple-validated signals"}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto mb-10">
+            <div className="bg-background border border-border rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-7 w-7 text-blue-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-foreground">
+                {translations.promoStat1Title || "Triple Validation"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {translations.promoStat1Desc || "Every signal passes through AI, expert traders, and market confirmation before reaching you"}
+              </p>
+            </div>
+            <div className="bg-background border border-border rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="h-7 w-7 text-green-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-foreground">
+                {translations.promoStat2Title || "97.2% Accuracy"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {translations.promoStat2Desc || "Our AI eliminates false signals — only the most reliable opportunities reach your screen"}
+              </p>
+            </div>
+            <div className="bg-background border border-border rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-7 w-7 text-purple-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-foreground">
+                {translations.promoStat3Title || "24/7 Real-Time"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {translations.promoStat3Desc || "Never miss an opportunity — our system monitors markets around the clock for you"}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Button
+              onClick={() => window.location.href = "/signin"}
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-8 py-3 text-base rounded-xl shadow-lg"
+            >
+              {translations.promoCta || "Start Trading Smarter Today"} <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <p className="mt-3 text-xs text-red-500 font-medium animate-pulse">
+              {translations.promoUrgency || "Limited spots available — Premium access may close soon"}
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 border-t border-purple-800 mt-8 md:mt-16">
         <div className="container mx-auto px-4 py-6 md:py-8">
@@ -2589,6 +2675,12 @@ const Index = () => {
 
       {/* Cookie Banner */}
       <CookieBanner />
+
+      {/* Promotional Popup - 30s delay */}
+      <PromoPopup 
+        translations={translations} 
+        onGetStarted={() => window.location.href = "/signin"}
+      />
     </div>
   );
 };

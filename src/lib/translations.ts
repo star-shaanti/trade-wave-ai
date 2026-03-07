@@ -142,7 +142,35 @@ export const globalTranslations = {
     privacyPolicy: "Privacy Policy",
     tradingRisks: "Trading Risks",
     legalNotice: "Legal Notice",
-    copyright: "© 2025 Real-time Trading Signals. All rights reserved."
+    copyright: "© 2025 Real-time Trading Signals. All rights reserved.",
+    
+    // Sub-header banner
+    bannerBadge: "The Most Revolutionary Platform",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "The first signal platform with triple validation: Artificial Intelligence + Human Experts + Market Confirmation. Zero tolerance for false signals.",
+    bannerCta: "Discover Now",
+    
+    // Above-footer promo
+    promoTitle: "Why Traders Choose Market Signals24?",
+    promoSubtitle: "Join thousands of traders who already profit from our triple-validated signals",
+    promoStat1Title: "Triple Validation",
+    promoStat1Desc: "Every signal passes through AI, expert traders, and market confirmation before reaching you",
+    promoStat2Title: "97.2% Accuracy",
+    promoStat2Desc: "Our AI eliminates false signals — only the most reliable opportunities reach your screen",
+    promoStat3Title: "24/7 Real-Time",
+    promoStat3Desc: "Never miss an opportunity — our system monitors markets around the clock for you",
+    promoCta: "Start Trading Smarter Today",
+    promoUrgency: "Limited spots available — Premium access may close soon",
+    
+    // Popup
+    popupTitle: "Don't Trade Blind!",
+    popupSubtitle: "93% of traders lose money using unverified signals.",
+    popupHighlight: "Market Signals24 is the ONLY platform that triple-validates every signal before sending it to you.",
+    popupBullet1: "AI analyzes 10,000+ data points per second",
+    popupBullet2: "Expert traders confirm every signal manually",
+    popupBullet3: "Market conditions verified in real-time",
+    popupCta: "Get Verified Signals Now",
+    popupDismiss: "I'll risk trading without verification"
   },
   fr: {
     pricingTitle: "Choisissez votre plan",
@@ -268,7 +296,35 @@ export const globalTranslations = {
     privacyPolicy: "Politique de Confidentialité",
     tradingRisks: "Risques de Trading",
     legalNotice: "Mentions Légales",
-    copyright: "© 2025 Signaux de Trading en Temps Réel. Tous droits réservés."
+    copyright: "© 2025 Signaux de Trading en Temps Réel. Tous droits réservés.",
+    
+    // Sub-header banner
+    bannerBadge: "La Plateforme la Plus Révolutionnaire",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "La première plateforme de signaux avec triple validation : Intelligence Artificielle + Experts Humains + Confirmation Marché. Zéro tolérance pour les faux signaux.",
+    bannerCta: "Découvrir Maintenant",
+    
+    // Above-footer promo
+    promoTitle: "Pourquoi les Traders Choisissent Market Signals24 ?",
+    promoSubtitle: "Rejoignez des milliers de traders qui profitent déjà de nos signaux triplement validés",
+    promoStat1Title: "Triple Validation",
+    promoStat1Desc: "Chaque signal passe par l'IA, des traders experts et une confirmation marché avant de vous parvenir",
+    promoStat2Title: "97,2% de Précision",
+    promoStat2Desc: "Notre IA élimine les faux signaux — seules les opportunités les plus fiables atteignent votre écran",
+    promoStat3Title: "24/7 Temps Réel",
+    promoStat3Desc: "Ne manquez jamais une opportunité — notre système surveille les marchés en continu pour vous",
+    promoCta: "Commencez à Trader Plus Intelligemment",
+    promoUrgency: "Places limitées — L'accès Premium pourrait fermer bientôt",
+    
+    // Popup
+    popupTitle: "Ne Tradez Pas à l'Aveugle !",
+    popupSubtitle: "93% des traders perdent de l'argent avec des signaux non vérifiés.",
+    popupHighlight: "Market Signals24 est la SEULE plateforme qui triple-valide chaque signal avant de vous l'envoyer.",
+    popupBullet1: "L'IA analyse plus de 10 000 points de données par seconde",
+    popupBullet2: "Des traders experts confirment chaque signal manuellement",
+    popupBullet3: "Les conditions du marché sont vérifiées en temps réel",
+    popupCta: "Obtenez des Signaux Vérifiés Maintenant",
+    popupDismiss: "Je prends le risque de trader sans vérification"
   },
   es: {
     pricingTitle: "Elige tu plan",
@@ -394,7 +450,35 @@ export const globalTranslations = {
     privacyPolicy: "Política de Privacidad",
     tradingRisks: "Riesgos de Trading",
     legalNotice: "Aviso Legal",
-    copyright: "© 2025 Señales de Trading en Tiempo Real. Todos los derechos reservados."
+    copyright: "© 2025 Señales de Trading en Tiempo Real. Todos los derechos reservados.",
+    
+    // Sub-header banner
+    bannerBadge: "La Plataforma Más Revolucionaria",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "La primera plataforma de señales con triple validación: Inteligencia Artificial + Expertos Humanos + Confirmación del Mercado. Cero tolerancia para señales falsas.",
+    bannerCta: "Descubrir Ahora",
+    
+    // Above-footer promo
+    promoTitle: "¿Por Qué los Traders Eligen Market Signals24?",
+    promoSubtitle: "Únete a miles de traders que ya se benefician de nuestras señales triplemente validadas",
+    promoStat1Title: "Triple Validación",
+    promoStat1Desc: "Cada señal pasa por IA, traders expertos y confirmación del mercado antes de llegar a ti",
+    promoStat2Title: "97,2% de Precisión",
+    promoStat2Desc: "Nuestra IA elimina las señales falsas — solo las oportunidades más fiables llegan a tu pantalla",
+    promoStat3Title: "24/7 Tiempo Real",
+    promoStat3Desc: "Nunca pierdas una oportunidad — nuestro sistema vigila los mercados las 24 horas por ti",
+    promoCta: "Empieza a Operar Más Inteligentemente Hoy",
+    promoUrgency: "Plazas limitadas — El acceso Premium podría cerrarse pronto",
+    
+    // Popup
+    popupTitle: "¡No Operes a Ciegas!",
+    popupSubtitle: "El 93% de los traders pierden dinero usando señales no verificadas.",
+    popupHighlight: "Market Signals24 es la ÚNICA plataforma que triple-valida cada señal antes de enviártela.",
+    popupBullet1: "La IA analiza más de 10.000 puntos de datos por segundo",
+    popupBullet2: "Traders expertos confirman cada señal manualmente",
+    popupBullet3: "Las condiciones del mercado se verifican en tiempo real",
+    popupCta: "Obtén Señales Verificadas Ahora",
+    popupDismiss: "Me arriesgo a operar sin verificación"
   },
   it: {
     pricingTitle: "Scegli il tuo piano",
@@ -520,7 +604,35 @@ export const globalTranslations = {
     privacyPolicy: "Informativa sulla Privacy",
     tradingRisks: "Rischi di Trading",
     legalNotice: "Note Legali",
-    copyright: "© 2025 Segnali di Trading in Tempo Reale. Tutti i diritti riservati."
+    copyright: "© 2025 Segnali di Trading in Tempo Reale. Tutti i diritti riservati.",
+    
+    // Sub-header banner
+    bannerBadge: "La Piattaforma Più Rivoluzionaria",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "La prima piattaforma di segnali con tripla validazione: Intelligenza Artificiale + Esperti Umani + Conferma del Mercato. Zero tolleranza per i segnali falsi.",
+    bannerCta: "Scopri Ora",
+    
+    // Above-footer promo
+    promoTitle: "Perché i Trader Scelgono Market Signals24?",
+    promoSubtitle: "Unisciti a migliaia di trader che già beneficiano dei nostri segnali triplamente validati",
+    promoStat1Title: "Tripla Validazione",
+    promoStat1Desc: "Ogni segnale passa attraverso IA, trader esperti e conferma del mercato prima di raggiungerti",
+    promoStat2Title: "97,2% di Precisione",
+    promoStat2Desc: "La nostra IA elimina i segnali falsi — solo le opportunità più affidabili raggiungono il tuo schermo",
+    promoStat3Title: "24/7 Tempo Reale",
+    promoStat3Desc: "Non perdere mai un'opportunità — il nostro sistema monitora i mercati 24 ore su 24 per te",
+    promoCta: "Inizia a Fare Trading in Modo Più Intelligente Oggi",
+    promoUrgency: "Posti limitati — L'accesso Premium potrebbe chiudersi presto",
+    
+    // Popup
+    popupTitle: "Non Fare Trading alla Cieca!",
+    popupSubtitle: "Il 93% dei trader perde denaro usando segnali non verificati.",
+    popupHighlight: "Market Signals24 è l'UNICA piattaforma che tripla-valida ogni segnale prima di inviartelo.",
+    popupBullet1: "L'IA analizza più di 10.000 punti dati al secondo",
+    popupBullet2: "Trader esperti confermano ogni segnale manualmente",
+    popupBullet3: "Le condizioni di mercato sono verificate in tempo reale",
+    popupCta: "Ottieni Segnali Verificati Ora",
+    popupDismiss: "Mi prendo il rischio di fare trading senza verifica"
   },
   pt: {
     pricingTitle: "Escolha seu plano",
@@ -646,7 +758,35 @@ export const globalTranslations = {
     cookieAnalyticsDescription: "Estes cookies nos ajudam a entender como os visitantes interagem com nosso site coletando e relatando informações anonimamente.",
     cookieSettingsTitle: "Configurações de cookies",
     cookieSettingsDescription: "Personalize suas preferências de cookies. Você pode ativar ou desativar diferentes tipos de cookies abaixo.",
-    cookieSavePreferences: "Salvar preferências"
+    cookieSavePreferences: "Salvar preferências",
+    
+    // Sub-header banner
+    bannerBadge: "A Plataforma Mais Revolucionária",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "A primeira plataforma de sinais com tripla validação: Inteligência Artificial + Especialistas Humanos + Confirmação do Mercado. Zero tolerância para sinais falsos.",
+    bannerCta: "Descubra Agora",
+    
+    // Above-footer promo
+    promoTitle: "Por Que os Traders Escolhem o Market Signals24?",
+    promoSubtitle: "Junte-se a milhares de traders que já lucram com nossos sinais triplamente validados",
+    promoStat1Title: "Tripla Validação",
+    promoStat1Desc: "Cada sinal passa pela IA, traders especialistas e confirmação do mercado antes de chegar a você",
+    promoStat2Title: "97,2% de Precisão",
+    promoStat2Desc: "Nossa IA elimina sinais falsos — apenas as oportunidades mais confiáveis chegam à sua tela",
+    promoStat3Title: "24/7 Tempo Real",
+    promoStat3Desc: "Nunca perca uma oportunidade — nosso sistema monitora os mercados 24 horas por dia para você",
+    promoCta: "Comece a Operar de Forma Mais Inteligente Hoje",
+    promoUrgency: "Vagas limitadas — O acesso Premium pode fechar em breve",
+    
+    // Popup
+    popupTitle: "Não Opere no Escuro!",
+    popupSubtitle: "93% dos traders perdem dinheiro usando sinais não verificados.",
+    popupHighlight: "O Market Signals24 é a ÚNICA plataforma que tripla-valida cada sinal antes de enviá-lo a você.",
+    popupBullet1: "A IA analisa mais de 10.000 pontos de dados por segundo",
+    popupBullet2: "Traders especialistas confirmam cada sinal manualmente",
+    popupBullet3: "As condições do mercado são verificadas em tempo real",
+    popupCta: "Obtenha Sinais Verificados Agora",
+    popupDismiss: "Eu arrisco operar sem verificação"
   },
   ru: {
     pricingTitle: "Выберите тариф",
@@ -772,7 +912,35 @@ export const globalTranslations = {
     cookieAnalyticsDescription: "Эти cookies помогают нам понять, как посетители взаимодействуют с нашим веб-сайтом, собирая и сообщая информацию анонимно.",
     cookieSettingsTitle: "Настройки cookies",
     cookieSettingsDescription: "Настройте свои предпочтения cookies. Вы можете включить или отключить различные типы cookies ниже.",
-    cookieSavePreferences: "Сохранить предпочтения"
+    cookieSavePreferences: "Сохранить предпочтения",
+    
+    // Sub-header banner
+    bannerBadge: "Самая Революционная Платформа",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "Первая платформа сигналов с тройной проверкой: Искусственный Интеллект + Эксперты-Люди + Подтверждение Рынка. Нулевая толерантность к ложным сигналам.",
+    bannerCta: "Узнать Сейчас",
+    
+    // Above-footer promo
+    promoTitle: "Почему Трейдеры Выбирают Market Signals24?",
+    promoSubtitle: "Присоединяйтесь к тысячам трейдеров, которые уже зарабатывают на наших тройно проверенных сигналах",
+    promoStat1Title: "Тройная Проверка",
+    promoStat1Desc: "Каждый сигнал проходит через ИИ, команду экспертов и подтверждение рынка перед отправкой вам",
+    promoStat2Title: "97,2% Точности",
+    promoStat2Desc: "Наш ИИ устраняет ложные сигналы — только самые надежные возможности попадают на ваш экран",
+    promoStat3Title: "24/7 В Реальном Времени",
+    promoStat3Desc: "Не упустите ни одной возможности — наша система контролирует рынки круглосуточно для вас",
+    promoCta: "Начните Торговать Умнее Сегодня",
+    promoUrgency: "Ограниченное количество мест — Премиум доступ может закрыться скоро",
+    
+    // Popup
+    popupTitle: "Не Торгуйте Вслепую!",
+    popupSubtitle: "93% трейдеров теряют деньги, используя непроверенные сигналы.",
+    popupHighlight: "Market Signals24 — ЕДИНСТВЕННАЯ платформа, которая тройно проверяет каждый сигнал перед отправкой вам.",
+    popupBullet1: "ИИ анализирует более 10 000 точек данных в секунду",
+    popupBullet2: "Эксперты-трейдеры подтверждают каждый сигнал вручную",
+    popupBullet3: "Рыночные условия проверяются в режиме реального времени",
+    popupCta: "Получите Проверенные Сигналы Сейчас",
+    popupDismiss: "Я рискну торговать без проверки"
   },
   ar: {
     pricingTitle: "اختر خطتك",
@@ -898,7 +1066,35 @@ export const globalTranslations = {
     cookieAnalyticsDescription: "تساعدنا هذه الملفات على فهم كيفية تفاعل الزوار مع موقعنا من خلال جمع المعلومات والإبلاغ عنها بشكل مجهول.",
     cookieSettingsTitle: "إعدادات ملفات تعريف الارتباط",
     cookieSettingsDescription: "خصص تفضيلات ملفات تعريف الارتباط الخاصة بك. يمكنك تفعيل أو إلغاء تفعيل أنواع مختلفة من ملفات تعريف الارتباط أدناه.",
-    cookieSavePreferences: "حفظ التفضيلات"
+    cookieSavePreferences: "حفظ التفضيلات",
+    
+    // Sub-header banner
+    bannerBadge: "المنصة الأكثر ثورية",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "أول منصة إشارات مع التحقق الثلاثي: الذكاء الاصطناعي + خبراء بشريون + تأكيد السوق. عدم التسامح مطلقاً مع الإشارات الكاذبة.",
+    bannerCta: "اكتشف الآن",
+    
+    // Above-footer promo
+    promoTitle: "لماذا يختار المتداولون Market Signals24؟",
+    promoSubtitle: "انضم إلى آلاف المتداولين الذين يستفيدون بالفعل من إشاراتنا المعتمدة ثلاثياً",
+    promoStat1Title: "تحقق ثلاثي",
+    promoStat1Desc: "كل إشارة تمر عبر الذكاء الاصطناعي والمتداولين الخبراء وتأكيد السوق قبل أن تصل إليك",
+    promoStat2Title: "97.2% دقة",
+    promoStat2Desc: "ذكاؤنا الاصطناعي يزيل الإشارات الكاذبة — فقط الفرص الأكثر موثوقية تصل إلى شاشتك",
+    promoStat3Title: "24/7 في الوقت الفعلي",
+    promoStat3Desc: "لا تفوت أي فرصة أبداً — نظامنا يراقب الأسواق على مدار الساعة من أجلك",
+    promoCta: "ابدأ التداول بذكاء اليوم",
+    promoUrgency: "أماكن محدودة — قد يُغلق الوصول المميز قريباً",
+    
+    // Popup
+    popupTitle: "لا تتداول بشكل أعمى!",
+    popupSubtitle: "93% من المتداولين يخسرون أموالهم باستخدام إشارات غير موثقة.",
+    popupHighlight: "Market Signals24 هي المنصة الوحيدة التي تتحقق ثلاثياً من كل إشارة قبل إرسالها إليك.",
+    popupBullet1: "الذكاء الاصطناعي يحلل أكثر من 10,000 نقطة بيانات في الثانية",
+    popupBullet2: "متداولون خبراء يؤكدون كل إشارة يدوياً",
+    popupBullet3: "يتم التحقق من ظروف السوق في الوقت الفعلي",
+    popupCta: "احصل على إشارات موثقة الآن",
+    popupDismiss: "سأخاطر بالتداول بدون تحقق"
   },
   hi: {
     pricingTitle: "अपनी योजना चुनें",
@@ -1024,7 +1220,35 @@ export const globalTranslations = {
     cookieAnalyticsDescription: "ये कुकीज़ हमें गुमनाम रूप से जानकारी एकत्र करके और रिपोर्टिंग करके समझने में मदद करती हैं कि आगंतुक हमारी वेबसाइट के साथ कैसे बातचीत करते हैं।",
     cookieSettingsTitle: "कुकी सेटिंग्स",
     cookieSettingsDescription: "अपनी कुकी प्राथमिकताएं अनुकूलित करें। आप नीचे विभिन्न प्रकार की कुकीज़ को सक्षम या अक्षम कर सकते हैं।",
-    cookieSavePreferences: "प्राथमिकताएं सहेजें"
+    cookieSavePreferences: "प्राथमिकताएं सहेजें",
+    
+    // Sub-header banner
+    bannerBadge: "सबसे क्रांतिकारी प्लेटफॉर्म",
+    bannerTitle: "Market Signals24",
+    bannerDescription: "ट्रिपल वैलिडेशन वाला पहला सिग्नल प्लेटफॉर्म: आर्टिफिशियल इंटेलिजेंस + मानव विशेषज्ञ + बाजार पुष्टि। झूठे सिग्नलों के लिए शून्य सहनशीलता।",
+    bannerCta: "अभी खोजें",
+    
+    // Above-footer promo
+    promoTitle: "ट्रेडर्स Market Signals24 क्यों चुनते हैं?",
+    promoSubtitle: "हजारों ट्रेडर्स से जुड़ें जो पहले से हमारे ट्रिपल-वैलिडेटेड सिग्नल से लाभ कमा रहे हैं",
+    promoStat1Title: "ट्रिपल वैलिडेशन",
+    promoStat1Desc: "हर सिग्नल आपके पास पहुंचने से पहले AI, विशेषज्ञ ट्रेडर्स और बाजार पुष्टि से गुजरता है",
+    promoStat2Title: "97.2% सटीकता",
+    promoStat2Desc: "हमारा AI झूठे सिग्नल हटाता है — केवल सबसे विश्वसनीय अवसर आपकी स्क्रीन तक पहुंचते हैं",
+    promoStat3Title: "24/7 रियल-टाइम",
+    promoStat3Desc: "कभी कोई अवसर न चूकें — हमारा सिस्टम आपके लिए चौबीसों घंटे बाजारों की निगरानी करता है",
+    promoCta: "आज ही स्मार्ट ट्रेडिंग शुरू करें",
+    promoUrgency: "सीमित स्थान उपलब्ध — प्रीमियम एक्सेस जल्द बंद हो सकता है",
+    
+    // Popup
+    popupTitle: "अंधेरे में ट्रेड न करें!",
+    popupSubtitle: "93% ट्रेडर्स अनवेरिफाइड सिग्नल का उपयोग करके पैसे खो देते हैं।",
+    popupHighlight: "Market Signals24 एकमात्र प्लेटफॉर्म है जो आपको भेजने से पहले हर सिग्नल को ट्रिपल-वैलिडेट करता है।",
+    popupBullet1: "AI प्रति सेकंड 10,000+ डेटा पॉइंट्स का विश्लेषण करता है",
+    popupBullet2: "विशेषज्ञ ट्रेडर्स हर सिग्नल को मैन्युअल रूप से कन्फर्म करते हैं",
+    popupBullet3: "बाजार की स्थिति रियल-टाइम में सत्यापित होती है",
+    popupCta: "अभी सत्यापित सिग्नल प्राप्त करें",
+    popupDismiss: "मैं बिना सत्यापन के ट्रेडिंग का जोखिम लूंगा"
   }
 };
 
