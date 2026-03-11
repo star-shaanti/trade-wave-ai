@@ -1704,24 +1704,25 @@ const Index = () => {
       </header>
 
       {/* Sub-header Banner - Market Signals24 */}
-      <div className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 text-white py-3 px-4">
+      <div className="w-full bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 text-white py-3 px-4 shadow-md">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <span className="bg-white/20 backdrop-blur-sm text-xs font-bold px-3 py-1 rounded-full animate-pulse">
-              {translations.bannerBadge || "The Most Revolutionary Platform"}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <span className="bg-yellow-400/90 text-yellow-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wide animate-pulse">
+              🏆 {translations.bannerBadge || "#1 Platform 2026"}
             </span>
-            <span className="font-bold text-lg hidden sm:inline">{translations.bannerTitle || "Market Signals24"}</span>
+            <span className="font-bold text-base hidden sm:inline tracking-tight">marketsignals24.com</span>
           </div>
-          <p className="text-xs md:text-sm text-center md:text-left text-white/90 flex-1 mx-4">
-            {translations.bannerDescription || "The first signal platform with triple validation: Artificial Intelligence + Human Experts + Market Confirmation. Zero tolerance for false signals."}
+          <p className="text-xs md:text-sm text-center md:text-left text-white/90 flex-1 mx-4 leading-snug">
+            {translations.bannerDescription || "Our new platform — ranked among the most trusted trading signal providers of 2026. AI-powered, expert-validated, ultra-precise signals in real time."}
           </p>
-          <Button
-            onClick={() => window.location.href = "/signin"}
-            size="sm"
-            className="bg-white text-purple-700 hover:bg-white/90 font-bold text-xs whitespace-nowrap shadow-lg"
+          <a
+            href="https://marketsignals24.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 bg-white text-purple-700 hover:bg-white/90 font-bold text-xs whitespace-nowrap shadow-lg px-4 py-2 rounded-md transition-colors"
           >
-            {translations.bannerCta || "Discover Now"} <ArrowRight className="h-3 w-3 ml-1" />
-          </Button>
+            {translations.bannerCta || "Explore Now"} <ArrowRight className="h-3 w-3" />
+          </a>
         </div>
       </div>
 

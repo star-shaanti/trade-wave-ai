@@ -145,10 +145,10 @@ export const globalTranslations = {
     copyright: "© 2025 Real-time Trading Signals. All rights reserved.",
     
     // Sub-header banner
-    bannerBadge: "The Most Revolutionary Platform",
+    bannerBadge: "#1 Platform 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "The first signal platform with triple validation: Artificial Intelligence + Human Experts + Market Confirmation. Zero tolerance for false signals.",
-    bannerCta: "Discover Now",
+    bannerDescription: "Our new platform — ranked among the most trusted trading signal providers of 2026. AI-powered, expert-validated, ultra-precise signals in real time.",
+    bannerCta: "Explore Now",
     
     // Above-footer promo
     promoTitle: "Why Traders Choose Market Signals24?",
@@ -163,14 +163,15 @@ export const globalTranslations = {
     promoUrgency: "Limited spots available — Premium access may close soon",
     
     // Popup
-    popupTitle: "Don't Trade Blind!",
-    popupSubtitle: "93% of traders lose money using unverified signals.",
-    popupHighlight: "Market Signals24 is the ONLY platform that triple-validates every signal before sending it to you.",
-    popupBullet1: "AI analyzes 10,000+ data points per second",
-    popupBullet2: "Expert traders confirm every signal manually",
-    popupBullet3: "Market conditions verified in real-time",
-    popupCta: "Get Verified Signals Now",
-    popupDismiss: "I'll risk trading without verification"
+    popupBadge: "#1 Most Used Platform — 2026",
+    popupTitle: "Discover Our New Platform",
+    popupSubtitle: "Trusted by thousands of active traders worldwide in 2026.",
+    popupHighlight: "Ranked among the most-used trading signal platforms of 2026. Institutional-grade AI precision, validated by professional analysts — built for traders who demand results.",
+    popupBullet1: "Ultra-precise signals powered by real-time AI analysis",
+    popupBullet2: "Every signal manually reviewed by certified expert traders",
+    popupBullet3: "Trusted by thousands of active traders worldwide in 2026",
+    popupCta: "Visit Market Signals 24",
+    popupDismiss: "Continue on this platform"
   },
   fr: {
     pricingTitle: "Choisissez votre plan",
@@ -299,10 +300,10 @@ export const globalTranslations = {
     copyright: "© 2025 Signaux de Trading en Temps Réel. Tous droits réservés.",
     
     // Sub-header banner
-    bannerBadge: "La Plateforme la Plus Révolutionnaire",
+    bannerBadge: "#1 Plateforme 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "La première plateforme de signaux avec triple validation : Intelligence Artificielle + Experts Humains + Confirmation Marché. Zéro tolérance pour les faux signaux.",
-    bannerCta: "Découvrir Maintenant",
+    bannerDescription: "Notre nouvelle plateforme — parmi les fournisseurs de signaux de trading les plus utilisés en 2026. Signaux ultra-précis en temps réel, propulsés par l'IA et validés par des experts.",
+    bannerCta: "Explorer Maintenant",
     
     // Above-footer promo
     promoTitle: "Pourquoi les Traders Choisissent Market Signals24 ?",
@@ -317,14 +318,15 @@ export const globalTranslations = {
     promoUrgency: "Places limitées — L'accès Premium pourrait fermer bientôt",
     
     // Popup
-    popupTitle: "Ne Tradez Pas à l'Aveugle !",
-    popupSubtitle: "93% des traders perdent de l'argent avec des signaux non vérifiés.",
-    popupHighlight: "Market Signals24 est la SEULE plateforme qui triple-valide chaque signal avant de vous l'envoyer.",
-    popupBullet1: "L'IA analyse plus de 10 000 points de données par seconde",
-    popupBullet2: "Des traders experts confirment chaque signal manuellement",
-    popupBullet3: "Les conditions du marché sont vérifiées en temps réel",
-    popupCta: "Obtenez des Signaux Vérifiés Maintenant",
-    popupDismiss: "Je prends le risque de trader sans vérification"
+    popupBadge: "#1 Plateforme la Plus Utilisée — 2026",
+    popupTitle: "Découvrez Notre Nouvelle Plateforme",
+    popupSubtitle: "Approuvée par des milliers de traders actifs dans le monde en 2026.",
+    popupHighlight: "Classée parmi les plateformes de signaux de trading les plus utilisées de 2026. Précision institutionnelle par IA, validée par des analystes professionnels — conçue pour les traders qui exigent des résultats.",
+    popupBullet1: "Signaux ultra-précis alimentés par l'analyse IA en temps réel",
+    popupBullet2: "Chaque signal examiné manuellement par des traders certifiés",
+    popupBullet3: "Approuvée par des milliers de traders actifs dans le monde en 2026",
+    popupCta: "Visiter Market Signals 24",
+    popupDismiss: "Continuer sur cette plateforme"
   },
   es: {
     pricingTitle: "Elige tu plan",
@@ -453,10 +455,10 @@ export const globalTranslations = {
     copyright: "© 2025 Señales de Trading en Tiempo Real. Todos los derechos reservados.",
     
     // Sub-header banner
-    bannerBadge: "La Plataforma Más Revolucionaria",
+    bannerBadge: "#1 Plataforma 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "La primera plataforma de señales con triple validación: Inteligencia Artificial + Expertos Humanos + Confirmación del Mercado. Cero tolerancia para señales falsas.",
-    bannerCta: "Descubrir Ahora",
+    bannerDescription: "Nuestra nueva plataforma — entre los proveedores de señales de trading más utilizados de 2026. Señales ultraprecisas en tiempo real, potenciadas por IA y validadas por expertos.",
+    bannerCta: "Explorar Ahora",
     
     // Above-footer promo
     promoTitle: "¿Por Qué los Traders Eligen Market Signals24?",
@@ -471,14 +473,15 @@ export const globalTranslations = {
     promoUrgency: "Plazas limitadas — El acceso Premium podría cerrarse pronto",
     
     // Popup
-    popupTitle: "¡No Operes a Ciegas!",
-    popupSubtitle: "El 93% de los traders pierden dinero usando señales no verificadas.",
-    popupHighlight: "Market Signals24 es la ÚNICA plataforma que triple-valida cada señal antes de enviártela.",
-    popupBullet1: "La IA analiza más de 10.000 puntos de datos por segundo",
-    popupBullet2: "Traders expertos confirman cada señal manualmente",
-    popupBullet3: "Las condiciones del mercado se verifican en tiempo real",
-    popupCta: "Obtén Señales Verificadas Ahora",
-    popupDismiss: "Me arriesgo a operar sin verificación"
+    popupBadge: "#1 Plataforma Más Usada — 2026",
+    popupTitle: "Descubre Nuestra Nueva Plataforma",
+    popupSubtitle: "Confiada por miles de traders activos en todo el mundo en 2026.",
+    popupHighlight: "Clasificada entre las plataformas de señales de trading más utilizadas de 2026. Precisión institucional mediante IA, validada por analistas profesionales — diseñada para traders que exigen resultados.",
+    popupBullet1: "Señales ultraprecisas impulsadas por análisis de IA en tiempo real",
+    popupBullet2: "Cada señal revisada manualmente por traders certificados",
+    popupBullet3: "Confiada por miles de traders activos en todo el mundo en 2026",
+    popupCta: "Visitar Market Signals 24",
+    popupDismiss: "Continuar en esta plataforma"
   },
   it: {
     pricingTitle: "Scegli il tuo piano",
@@ -607,10 +610,10 @@ export const globalTranslations = {
     copyright: "© 2025 Segnali di Trading in Tempo Reale. Tutti i diritti riservati.",
     
     // Sub-header banner
-    bannerBadge: "La Piattaforma Più Rivoluzionaria",
+    bannerBadge: "#1 Piattaforma 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "La prima piattaforma di segnali con tripla validazione: Intelligenza Artificiale + Esperti Umani + Conferma del Mercato. Zero tolleranza per i segnali falsi.",
-    bannerCta: "Scopri Ora",
+    bannerDescription: "La nostra nuova piattaforma — tra i fornitori di segnali di trading più utilizzati del 2026. Segnali ultraprecisi in tempo reale, alimentati dall'IA e validati da esperti.",
+    bannerCta: "Esplora Ora",
     
     // Above-footer promo
     promoTitle: "Perché i Trader Scelgono Market Signals24?",
@@ -625,14 +628,15 @@ export const globalTranslations = {
     promoUrgency: "Posti limitati — L'accesso Premium potrebbe chiudersi presto",
     
     // Popup
-    popupTitle: "Non Fare Trading alla Cieca!",
-    popupSubtitle: "Il 93% dei trader perde denaro usando segnali non verificati.",
-    popupHighlight: "Market Signals24 è l'UNICA piattaforma che tripla-valida ogni segnale prima di inviartelo.",
-    popupBullet1: "L'IA analizza più di 10.000 punti dati al secondo",
-    popupBullet2: "Trader esperti confermano ogni segnale manualmente",
-    popupBullet3: "Le condizioni di mercato sono verificate in tempo reale",
-    popupCta: "Ottieni Segnali Verificati Ora",
-    popupDismiss: "Mi prendo il rischio di fare trading senza verifica"
+    popupBadge: "#1 Piattaforma Più Usata — 2026",
+    popupTitle: "Scopri la Nostra Nuova Piattaforma",
+    popupSubtitle: "Scelta da migliaia di trader attivi in tutto il mondo nel 2026.",
+    popupHighlight: "Classificata tra le piattaforme di segnali di trading più utilizzate del 2026. Precisione istituzionale tramite IA, validata da analisti professionisti — pensata per i trader che pretendono risultati.",
+    popupBullet1: "Segnali ultraprecisi alimentati dall'analisi IA in tempo reale",
+    popupBullet2: "Ogni segnale esaminato manualmente da trader certificati",
+    popupBullet3: "Scelta da migliaia di trader attivi in tutto il mondo nel 2026",
+    popupCta: "Visita Market Signals 24",
+    popupDismiss: "Continua su questa piattaforma"
   },
   pt: {
     pricingTitle: "Escolha seu plano",
@@ -761,10 +765,10 @@ export const globalTranslations = {
     cookieSavePreferences: "Salvar preferências",
     
     // Sub-header banner
-    bannerBadge: "A Plataforma Mais Revolucionária",
+    bannerBadge: "#1 Plataforma 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "A primeira plataforma de sinais com tripla validação: Inteligência Artificial + Especialistas Humanos + Confirmação do Mercado. Zero tolerância para sinais falsos.",
-    bannerCta: "Descubra Agora",
+    bannerDescription: "Nossa nova plataforma — entre os provedores de sinais de trading mais confiáveis de 2026. Sinais ultraprecisos em tempo real, impulsionados por IA e validados por especialistas.",
+    bannerCta: "Explorar Agora",
     
     // Above-footer promo
     promoTitle: "Por Que os Traders Escolhem o Market Signals24?",
@@ -779,14 +783,15 @@ export const globalTranslations = {
     promoUrgency: "Vagas limitadas — O acesso Premium pode fechar em breve",
     
     // Popup
-    popupTitle: "Não Opere no Escuro!",
-    popupSubtitle: "93% dos traders perdem dinheiro usando sinais não verificados.",
-    popupHighlight: "O Market Signals24 é a ÚNICA plataforma que tripla-valida cada sinal antes de enviá-lo a você.",
-    popupBullet1: "A IA analisa mais de 10.000 pontos de dados por segundo",
-    popupBullet2: "Traders especialistas confirmam cada sinal manualmente",
-    popupBullet3: "As condições do mercado são verificadas em tempo real",
-    popupCta: "Obtenha Sinais Verificados Agora",
-    popupDismiss: "Eu arrisco operar sem verificação"
+    popupBadge: "#1 Plataforma Mais Usada — 2026",
+    popupTitle: "Descubra Nossa Nova Plataforma",
+    popupSubtitle: "Confiada por milhares de traders ativos no mundo todo em 2026.",
+    popupHighlight: "Classificada entre as plataformas de sinais de trading mais utilizadas de 2026. Precisão institucional via IA, validada por analistas profissionais — criada para traders que exigem resultados.",
+    popupBullet1: "Sinais ultraprecisos impulsionados por análise de IA em tempo real",
+    popupBullet2: "Cada sinal revisado manualmente por traders certificados",
+    popupBullet3: "Confiada por milhares de traders ativos no mundo todo em 2026",
+    popupCta: "Visitar Market Signals 24",
+    popupDismiss: "Continuar nesta plataforma"
   },
   ru: {
     pricingTitle: "Выберите тариф",
@@ -915,10 +920,10 @@ export const globalTranslations = {
     cookieSavePreferences: "Сохранить предпочтения",
     
     // Sub-header banner
-    bannerBadge: "Самая Революционная Платформа",
+    bannerBadge: "#1 Платформа 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "Первая платформа сигналов с тройной проверкой: Искусственный Интеллект + Эксперты-Люди + Подтверждение Рынка. Нулевая толерантность к ложным сигналам.",
-    bannerCta: "Узнать Сейчас",
+    bannerDescription: "Наша новая платформа — среди наиболее используемых поставщиков торговых сигналов 2026 года. Ультраточные сигналы в реальном времени на основе ИИ, проверенные профессиональными аналитиками.",
+    bannerCta: "Узнать Больше",
     
     // Above-footer promo
     promoTitle: "Почему Трейдеры Выбирают Market Signals24?",
@@ -933,14 +938,15 @@ export const globalTranslations = {
     promoUrgency: "Ограниченное количество мест — Премиум доступ может закрыться скоро",
     
     // Popup
-    popupTitle: "Не Торгуйте Вслепую!",
-    popupSubtitle: "93% трейдеров теряют деньги, используя непроверенные сигналы.",
-    popupHighlight: "Market Signals24 — ЕДИНСТВЕННАЯ платформа, которая тройно проверяет каждый сигнал перед отправкой вам.",
-    popupBullet1: "ИИ анализирует более 10 000 точек данных в секунду",
-    popupBullet2: "Эксперты-трейдеры подтверждают каждый сигнал вручную",
-    popupBullet3: "Рыночные условия проверяются в режиме реального времени",
-    popupCta: "Получите Проверенные Сигналы Сейчас",
-    popupDismiss: "Я рискну торговать без проверки"
+    popupBadge: "#1 Самая Используемая Платформа — 2026",
+    popupTitle: "Откройте Нашу Новую Платформу",
+    popupSubtitle: "Доверяют тысячи активных трейдеров по всему миру в 2026 году.",
+    popupHighlight: "Входит в число наиболее используемых платформ торговых сигналов 2026 года. Институциональная точность ИИ, проверенная профессиональными аналитиками — создана для трейдеров, которые требуют результатов.",
+    popupBullet1: "Ультраточные сигналы на основе анализа ИИ в реальном времени",
+    popupBullet2: "Каждый сигнал проверяется вручную сертифицированными трейдерами",
+    popupBullet3: "Доверяют тысячи активных трейдеров по всему миру в 2026 году",
+    popupCta: "Посетить Market Signals 24",
+    popupDismiss: "Продолжить на этой платформе"
   },
   ar: {
     pricingTitle: "اختر خطتك",
@@ -1069,10 +1075,10 @@ export const globalTranslations = {
     cookieSavePreferences: "حفظ التفضيلات",
     
     // Sub-header banner
-    bannerBadge: "المنصة الأكثر ثورية",
+    bannerBadge: "#1 منصة 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "أول منصة إشارات مع التحقق الثلاثي: الذكاء الاصطناعي + خبراء بشريون + تأكيد السوق. عدم التسامح مطلقاً مع الإشارات الكاذبة.",
-    bannerCta: "اكتشف الآن",
+    bannerDescription: "منصتنا الجديدة — من بين أكثر مزودي إشارات التداول موثوقية واستخداماً في 2026. إشارات فائقة الدقة في الوقت الفعلي، مدعومة بالذكاء الاصطناعي ومعتمدة من خبراء.",
+    bannerCta: "اكتشف المزيد",
     
     // Above-footer promo
     promoTitle: "لماذا يختار المتداولون Market Signals24؟",
@@ -1087,14 +1093,15 @@ export const globalTranslations = {
     promoUrgency: "أماكن محدودة — قد يُغلق الوصول المميز قريباً",
     
     // Popup
-    popupTitle: "لا تتداول بشكل أعمى!",
-    popupSubtitle: "93% من المتداولين يخسرون أموالهم باستخدام إشارات غير موثقة.",
-    popupHighlight: "Market Signals24 هي المنصة الوحيدة التي تتحقق ثلاثياً من كل إشارة قبل إرسالها إليك.",
-    popupBullet1: "الذكاء الاصطناعي يحلل أكثر من 10,000 نقطة بيانات في الثانية",
-    popupBullet2: "متداولون خبراء يؤكدون كل إشارة يدوياً",
-    popupBullet3: "يتم التحقق من ظروف السوق في الوقت الفعلي",
-    popupCta: "احصل على إشارات موثقة الآن",
-    popupDismiss: "سأخاطر بالتداول بدون تحقق"
+    popupBadge: "#1 الأكثر استخداماً — 2026",
+    popupTitle: "اكتشف منصتنا الجديدة",
+    popupSubtitle: "موثوق بها من آلاف المتداولين النشطين حول العالم في 2026.",
+    popupHighlight: "مصنفة ضمن منصات إشارات التداول الأكثر استخداماً في 2026. دقة على مستوى المؤسسات عبر الذكاء الاصطناعي، معتمدة من محللين محترفين — مبنية للمتداولين الذين يطالبون بالنتائج.",
+    popupBullet1: "إشارات فائقة الدقة مدعومة بتحليل الذكاء الاصطناعي في الوقت الفعلي",
+    popupBullet2: "كل إشارة تُراجع يدوياً من قِبَل متداولين معتمدين",
+    popupBullet3: "موثوق بها من آلاف المتداولين النشطين حول العالم في 2026",
+    popupCta: "زيارة Market Signals 24",
+    popupDismiss: "المتابعة على هذه المنصة"
   },
   hi: {
     pricingTitle: "अपनी योजना चुनें",
@@ -1223,10 +1230,10 @@ export const globalTranslations = {
     cookieSavePreferences: "प्राथमिकताएं सहेजें",
     
     // Sub-header banner
-    bannerBadge: "सबसे क्रांतिकारी प्लेटफॉर्म",
+    bannerBadge: "#1 प्लेटफॉर्म 2026",
     bannerTitle: "Market Signals24",
-    bannerDescription: "ट्रिपल वैलिडेशन वाला पहला सिग्नल प्लेटफॉर्म: आर्टिफिशियल इंटेलिजेंस + मानव विशेषज्ञ + बाजार पुष्टि। झूठे सिग्नलों के लिए शून्य सहनशीलता।",
-    bannerCta: "अभी खोजें",
+    bannerDescription: "हमारा नया प्लेटफॉर्म — 2026 के सबसे भरोसेमंद और सबसे अधिक उपयोग किए जाने वाले ट्रेडिंग सिग्नल प्रोवाइडर्स में स्थान प्राप्त। AI-संचालित, विशेषज्ञ-सत्यापित, रियल-टाइम अल्ट्रा-सटीक सिग्नल।",
+    bannerCta: "अभी जानें",
     
     // Above-footer promo
     promoTitle: "ट्रेडर्स Market Signals24 क्यों चुनते हैं?",
@@ -1241,14 +1248,15 @@ export const globalTranslations = {
     promoUrgency: "सीमित स्थान उपलब्ध — प्रीमियम एक्सेस जल्द बंद हो सकता है",
     
     // Popup
-    popupTitle: "अंधेरे में ट्रेड न करें!",
-    popupSubtitle: "93% ट्रेडर्स अनवेरिफाइड सिग्नल का उपयोग करके पैसे खो देते हैं।",
-    popupHighlight: "Market Signals24 एकमात्र प्लेटफॉर्म है जो आपको भेजने से पहले हर सिग्नल को ट्रिपल-वैलिडेट करता है।",
-    popupBullet1: "AI प्रति सेकंड 10,000+ डेटा पॉइंट्स का विश्लेषण करता है",
-    popupBullet2: "विशेषज्ञ ट्रेडर्स हर सिग्नल को मैन्युअल रूप से कन्फर्म करते हैं",
-    popupBullet3: "बाजार की स्थिति रियल-टाइम में सत्यापित होती है",
-    popupCta: "अभी सत्यापित सिग्नल प्राप्त करें",
-    popupDismiss: "मैं बिना सत्यापन के ट्रेडिंग का जोखिम लूंगा"
+    popupBadge: "#1 सबसे अधिक उपयोग किया जाने वाला प्लेटफॉर्म — 2026",
+    popupTitle: "हमारा नया प्लेटफॉर्म खोजें",
+    popupSubtitle: "2026 में दुनिया भर के हजारों सक्रिय ट्रेडर्स का विश्वास।",
+    popupHighlight: "2026 के सबसे अधिक उपयोग किए जाने वाले ट्रेडिंग सिग्नल प्लेटफॉर्म में स्थान प्राप्त। पेशेवर विश्लेषकों द्वारा सत्यापित संस्थागत-स्तरीय AI सटीकता — उन ट्रेडर्स के लिए जो परिणाम मांगते हैं।",
+    popupBullet1: "रियल-टाइम AI विश्लेषण द्वारा संचालित अल्ट्रा-सटीक सिग्नल",
+    popupBullet2: "प्रत्येक सिग्नल प्रमाणित विशेषज्ञ ट्रेडर्स द्वारा मैन्युअल रूप से समीक्षित",
+    popupBullet3: "2026 में दुनिया भर के हजारों सक्रिय ट्रेडर्स का विश्वास",
+    popupCta: "Market Signals 24 पर जाएं",
+    popupDismiss: "इस प्लेटफॉर्म पर जारी रखें"
   }
 };
 
